@@ -10,7 +10,7 @@ export default function LoginPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (username === 'admin' && password === '123456') {
-      alert('Đăng nhập thành công');
+      alert('Đăng nhập thành công 2');
       window.location.href = '/homepage';
     } else {
       alert('Sai tài khoản hoặc mật khẩu');
