@@ -4,6 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import { FaUser, FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
 import { useLoginMutation } from "@/feature/auth.api";
+import Swal from "sweetalert2";
 const UIT_BLUE = "#2563EB";
 export default function LoginPage() {
   const [username, setUsername] = useState("");
@@ -18,14 +19,28 @@ export default function LoginPage() {
       const res = await login({ username, password }).unwrap();
       localStorage.setItem("access_token", res.access_token);
       if (res.access_token) {
-        alert("Đăng nhập thành công");
+        await Swal.fire({
+          icon: "success",
+          title: "Đăng nhập thành công",
+          confirmButtonColor: "#2563EB",
+        });
+
         window.location.href = "/homepage";
       } else {
-        alert("Đăng nhập thất bại. Vui lòng kiểm tra lại.");
+        Swal.fire({
+          icon: "error",
+          title: "Đăng nhập thất bại",
+          text: "Vui lòng kiểm tra lại thông tin",
+          confirmButtonColor: "#2563EB",
+        });
       }
     } catch (error) {
-      console.error("Login error:", error);
-      alert("Sai tài khoản hoặc mật khẩu");
+      Swal.fire({
+        icon: "error",
+        title: "Đăng nhập thất bại",
+        text: "Vui lòng kiểm tra lại thông tin",
+        confirmButtonColor: "#2563EB",
+      });
     }
   };
 
@@ -125,11 +140,10 @@ export default function LoginPage() {
           {/* Nút Đăng nhập */}
           <button
             type="submit"
-            disabled={!canSubmit || isLoading}
             className="w-full bg-[#2563EB] text-white font-semibold py-3 rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
           >
             {isLoading ? (
-              <span className="inline-block animate-spin">⏳</span>
+              <span className="inline-block">Đang đăng nhập...</span>
             ) : (
               "Đăng nhập"
             )}
