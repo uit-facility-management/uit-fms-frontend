@@ -1,61 +1,138 @@
-'use client';
+"use client";
 
-import { use, useState } from 'react';
-
+import { useState } from "react";
+import Image from "next/image";
+import { FaUser, FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
+import { useLoginMutation } from "@/feature/auth.api";
+const UIT_BLUE = "#2563EB";
 export default function LoginPage() {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const canSubmit = username.trim() !== '' && password.trim() !== '';
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const canSubmit = username.trim() !== "" && password.trim() !== "";
+  const [login, { isLoading }] = useLoginMutation();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (username === 'admin' && password === '123456') {
-      alert('Đăng nhập thành công 2');
-      window.location.href = '/homepage';
-    } else {
-      alert('Sai tài khoản hoặc mật khẩu');
+    try {
+      const res = await login({ username, password }).unwrap();
+      localStorage.setItem("access_token", res.access_token);
+      if (res.access_token) {
+        alert("Đăng nhập thành công");
+        window.location.href = "/homepage";
+      } else {
+        alert("Đăng nhập thất bại. Vui lòng kiểm tra lại.");
+      }
+    } catch (error) {
+      console.error("Login error:", error);
+      alert("Sai tài khoản hoặc mật khẩu");
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="w-full max-w-md bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
-        <h1 className="text-3xl font-semibold tracking-tight text-[#696969]">Login</h1>
-        <p className="text-gray-500 mt-3">Hi, Welcome back 👋</p>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-600 via-blue-500 to-purple-600 p-4">
+      <div className="bg-white rounded-3xl shadow-2xl p-8 w-full max-w-md">
+        <div className="mb-8">
+          <div className="flex items-center gap-4 mb-6">
+            <div className="w-16 h-16">
+              <Image
+                src="/uit_icon.png"
+                alt="UIT Logo"
+                width={80}
+                height={80}
+                className="object-contain"
+              />
+            </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4 mt-6">
-          <div>
-            <label className="block text-sm font-medium mb-2 text-[#696969]">Tài khoản</label>
+            <div className="flex-1">
+              <div
+                className="font-bold text-sm leading-tight"
+                style={{ color: UIT_BLUE }}
+              >
+                TRƯỜNG ĐẠI HỌC
+              </div>
+              <div
+                className="font-bold text-sm leading-tight"
+                style={{ color: UIT_BLUE }}
+              >
+                CÔNG NGHỆ THÔNG TIN
+              </div>
+            </div>
+
+            <div
+              className="w-0.5 h-16"
+              style={{ backgroundColor: UIT_BLUE }}
+            ></div>
+
+            <div className="flex-1">
+              <div
+                className=" font-bold text-xl leading-tight"
+                style={{ color: UIT_BLUE }}
+              >
+                QUẢN LÝ
+              </div>
+              <div
+                className=" font-bold text-xl leading-tight"
+                style={{ color: UIT_BLUE }}
+              >
+                CƠ SỞ VẬT CHẤT
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <h2
+          className="text-center font-semibold text-lg mb-6"
+          style={{ color: UIT_BLUE }}
+        >
+          Dùng tài khoản nội bộ
+        </h2>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Trường Tài khoản */}
+          <div className="relative">
+            <FaUser className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
             <input
               type="text"
-              className="w-full rounded-lg border border-gray-300 focus:border-cyan-300 focus:ring-2 focus:ring-cyan-100 px-3 py-2 outline-none text-gray-500"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
+              placeholder="Tài khoản"
               autoComplete="username"
+              className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
 
-          <div>
-            <label className="block text-sm font-medium mb-2 text-[#696969]">Mật khẩu</label>
+          {/* Trường Mật khẩu */}
+          <div className="relative">
+            <FaLock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
             <input
-              type="password"
-              className="w-full rounded-lg border border-gray-300 focus:border-cyan-300 focus:ring-2 focus:ring-cyan-100 px-3 py-2 outline-none text-gray-500"
+              type={showPassword ? "text" : "password"}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              placeholder="Mật khẩu"
               autoComplete="current-password"
+              className="w-full pl-12 pr-12 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+            >
+              {showPassword ? <FaEyeSlash /> : <FaEye />}
+            </button>
           </div>
 
+          {/* Nút Đăng nhập */}
           <button
             type="submit"
-            disabled={!canSubmit}
-            className={`w-full mt-5 rounded-lg py-2.5 font-medium transition
-              ${canSubmit
-                ? 'bg-[#FD735D] text-white hover:bg-[#ffa79a]'
-                : 'bg-[#ffa79a] text-white cursor-not-allowed'}
-            `}
+            disabled={!canSubmit || isLoading}
+            className="w-full bg-[#2563EB] text-white font-semibold py-3 rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
           >
-            Login
+            {isLoading ? (
+              <span className="inline-block animate-spin">⏳</span>
+            ) : (
+              "Đăng nhập"
+            )}
           </button>
         </form>
       </div>
