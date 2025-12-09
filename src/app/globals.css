@@ -18,6 +18,9 @@
     --foreground: #ededed;
   }
 }
+input {
+  -webkit-text-fill-color: #000 !important;
+}
 
 body {
   background: var(--background);
