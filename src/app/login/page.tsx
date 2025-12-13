@@ -7,16 +7,16 @@ import { useLoginMutation } from "@/feature/auth.api";
 import Swal from "sweetalert2";
 const UIT_BLUE = "#2563EB";
 export default function LoginPage() {
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const canSubmit = username.trim() !== "" && password.trim() !== "";
+  const canSubmit = email.trim() !== "" && password.trim() !== "";
   const [login, { isLoading }] = useLoginMutation();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const res = await login({ email:username, password }).unwrap();
+      const res = await login({ email, password }).unwrap();
       localStorage.setItem("access_token", res.access_token);
       if (res.access_token) {
         await Swal.fire({
@@ -109,8 +109,8 @@ export default function LoginPage() {
             <FaUser className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
             <input
               type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               placeholder="Tài khoản"
               autoComplete="username"
               className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
