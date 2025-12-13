@@ -12,8 +12,7 @@ export default function SidebarNav({
   onChange: (key: TabKey) => void;
 }) {
   const items: { key: TabKey; label: string; icon: string }[] = [
-    { key: 'calendar', label: 'Lịch phòng', icon: '/calendar-icon.png' },
-    { key: 'room', label: 'Quản lý phòng', icon: '/room-icon.png' },
+    { key: 'room', label: 'Quản lý phòng', icon: '/calendar-icon.png' },
     { key: 'tools', label: 'Quản lý dụng cụ', icon: '/tools-icon.png' },
   ];
 

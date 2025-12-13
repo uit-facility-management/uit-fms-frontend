@@ -16,7 +16,7 @@ export default function LoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const res = await login({ username, password }).unwrap();
+      const res = await login({ email:username, password }).unwrap();
       localStorage.setItem("access_token", res.access_token);
       if (res.access_token) {
         await Swal.fire({

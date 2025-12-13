@@ -4,8 +4,8 @@ import { useState } from "react";
 import SidebarNav from "./components/SidebarNav";
 import Image from "next/image";
 import CalendarComponent from "./components/CalendarComponent";
-import RoomComponent from "./components/RoomComponent";
-import ToolsComponent from "./components/ToolsComponent";
+import RoomComponent from "./components/RoomManagement/RoomComponent";
+import ToolsComponent from "./components/ToolManagement/ToolsComponent";
 type TabKey = "calendar" | "room" | "tools";
 
 export default function HomePage() {
@@ -46,7 +46,6 @@ export default function HomePage() {
         </header>
 
         <main className="flex-1 p-6 text-gray-700">
-          {tab === "calendar" && <CalendarComponent />}
           {tab === "room" && <RoomComponent />}
           {tab === "tools" && <ToolsComponent />}
         </main>
