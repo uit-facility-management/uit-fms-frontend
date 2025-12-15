@@ -7,6 +7,7 @@ import DashboardHome from "./components/DashboardHome";
 import CalendarComponent from "./components/CalendarComponent";
 import RoomComponent from "./components/RoomManagement/RoomComponent";
 import ToolsComponent from "./components/ToolManagement/ToolsComponent";
+import FacilityComponent from "./components/FacilityManagement/FacilityComponent";
 
 export type TabKey = "home" | "calendar" | "room" | "tools" | "facility";
 
@@ -142,6 +143,7 @@ export default function HomePage() {
                   {tab === "calendar" && <CalendarComponent />}
                   {tab === "room" && <RoomComponent />}
                   {tab === "tools" && <ToolsComponent />}
+                  {tab === "facility" && <FacilityComponent />}
                 </div>
               </div>
             )}
