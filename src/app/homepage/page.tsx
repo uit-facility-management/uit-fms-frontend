@@ -34,22 +34,27 @@ export default function HomePage() {
   return (
     <div className="min-h-screen flex bg-gradient-to-br from-gray-50 to-gray-100">
       {/* Sidebar */}
+      <div className="absolute left-0 top-0 h-full w-1 bg-[#0B4DBA]" />
       <aside className="w-72 bg-white border-r border-gray-200 flex flex-col shadow-sm">
         {/* Logo Section */}
-        <div className="px-6 py-6 border-b border-gray-100">
-          <div className="flex items-center gap-3">
-            <div className="relative">
+        <div className="absolute left-0 top-0 h-full w-1 bg-[#0B4DBA]" />
+        <div className="px-6 py-8 border-b border-gray-100">
+          <div className="flex items-center gap-4">
+            <div className="rounded-2xl bg-white p-2">
               <Image
                 src="/uit_icon.png"
                 alt="UIT logo"
-                width={40}
-                height={40}
-                className="rounded-xl shadow-md"
+                width={90}
+                height={90}
+                className="rounded-xl bg-white p-1"
               />
             </div>
+
             <div className="flex-1">
-              <p className="text-base font-bold text-gray-900">UIT Facility</p>
-              <p className="text-xs text-gray-500 font-medium">
+              <p className="text-xl font-bold text-[#0B4DBA] tracking-tight leading-tight">
+                UIT Facility
+              </p>
+              <p className="text-sm text-gray-500 font-medium mt-0.5">
                 Management System
               </p>
             </div>
