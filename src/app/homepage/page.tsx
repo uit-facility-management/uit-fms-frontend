@@ -3,10 +3,11 @@ import { useState } from "react";
 import { LogOut, Search, Bell, User } from "lucide-react";
 import Image from "next/image";
 import SidebarNav from "./components/SidebarNav";
+import DashboardHome from "./components/DashboardHome";
 import CalendarComponent from "./components/CalendarComponent";
 import RoomComponent from "./components/RoomManagement/RoomComponent";
 import ToolsComponent from "./components/ToolManagement/ToolsComponent";
-import { Wrench, DoorOpen, Calendar } from "lucide-react";
+
 type TabKey = "home" | "calendar" | "room" | "tools";
 
 export default function HomePage() {
@@ -122,113 +123,15 @@ export default function HomePage() {
         </header>
 
         {/* Content Area */}
-        <main className="flex-1 p-6 overflow-auto">
-          <div className="max-w-7xl mx-auto">
-            {/* Stats Cards - Show on home tab */}
-            {tab === "home" && (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm hover:shadow-md transition-shadow">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-gray-600">
-                        Tổng phòng
-                      </p>
-                      <p className="text-2xl font-bold text-gray-900 mt-1">
-                        48
-                      </p>
-                    </div>
-                    <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
-                      <DoorOpen className="w-6 h-6 text-blue-600" />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm hover:shadow-md transition-shadow">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-gray-600">
-                        Đang sử dụng
-                      </p>
-                      <p className="text-2xl font-bold text-gray-900 mt-1">
-                        32
-                      </p>
-                    </div>
-                    <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
-                      <Calendar className="w-6 h-6 text-green-600" />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm hover:shadow-md transition-shadow">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-gray-600">
-                        Còn trống
-                      </p>
-                      <p className="text-2xl font-bold text-gray-900 mt-1">
-                        16
-                      </p>
-                    </div>
-                    <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
-                      <DoorOpen className="w-6 h-6 text-purple-600" />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm hover:shadow-md transition-shadow">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-gray-600">
-                        Tổng dụng cụ
-                      </p>
-                      <p className="text-2xl font-bold text-gray-900 mt-1">
-                        156
-                      </p>
-                    </div>
-                    <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center">
-                      <Wrench className="w-6 h-6 text-orange-600" />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm hover:shadow-md transition-shadow">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-gray-600">
-                        Đang mượn
-                      </p>
-                      <p className="text-2xl font-bold text-gray-900 mt-1">
-                        89
-                      </p>
-                    </div>
-                    <div className="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center">
-                      <Wrench className="w-6 h-6 text-yellow-600" />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm hover:shadow-md transition-shadow">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-gray-600">
-                        Khả dụng
-                      </p>
-                      <p className="text-2xl font-bold text-gray-900 mt-1">
-                        67
-                      </p>
-                    </div>
-                    <div className="w-12 h-12 bg-teal-100 rounded-xl flex items-center justify-center">
-                      <Wrench className="w-6 h-6 text-teal-600" />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
+        <main className="flex-1 p-8 overflow-auto">
+          <div className="max-w-[1800px] mx-auto">
+            {/* Dashboard Home - Show on home tab */}
+            {tab === "home" && <DashboardHome />}
 
             {/* Main Content Card */}
             {tab !== "home" && (
               <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-                <div className={tab === "calendar" ? "" : "p-8"}>
+                <div className={tab === "calendar" ? "" : "p-10"}>
                   {tab === "calendar" && <CalendarComponent />}
                   {tab === "room" && <RoomComponent />}
                   {tab === "tools" && <ToolsComponent />}
