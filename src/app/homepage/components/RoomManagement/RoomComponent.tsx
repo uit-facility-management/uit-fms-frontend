@@ -386,7 +386,7 @@ export default function RoomComponent() {
                 value={searchText}
                 onChange={(e) => setSearchText(e.target.value)}
                 placeholder="Search..."
-                className="w-full text-sm outline-none text-gray-700 placeholder:text-gray-400"
+                className="w-full text-sm outline-none text-gray-700 placeholder:opacity-70"
               />
             </div>
 
@@ -461,7 +461,7 @@ export default function RoomComponent() {
                     value={filterStage}
                     onChange={(e) => setFilterStage(e.target.value)}
                     placeholder="VD: 1"
-                    className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-700 outline-none"
+                    className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-700 placeholder:opacity-70 outline-none"
                   />
                 </div>
                 <div>
@@ -473,7 +473,7 @@ export default function RoomComponent() {
                     value={filterCapacity}
                     onChange={(e) => setFilterCapacity(e.target.value)}
                     placeholder="VD: 40"
-                    className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-700 outline-none"
+                    className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-700 placeholder:opacity-70 outline-none"
                   />
                 </div>
               </div>
