@@ -8,7 +8,7 @@ import CalendarComponent from "./components/CalendarComponent";
 import RoomComponent from "./components/RoomManagement/RoomComponent";
 import ToolsComponent from "./components/ToolManagement/ToolsComponent";
 
-type TabKey = "home" | "calendar" | "room" | "tools";
+export type TabKey = "home" | "calendar" | "room" | "tools" | "facility";
 
 export default function HomePage() {
   const [tab, setTab] = useState<TabKey>("home");
@@ -28,6 +28,8 @@ export default function HomePage() {
         return "Quản lý dụng cụ";
       case "calendar":
         return "Lịch sử dụng";
+      case "facility":
+        return "Quản lý cơ sở vật chất";
     }
   };
 

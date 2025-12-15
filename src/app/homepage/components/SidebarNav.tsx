@@ -1,7 +1,7 @@
 "use client";
 import { Home, Calendar, DoorOpen, Wrench } from "lucide-react";
 
-type TabKey = "home" | "calendar" | "room" | "tools";
+type TabKey = "home" | "calendar" | "room" | "tools" | "facility";
 
 interface SidebarNavProps {
   active: TabKey;
@@ -14,6 +14,11 @@ export default function SidebarNav({ active, onChange }: SidebarNavProps) {
     { key: "calendar" as TabKey, label: "Lịch sử dụng", icon: Calendar },
     { key: "room" as TabKey, label: "Quản lý phòng", icon: DoorOpen },
     { key: "tools" as TabKey, label: "Quản lý dụng cụ", icon: Wrench },
+    {
+      key: "facility" as TabKey,
+      label: "Quản lý cơ sở vật chất",
+      icon: Wrench,
+    },
   ];
 
   return (
