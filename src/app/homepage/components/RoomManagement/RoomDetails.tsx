@@ -247,7 +247,7 @@ export default function RoomDetails({ room, onBack }: Props) {
 
     enableSorting: true,
     enablePagination: true,
-    enableTopToolbar: true,
+    enableTopToolbar: false,
     enableBottomToolbar: true,
 
     enableColumnActions: false,
@@ -386,7 +386,7 @@ const incidentsTable = useMaterialReactTable({
 
   enableSorting: true,
   enablePagination: true,
-  enableTopToolbar: true,
+  enableTopToolbar: false,
   enableBottomToolbar: true,
 
   enableColumnActions: false,
