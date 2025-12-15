@@ -1,47 +1,45 @@
-'use client';
+"use client";
+import { Home, Calendar, DoorOpen, Wrench } from "lucide-react";
 
-import Image from 'next/image';
+type TabKey = "home" | "calendar" | "room" | "tools";
 
-type TabKey = 'calendar' | 'room' | 'tools';
-
-export default function SidebarNav({
-  active,
-  onChange,
-}: {
+interface SidebarNavProps {
   active: TabKey;
-  onChange: (key: TabKey) => void;
-}) {
-  const items: { key: TabKey; label: string; icon: string }[] = [
-    { key: 'room', label: 'Quản lý phòng', icon: '/calendar-icon.png' },
-    { key: 'tools', label: 'Quản lý dụng cụ', icon: '/tools-icon.png' },
+  onChange: (tab: TabKey) => void;
+}
+
+export default function SidebarNav({ active, onChange }: SidebarNavProps) {
+  const navItems = [
+    { key: "home" as TabKey, label: "Trang chủ", icon: Home },
+    { key: "calendar" as TabKey, label: "Lịch sử dụng", icon: Calendar },
+    { key: "room" as TabKey, label: "Quản lý phòng", icon: DoorOpen },
+    { key: "tools" as TabKey, label: "Quản lý dụng cụ", icon: Wrench },
   ];
 
   return (
-    <nav className="space-y-2">
-      {items.map((it) => {
-        const isActive = active === it.key;
+    <div className="space-y-1">
+      {navItems.map((item) => {
+        const Icon = item.icon;
+        const isActive = active === item.key;
+
         return (
           <button
-            key={it.key}
-            onClick={() => onChange(it.key)}
-            className={`w-full flex items-center gap-4 px-4 py-3 rounded-xl font-semibold tracking-tight transition-all duration-200 text-left
-              ${
-                isActive
-                  ? 'bg-[#86b3f8] text-white shadow-sm scale-[1.02]'
-                  : 'text-gray-700 hover:bg-gray-100 hover:text-[#FD735D]'
-              }`}
+            key={item.key}
+            onClick={() => onChange(item.key)}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
+              isActive
+                ? "bg-blue-50 text-blue-700 shadow-sm"
+                : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+            }`}
           >
-            <Image
-              src={it.icon}
-              alt={it.label}
-              width={28}
-              height={28}
-              className={`object-contain ${isActive ? 'brightness-0 invert' : ''}`}
-            />
-            <span className="text-[15px]">{it.label}</span>
+            <Icon className={`w-5 h-5 ${isActive ? "text-blue-600" : ""}`} />
+            <span className="text-sm font-medium">{item.label}</span>
+            {isActive && (
+              <div className="ml-auto w-1.5 h-1.5 bg-blue-600 rounded-full" />
+            )}
           </button>
         );
       })}
-    </nav>
+    </div>
   );
 }
