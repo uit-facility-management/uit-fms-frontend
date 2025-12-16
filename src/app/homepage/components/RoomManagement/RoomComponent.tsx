@@ -13,9 +13,8 @@ import {
   FilterAlt as FilterIcon,
 } from "@mui/icons-material";
 import RoomDetails from "./RoomDetails";
-import {useGetRoomQuery} from "@/feature/RoomApi/room.api";
+import { useGetRoomQuery } from "@/feature/RoomApi/room.api";
 import { RoomResponse } from "@/feature/RoomApi/type";
-
 
 type RoomType = "Phòng học" | "Thực hành" | "Hội trường";
 type RoomStatus = "Đang sử dụng" | "Hư hỏng" | "Bảo trì";
@@ -66,9 +65,7 @@ export const toRoomRow = (r: RoomResponse): RoomRow => ({
   type: mapType(r.type),
 });
 
-const MOCK_DATA: RoomRow[] = [
-  
-];
+const MOCK_DATA: RoomRow[] = [];
 
 const statusChipSx = (s: RoomStatus) => {
   switch (s) {
@@ -82,7 +79,6 @@ const statusChipSx = (s: RoomStatus) => {
       return { backgroundColor: "#F3F4F6", color: "#4B5563", border: "none" };
   }
 };
-
 
 export default function RoomComponent() {
   const handleCreateRoom = () => console.log("Tạo phòng");
@@ -101,18 +97,27 @@ export default function RoomComponent() {
   const [filterStage, setFilterStage] = useState<string>("");
   const [filterCapacity, setFilterCapacity] = useState<string>("");
 
-  const { data, isLoading, isError, error } = useGetRoomQuery();
+  const { data, isLoading, isError, error, isFetching } = useGetRoomQuery();
+  console.log("ROOM data", { data, isLoading, isFetching, isError, error });
 
   const roomsData = useMemo<RoomResponse[]>(() => {
-    if (Array.isArray(data)) return data;
-    return (data as any)?.roomsData ?? [];
+    if (!data) return [];
+    if (Array.isArray(data)) return data as RoomResponse[];
+    if (Array.isArray((data as any).roomsData)) return (data as any).roomsData;
+    if (Array.isArray((data as any).data)) return (data as any).data;
+    return [];
   }, [data]);
 
   const tableData = useMemo(() => roomsData.map(toRoomRow), [roomsData]);
 
-  console.log("ROOM DAta", data);
+  const showLoader = (isLoading || isFetching) && !data;
 
-  console.log({ data, roomsData, tableData, isLoading, isError, error });
+  console.log("TABLE data ready:", {
+    tableDataLength: tableData.length,
+    isLoading,
+    isFetching,
+    showLoader,
+  });
 
   const columns = useMemo<MRT_ColumnDef<RoomRow>[]>(
     () => [
@@ -441,7 +446,24 @@ export default function RoomComponent() {
           )}
 
           <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-            <MaterialReactTable table={table} />
+            {showLoader ? (
+              <div className="flex items-center justify-center py-8">
+                <p className="text-gray-500">Đang tải dữ liệu...</p>
+              </div>
+            ) : isError ? (
+              <div className="flex items-center justify-center py-8">
+                <p className="text-red-500">
+                  Lỗi tải dữ liệu:{" "}
+                  {"message" in error
+                    ? error.message
+                    : "status" in error
+                    ? error.status
+                    : "Unknown error"}
+                </p>
+              </div>
+            ) : (
+              <MaterialReactTable table={table} />
+            )}
           </div>
         </>
       )}

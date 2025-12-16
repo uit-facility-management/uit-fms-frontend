@@ -1,10 +1,11 @@
 import { appApi } from "@/lib/appApi";
-import type {RoomResponse} from "./type";
+import type { RoomResponse } from "./type";
 
 export const roomApi = appApi.injectEndpoints({
   endpoints: (builder) => ({
-    getRoom: builder.query<RoomResponse[], void>({
-      query: () => ({ url: "/room", method: "GET" }),
+    getRoom: builder.query<{ roomsData: RoomResponse[] }, void>({
+      query: () => "/room",
+      keepUnusedDataFor: 60,
     }),
   }),
 });
