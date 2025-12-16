@@ -13,141 +13,61 @@ import {
   FilterAlt as FilterIcon,
 } from "@mui/icons-material";
 import RoomDetails from "./RoomDetails";
+import {useGetRoomQuery} from "@/feature/RoomApi/room.api";
+import { RoomResponse } from "@/feature/RoomApi/type";
+
 
 type RoomType = "Phòng học" | "Thực hành" | "Hội trường";
 type RoomStatus = "Đang sử dụng" | "Hư hỏng" | "Bảo trì";
 
 export type RoomRow = {
+  id: string;
   room: string;
   building: string;
   stage: number;
   type: RoomType;
   capacity: number;
   status: RoomStatus;
-  actions?: string;
 };
 
+const mapStatus = (s: RoomResponse["status"]): RoomStatus => {
+  switch (s) {
+    case "active":
+      return "Đang sử dụng";
+    case "inactive":
+      return "Hư hỏng";
+    case "maintenance":
+      return "Bảo trì";
+    default:
+      return "Hư hỏng";
+  }
+};
+
+const mapType = (t: RoomResponse["type"]): RoomType => {
+  switch (t) {
+    case "meeting":
+      return "Hội trường";
+    case "lab":
+      return "Thực hành";
+    case "classroom":
+      return "Phòng học";
+    default:
+      return "Phòng học";
+  }
+};
+
+export const toRoomRow = (r: RoomResponse): RoomRow => ({
+  id: r.id,
+  room: r.name,
+  building: r.building?.name ?? "",
+  stage: r.stage,
+  capacity: r.capacity,
+  status: mapStatus(r.status),
+  type: mapType(r.type),
+});
+
 const MOCK_DATA: RoomRow[] = [
-  {
-    room: "A101",
-    building: "A",
-    stage: 1,
-    type: "Phòng học",
-    capacity: 40,
-    status: "Đang sử dụng",
-  },
-  {
-    room: "A102",
-    building: "A",
-    stage: 1,
-    type: "Thực hành",
-    capacity: 35,
-    status: "Hư hỏng",
-  },
-  {
-    room: "A103",
-    building: "A",
-    stage: 1,
-    type: "Phòng học",
-    capacity: 50,
-    status: "Hư hỏng",
-  },
-  {
-    room: "A201",
-    building: "A",
-    stage: 2,
-    type: "Phòng học",
-    capacity: 45,
-    status: "Đang sử dụng",
-  },
-  {
-    room: "A202",
-    building: "A",
-    stage: 2,
-    type: "Thực hành",
-    capacity: 30,
-    status: "Bảo trì",
-  },
-  {
-    room: "B101",
-    building: "B",
-    stage: 1,
-    type: "Phòng học",
-    capacity: 60,
-    status: "Hư hỏng",
-  },
-  {
-    room: "B102",
-    building: "B",
-    stage: 1,
-    type: "Thực hành",
-    capacity: 40,
-    status: "Đang sử dụng",
-  },
-  {
-    room: "B201",
-    building: "B",
-    stage: 2,
-    type: "Phòng học",
-    capacity: 55,
-    status: "Hư hỏng",
-  },
-  {
-    room: "B202",
-    building: "B",
-    stage: 2,
-    type: "Hội trường",
-    capacity: 150,
-    status: "Đang sử dụng",
-  },
-  {
-    room: "C101",
-    building: "C",
-    stage: 1,
-    type: "Phòng học",
-    capacity: 35,
-    status: "Hư hỏng",
-  },
-  {
-    room: "C201",
-    building: "C",
-    stage: 2,
-    type: "Phòng học",
-    capacity: 45,
-    status: "Đang sử dụng",
-  },
-  {
-    room: "C301",
-    building: "C",
-    stage: 3,
-    type: "Hội trường",
-    capacity: 200,
-    status: "Bảo trì",
-  },
-  {
-    room: "D101",
-    building: "D",
-    stage: 1,
-    type: "Thực hành",
-    capacity: 25,
-    status: "Hư hỏng",
-  },
-  {
-    room: "D201",
-    building: "D",
-    stage: 2,
-    type: "Phòng học",
-    capacity: 40,
-    status: "Đang sử dụng",
-  },
-  {
-    room: "D301",
-    building: "D",
-    stage: 3,
-    type: "Phòng học",
-    capacity: 50,
-    status: "Hư hỏng",
-  },
+  
 ];
 
 const statusChipSx = (s: RoomStatus) => {
@@ -180,6 +100,19 @@ export default function RoomComponent() {
   const [filterStatus, setFilterStatus] = useState<string>("");
   const [filterStage, setFilterStage] = useState<string>("");
   const [filterCapacity, setFilterCapacity] = useState<string>("");
+
+  const { data, isLoading, isError, error } = useGetRoomQuery();
+
+  const roomsData = useMemo<RoomResponse[]>(() => {
+    if (Array.isArray(data)) return data;
+    return (data as any)?.roomsData ?? [];
+  }, [data]);
+
+  const tableData = useMemo(() => roomsData.map(toRoomRow), [roomsData]);
+
+  console.log("ROOM DAta", data);
+
+  console.log({ data, roomsData, tableData, isLoading, isError, error });
 
   const columns = useMemo<MRT_ColumnDef<RoomRow>[]>(
     () => [
@@ -292,7 +225,7 @@ export default function RoomComponent() {
 
   const table = useMaterialReactTable({
     columns,
-    data: MOCK_DATA,
+    data: tableData,
 
     enableSorting: true,
     enableTopToolbar: false,
