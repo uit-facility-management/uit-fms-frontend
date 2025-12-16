@@ -13,8 +13,12 @@ import {
   FilterAlt as FilterIcon,
 } from "@mui/icons-material";
 import RoomDetails from "./RoomDetails";
-import { useGetRoomQuery } from "@/feature/RoomApi/room.api";
+import CreateRoomModal, { CreateRoomPayload } from "./CreateRoomModal";
+import { useGetRoomQuery, useCreateRoomMutation, useGetBuildingsQuery } from "@/feature/RoomApi/room.api";
 import { RoomResponse } from "@/feature/RoomApi/type";
+import type { CreateRoomRequest } from "@/feature/RoomApi/type";
+import type { BuildingOption } from "./CreateRoomModal";
+
 
 type RoomType = "Phòng học" | "Thực hành" | "Hội trường";
 type RoomStatus = "Đang sử dụng" | "Hư hỏng" | "Bảo trì";
@@ -65,8 +69,6 @@ export const toRoomRow = (r: RoomResponse): RoomRow => ({
   type: mapType(r.type),
 });
 
-const MOCK_DATA: RoomRow[] = [];
-
 const statusChipSx = (s: RoomStatus) => {
   switch (s) {
     case "Đang sử dụng":
@@ -81,10 +83,12 @@ const statusChipSx = (s: RoomStatus) => {
 };
 
 export default function RoomComponent() {
-  const handleCreateRoom = () => console.log("Tạo phòng");
   const handleBookRoom = () => console.log("Đặt phòng");
+  const handleCreateRoom = () => setIsCreateOpen(true);
 
   const [selectedRoom, setSelectedRoom] = useState<RoomRow | null>(null);
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
+  
 
   // search + filter UI state
   const [searchText, setSearchText] = useState("");
@@ -97,8 +101,7 @@ export default function RoomComponent() {
   const [filterStage, setFilterStage] = useState<string>("");
   const [filterCapacity, setFilterCapacity] = useState<string>("");
 
-  const { data, isLoading, isError, error, isFetching } = useGetRoomQuery();
-  console.log("ROOM data", { data, isLoading, isFetching, isError, error });
+  const { data, isLoading, isError, error, isFetching, refetch } = useGetRoomQuery();
 
   const roomsData = useMemo<RoomResponse[]>(() => {
     if (!data) return [];
@@ -112,12 +115,57 @@ export default function RoomComponent() {
 
   const showLoader = (isLoading || isFetching) && !data;
 
-  console.log("TABLE data ready:", {
-    tableDataLength: tableData.length,
-    isLoading,
-    isFetching,
-    showLoader,
-  });
+  const [createRoom, { isLoading: isCreating }] = useCreateRoomMutation();
+  const { data: buildingsRes, isLoading: isBuildingsLoading } = useGetBuildingsQuery();
+
+  const buildings: BuildingOption[] = useMemo(() => {
+    if (!buildingsRes) return [];
+    return buildingsRes.map((b) => ({ id: b.id, name: b.name }));
+  }, [buildingsRes]);
+
+  const mapStatusToApi = (s: "Đang sử dụng" | "Hư hỏng" | "Bảo trì") => {
+    switch (s) {
+      case "Đang sử dụng":
+        return "active" as const;
+      case "Bảo trì":
+        return "maintenance" as const;
+      case "Hư hỏng":
+      default:
+        return "inactive" as const;
+    }
+  };
+
+  const mapTypeToApi = (t: "Phòng học" | "Thực hành" | "Hội trường") => {
+    switch (t) {
+      case "Hội trường":
+        return "meeting" as const;
+      case "Thực hành":
+        return "lab" as const;
+      case "Phòng học":
+      default:
+        return "classroom" as const;
+    }
+  };
+
+
+  const handleSubmitCreate = async (payload: CreateRoomPayload) => {
+    const body: CreateRoomRequest = {
+      name: payload.name,
+      status: mapStatusToApi(payload.status),
+      stage: payload.stage,
+      type: mapTypeToApi(payload.type),
+      capacity: payload.capacity,
+      building_id: payload.building_id,
+    };
+
+    try {
+      await createRoom(body).unwrap();
+      await refetch();
+      setIsCreateOpen(false);
+    } catch (err) {
+      console.error("Create room failed:", err);
+    }
+  };
 
   const columns = useMemo<MRT_ColumnDef<RoomRow>[]>(
     () => [
@@ -465,6 +513,12 @@ export default function RoomComponent() {
               <MaterialReactTable table={table} />
             )}
           </div>
+              <CreateRoomModal
+                open={isCreateOpen}
+                onClose={() => setIsCreateOpen(false)}
+                onSubmit={handleSubmitCreate}
+                buildings={buildings}
+              />
         </>
       )}
     </div>

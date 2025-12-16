@@ -15,3 +15,13 @@ export interface BuildingDTO {
   name: string;
   status: "active" | "inactive";
 }
+
+
+export interface CreateRoomRequest {
+  name: string;
+  status: "active" | "inactive" | "maintenance";
+  stage: number;
+  type: "meeting" | "lab" | "classroom";
+  capacity: number;
+  building_id: string;
+};
