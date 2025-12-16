@@ -17,6 +17,10 @@ import ArrowBackIosNewRoundedIcon from "@mui/icons-material/ArrowBackIosNewRound
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
+import { useUpdateRoomMutation } from "@/feature/RoomApi/room.api";
+import type { CreateRoomRequest } from "@/feature/RoomApi/type";
+
+
 
 import {
   MaterialReactTable,
@@ -26,12 +30,15 @@ import {
 
 import type { RoomRow } from "./RoomComponent";
 
+type BuildingOption = { id: string; name: string };
+
 type Props = {
   room: RoomRow;
   onBack: () => void;
+  buildings: BuildingOption[];
+  onUpdated?: () => void;
 };
 
-type Building = "A" | "B" | "C" | "E";
 type RoomType = "Phòng học" | "Thực hành" | "Hội trường";
 type RoomStatus = "Đang sử dụng" | "Hư hỏng" | "Bảo trì";
 
@@ -123,7 +130,14 @@ function InfoRow({ label, value }: { label: string; value: React.ReactNode }) {
   );
 }
 
-export default function RoomDetails({ room, onBack }: Props) {
+const mapStatusToApi = (s: RoomStatus) =>
+  s === "Đang sử dụng" ? "active" : s === "Bảo trì" ? "maintenance" : "inactive";
+
+const mapTypeToApi = (t: RoomType) =>
+  t === "Hội trường" ? "meeting" : t === "Thực hành" ? "lab" : "classroom";
+
+
+export default function RoomDetails({ room, onBack, buildings, onUpdated }: Props) {
   const r = room as RoomRowWithName;
 
   const [isEditing, setIsEditing] = useState(false);
@@ -132,9 +146,12 @@ export default function RoomDetails({ room, onBack }: Props) {
   const [stage, setStage] = useState<number>(Number(r.stage));
   const [capacity, setCapacity] = useState<number>(r.capacity);
 
-  const [building, setBuilding] = useState<Building>(
-    (r.building as Building) ?? "A"
-  );
+  const [buildingId, setBuildingId] = useState<string>(r.building_id ?? "");
+  const buildingName = useMemo(() => {
+    return buildings.find((b) => b.id === buildingId)?.name ?? r.building ?? "";
+  }, [buildings, buildingId, r.building]);
+  const [updateRoom, { isLoading: isUpdating }] = useUpdateRoomMutation();
+
   const [type, setType] = useState<RoomType>(r.type as RoomType);
   const [status, setStatus] = useState<RoomStatus>(r.status as RoomStatus);
 
@@ -163,30 +180,32 @@ export default function RoomDetails({ room, onBack }: Props) {
     setName(r.name ?? r.room);
     setStage(Number(r.stage));
     setCapacity(r.capacity);
-    setBuilding(((r.building as Building) ?? "A") as Building);
+    setBuildingId(r.building_id ?? "");
     setType(r.type as RoomType);
     setStatus(r.status as RoomStatus);
     setIsEditing(false);
   };
 
-  const handleSave = () => {
-    console.log("SAVE ROOM", {
-      code: r.room,
+  const handleSave = async () => {
+    const body: CreateRoomRequest = {
       name,
-      building,
+      status: mapStatusToApi(status),
       stage,
-      type,
+      type: mapTypeToApi(type),
       capacity,
-      status,
-    });
+      building_id: buildingId,
+    };
 
-    // update roomName on facilities display
-    setFacilities((prev) =>
-      prev.map((x) => ({ ...x, roomName: name || r.room }))
-    );
-
-    setIsEditing(false);
+    try {
+      await updateRoom({ id: r.id, body }).unwrap();
+      onUpdated?.();
+      setFacilities((prev) => prev.map((x) => ({ ...x, roomName: name || r.room })));
+      setIsEditing(false);
+    } catch (e) {
+      console.error("Update room failed:", e);
+    }
   };
+
 
   // ===== Facilities table columns =====
   const facilityColumns = useMemo<MRT_ColumnDef<FacilityRow>[]>(
@@ -537,7 +556,7 @@ export default function RoomDetails({ room, onBack }: Props) {
             {!isEditing ? (
               <>
                 <InfoRow label="Tên phòng" value={name} />
-                <InfoRow label="Tòa" value={building} />
+                <InfoRow label="Tòa" value={buildingName} />
                 <InfoRow label="Tầng" value={stage} />
                 <InfoRow label="Loại" value={type} />
                 <InfoRow label="Sức chứa" value={capacity} />
@@ -558,15 +577,14 @@ export default function RoomDetails({ room, onBack }: Props) {
                   <Select
                     labelId="building-label"
                     label="Tòa"
-                    value={building}
-                    onChange={(e: SelectChangeEvent) =>
-                      setBuilding(e.target.value as Building)
-                    }
+                    value={buildingId}
+                    onChange={(e) => setBuildingId(String(e.target.value))}
                   >
-                    <MenuItem value="A">A</MenuItem>
-                    <MenuItem value="B">B</MenuItem>
-                    <MenuItem value="C">C</MenuItem>
-                    <MenuItem value="E">E</MenuItem>
+                    {buildings.map((b) => (
+                      <MenuItem key={b.id} value={b.id}>
+                        {b.name}
+                      </MenuItem>
+                    ))}
                   </Select>
                 </FormControl>
 

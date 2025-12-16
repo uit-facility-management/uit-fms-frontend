@@ -20,7 +20,16 @@ export const roomApi = appApi.injectEndpoints({
         body,
       }),
     }),
+
+    updateRoom: builder.mutation<RoomResponse, { id: string; body: CreateRoomRequest }>({
+      query: ({ id, body }) => ({
+        url: `/room/${id}`,
+        method: "PATCH",
+        body,
+      }),
+    }),
+
   }),
 });
 
-export const { useGetRoomQuery, useCreateRoomMutation, useGetBuildingsQuery } = roomApi;
+export const { useGetRoomQuery, useCreateRoomMutation, useGetBuildingsQuery , useUpdateRoomMutation,} = roomApi;

@@ -27,6 +27,7 @@ export type RoomRow = {
   id: string;
   room: string;
   building: string;
+  building_id: string;
   stage: number;
   type: RoomType;
   capacity: number;
@@ -63,6 +64,7 @@ export const toRoomRow = (r: RoomResponse): RoomRow => ({
   id: r.id,
   room: r.name,
   building: r.building?.name ?? "",
+  building_id: r.building?.id ?? "", 
   stage: r.stage,
   capacity: r.capacity,
   status: mapStatus(r.status),
@@ -113,7 +115,8 @@ export default function RoomComponent() {
 
   const tableData = useMemo(() => roomsData.map(toRoomRow), [roomsData]);
 
-  const showLoader = (isLoading || isFetching) && !data;
+  const showLoader = isLoading || isFetching;
+
 
   const [createRoom, { isLoading: isCreating }] = useCreateRoomMutation();
   const { data: buildingsRes, isLoading: isBuildingsLoading } = useGetBuildingsQuery();
@@ -341,7 +344,10 @@ export default function RoomComponent() {
   return (
     <div className="w-full">
       {selectedRoom ? (
-        <RoomDetails room={selectedRoom} onBack={() => setSelectedRoom(null)} />
+        <RoomDetails room={selectedRoom} onBack={() => setSelectedRoom(null)} 
+        buildings={buildings}
+        onUpdated={() => refetch()}
+        />
       ) : (
         <>
           <div className="flex items-center justify-between mb-6">
