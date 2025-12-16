@@ -302,9 +302,9 @@ export default function RoomComponent() {
     enableColumnFilters: true,
 
     // NEW: dùng globalFilter theo searchText (FE-only)
-    enableGlobalFilter: true,
-    onGlobalFilterChange: setSearchText,
-    state: { globalFilter: searchText },
+    enableGlobalFilter: false,
+    // onGlobalFilterChange: setSearchText,
+    // state: { globalFilter: searchText },
 
     muiTableHeadCellProps: {
       sx: {
