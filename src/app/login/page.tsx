@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import { FaUser, FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
-import { useLoginMutation } from "@/feature/auth.api";
+import { useLoginMutation } from "@/feature/auth/auth.api";
 import Swal from "sweetalert2";
 const UIT_BLUE = "#2563EB";
 export default function LoginPage() {
