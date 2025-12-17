@@ -72,7 +72,7 @@ export default function DashboardHome() {
       quantity: 15,
       available: 8,
       borrowed: 7,
-      status: "Khả dụng",
+      status: "Chưa sử dụng",
     },
     {
       id: 2,
@@ -80,7 +80,7 @@ export default function DashboardHome() {
       quantity: 25,
       available: 20,
       borrowed: 5,
-      status: "Khả dụng",
+      status: "Chưa sử dụng",
     },
     {
       id: 3,
@@ -96,7 +96,7 @@ export default function DashboardHome() {
       quantity: 20,
       available: 15,
       borrowed: 5,
-      status: "Khả dụng",
+      status: "Chưa sử dụng",
     },
     {
       id: 5,
@@ -104,7 +104,7 @@ export default function DashboardHome() {
       quantity: 30,
       available: 25,
       borrowed: 5,
-      status: "Khả dụng",
+      status: "Chưa sử dụng",
     },
   ];
 
@@ -142,7 +142,7 @@ export default function DashboardHome() {
               <p className="text-3xl font-bold text-gray-900 mt-2">45</p>
               <p className="text-xs text-green-600 mt-1 flex items-center gap-1">
                 <CheckCircle className="w-3 h-3" />
-                93.75% khả dụng
+                93.75% Chưa sử dụng
               </p>
             </div>
             <div className="w-14 h-14 bg-green-100 rounded-xl flex items-center justify-center">
@@ -311,7 +311,7 @@ export default function DashboardHome() {
                       Tổng số
                     </th>
                     <th className="text-left py-3 px-4 text-xs font-semibold text-gray-600 uppercase">
-                      Khả dụng
+                      Chưa sử dụng
                     </th>
                     <th className="text-left py-3 px-4 text-xs font-semibold text-gray-600 uppercase">
                       Đang mượn
@@ -344,7 +344,7 @@ export default function DashboardHome() {
                       <td className="py-4 px-4">
                         <span
                           className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${
-                            item.status === "Khả dụng"
+                            item.status === "Chưa sử dụng"
                               ? "bg-green-100 text-green-700 border border-green-200"
                               : "bg-yellow-100 text-yellow-700 border border-yellow-200"
                           }`}
