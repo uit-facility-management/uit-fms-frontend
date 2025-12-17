@@ -11,7 +11,7 @@ import { Visibility } from "@mui/icons-material";
 import FacilityDetails from "./FacilityDetails";
 
 type FacilityType = "Điều khiển" | "Mic" | "Máy chiếu" | "Loa" | "PC" | "Máy lạnh";
-type FacilityStatus = "Đang sử dụng" | "Chưa sử dụng" | "Bị hỏng";
+type FacilityStatus = "Đang sử dụng" | "Chưa sử dụng" | "Hư hỏng";
 
 export type FacilityRow = {
   type: FacilityType;
@@ -38,7 +38,7 @@ const MOCK_DATA: FacilityRow[] = [
     type: "Mic",
     room: "A102",
     building: "A",
-    status: "Bị hỏng",
+    status: "Hư hỏng",
   },
   {
     type: "PC",
@@ -56,7 +56,7 @@ const MOCK_DATA: FacilityRow[] = [
     type: "Điều khiển",
     room: "A201",
     building: "A",
-    status: "Bị hỏng",
+    status: "Hư hỏng",
   },
   {
     type: "Máy chiếu",
@@ -92,13 +92,13 @@ const MOCK_DATA: FacilityRow[] = [
     type: "Máy chiếu",
     room: "C201",
     building: "C",
-    status: "Bị hỏng",
+    status: "Hư hỏng",
   },
   {
     type: "Loa",
     room: "C301",
     building: "C",
-    status: "Bị hỏng",
+    status: "Hư hỏng",
   },
   {
     type: "PC",
@@ -129,7 +129,7 @@ const facilityStatusChipSx = (s: FacilityStatus) => {
         color: "#155dfc",
         border: "none",
       };
-    case "Bị hỏng":
+    case "Hư hỏng":
       return {
         backgroundColor: "#ffe5e5",
         color: "#ff1919",
@@ -139,8 +139,7 @@ const facilityStatusChipSx = (s: FacilityStatus) => {
 };
 
 export default function ToolsComponent() {
-  const handleAddFacility = () => console.log("Thêm tài sản");
-  const handleFacility = () => console.log("Bảo trì");
+  const handleAddFacility = () => console.log("Thêm thiết bi");
 
   const [selectedFacility, setSelectedFacility] = useState<FacilityRow | null>(null);
 
@@ -320,7 +319,7 @@ export default function ToolsComponent() {
 
             <div className="flex gap-3">
               <button
-                onClick={handleFacility}
+                onClick={handleAddFacility}
                 className="rounded-lg px-5 py-2.5 text-sm font-semibold text-white bg-[#0B4DBA] hover:bg-[#0940A3] transition-all shadow-sm"
               >
                 Thêm thiết bị
