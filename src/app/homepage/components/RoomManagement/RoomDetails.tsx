@@ -17,18 +17,25 @@ import ArrowBackIosNewRoundedIcon from "@mui/icons-material/ArrowBackIosNewRound
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
-import { useUpdateRoomMutation } from "@/feature/RoomApi/room.api";
-import type { CreateRoomRequest } from "@/feature/RoomApi/type";
-
-
-
+import { 
+  useUpdateRoomMutation, 
+  useGetRoomAssetsQuery,
+  useDeleteRoomAssetMutation,
+} from "@/feature/RoomApi/room.api";
+import type { 
+  CreateRoomRequest,
+  RoomAssetResponse,
+} from "@/feature/RoomApi/type";
 import {
   MaterialReactTable,
   useMaterialReactTable,
   type MRT_ColumnDef,
 } from "material-react-table";
-
 import type { RoomRow } from "./RoomComponent";
+import CreateRoomAssetModal from "./CreateRoomAssetModal";
+import EditRoomAssetModal from "./EditRoomAssetModal";
+
+
 
 type BuildingOption = { id: string; name: string };
 
@@ -49,6 +56,7 @@ type IncidentStatus = "Đã xử lý" | "Chưa xử lý";
 type FacilityRow = {
   id: string;
   name: string;
+  type: string;
   status: FacilityStatus;
   roomName: string;
 };
@@ -60,12 +68,6 @@ type IncidentRow = {
   happenedAt: string;
   status: IncidentStatus;
 };
-
-// demo data
-const INITIAL_FACILITIES: FacilityRow[] = [
-  { id: "1", name: "Máy chiếu", status: "Hoạt động", roomName: "A101" },
-  { id: "2", name: "Máy lạnh", status: "Hư hỏng", roomName: "A101" },
-];
 
 const INITIAL_INCIDENTS: IncidentRow[] = [
   {
@@ -119,6 +121,23 @@ const incidentStatusChipSx = (s: IncidentStatus) => {
   }
 };
 
+const mapAssetTypeToUI = (t: string) => {
+  switch (t) {
+    case "Electronics":
+      return "Thiết bị điện tử";
+    case "Furniture":
+      return "Nội thất";
+    case "Stationery":
+      return "Văn phòng phẩm";
+    case "Other":
+      return "Khác";
+    default:
+      return t;
+  }
+};
+
+
+
 function InfoRow({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div className="flex items-center justify-between gap-6 py-3 border-b border-gray-100 last:border-b-0">
@@ -136,11 +155,19 @@ const mapStatusToApi = (s: RoomStatus) =>
 const mapTypeToApi = (t: RoomType) =>
   t === "Hội trường" ? "meeting" : t === "Thực hành" ? "lab" : "classroom";
 
+const mapAssetStatusToUI = (s: RoomAssetResponse["status"]): FacilityStatus =>
+  s === "ACTIVE" ? "Hoạt động" : "Hư hỏng";
+
+
 
 export default function RoomDetails({ room, onBack, buildings, onUpdated }: Props) {
   const r = room as RoomRowWithName;
 
   const [isEditing, setIsEditing] = useState(false);
+  const [openCreateAsset, setOpenCreateAsset] = useState(false);
+  const [openEditAsset, setOpenEditAsset] = useState(false);
+  const [selectedAsset, setSelectedAsset] = useState<FacilityRow | null>(null);
+  const [deleteRoomAsset, { isLoading: isDeletingAsset }] = useDeleteRoomAssetMutation();
 
   const [name, setName] = useState<string>(r.name ?? r.room);
   const [stage, setStage] = useState<number>(Number(r.stage));
@@ -154,11 +181,28 @@ export default function RoomDetails({ room, onBack, buildings, onUpdated }: Prop
 
   const [type, setType] = useState<RoomType>(r.type as RoomType);
   const [status, setStatus] = useState<RoomStatus>(r.status as RoomStatus);
-
-  const [facilities, setFacilities] = useState<FacilityRow[]>(
-    INITIAL_FACILITIES.map((x) => ({ ...x, roomName: name || r.room }))
-  );
   const [incidents, setIncidents] = useState<IncidentRow[]>(INITIAL_INCIDENTS);
+
+  const {
+    data: roomAssets = [],
+    isLoading: isLoadingAssets,
+    isFetching: isFetchingAssets,
+    isError: isAssetsError,
+    refetch: refetchAssets,
+  } = useGetRoomAssetsQuery();
+
+  const facilitiesFromApi: FacilityRow[] = useMemo(() => {
+    return roomAssets
+      .filter((a) => a.room?.id === r.id)
+      .map((a) => ({
+        id: a.id,
+        name: a.name,
+        type: mapAssetTypeToUI(a.type),
+        status: mapAssetStatusToUI(a.status),
+        roomName: a.room?.name ?? (name || r.room),
+      }));
+  }, [roomAssets, r.id, r.room, name]);
+
 
   const currentRoomStatusChip = useMemo(
     () => (
@@ -199,7 +243,6 @@ export default function RoomDetails({ room, onBack, buildings, onUpdated }: Prop
     try {
       await updateRoom({ id: r.id, body }).unwrap();
       onUpdated?.();
-      setFacilities((prev) => prev.map((x) => ({ ...x, roomName: name || r.room })));
       setIsEditing(false);
     } catch (e) {
       console.error("Update room failed:", e);
@@ -211,6 +254,7 @@ export default function RoomDetails({ room, onBack, buildings, onUpdated }: Prop
   const facilityColumns = useMemo<MRT_ColumnDef<FacilityRow>[]>(
     () => [
       { accessorKey: "name", header: "Tên", size: 240 },
+      { accessorKey: "type", header: "Loại", size: 180 },
       {
         accessorKey: "status",
         header: "Trạng thái",
@@ -241,7 +285,10 @@ export default function RoomDetails({ room, onBack, buildings, onUpdated }: Prop
             <Tooltip title="Chỉnh sửa">
               <IconButton
                 size="small"
-                onClick={() => console.log("EDIT facility", row.original)}
+                onClick={() => {
+                  setSelectedAsset(row.original);
+                  setOpenEditAsset(true);
+                }}
                 sx={{ color: "#2563eb" }}
               >
                 <EditOutlinedIcon fontSize="small" />
@@ -251,11 +298,16 @@ export default function RoomDetails({ room, onBack, buildings, onUpdated }: Prop
             <Tooltip title="Xóa">
               <IconButton
                 size="small"
-                onClick={() =>
-                  setFacilities((prev) =>
-                    prev.filter((x) => x.id !== row.original.id)
-                  )
-                }
+                disabled={isDeletingAsset}
+                onClick={async () => {
+                  const id = row.original.id;
+                  try {
+                    await deleteRoomAsset({ id }).unwrap();
+                    refetchAssets();
+                  } catch (e) {
+                    console.error("Delete room asset failed:", e);
+                  }
+                }}
                 sx={{ color: "#dc2626" }}
               >
                 <DeleteOutlineOutlinedIcon fontSize="small" />
@@ -265,12 +317,20 @@ export default function RoomDetails({ room, onBack, buildings, onUpdated }: Prop
         ),
       },
     ],
-    []
+    [deleteRoomAsset, isDeletingAsset, refetchAssets]
   );
 
   const facilitiesTable = useMaterialReactTable({
     columns: facilityColumns,
-    data: facilities,
+    data: facilitiesFromApi,
+    state: {
+      isLoading: isLoadingAssets || isFetchingAssets,
+      showAlertBanner: isAssetsError,
+    },
+    muiToolbarAlertBannerProps: isAssetsError
+      ? { color: "error", children: "Không tải được danh sách cơ sở vật chất" }
+      : undefined,
+
 
     enableSorting: true,
     enablePagination: true,
@@ -395,11 +455,7 @@ export default function RoomDetails({ room, onBack, buildings, onUpdated }: Prop
             <Tooltip title="Xóa">
               <IconButton
                 size="small"
-                onClick={() =>
-                  setIncidents((prev) =>
-                    prev.filter((x) => x.id !== row.original.id)
-                  )
-                }
+                onClick={() => console.log("DELETE facility (need API):", row.original.id)}
                 sx={{ color: "#dc2626" }}
               >
                 <DeleteOutlineOutlinedIcon fontSize="small" />
@@ -658,25 +714,29 @@ export default function RoomDetails({ room, onBack, buildings, onUpdated }: Prop
 
           <button
             type="button"
-            onClick={() => {
-              console.log("ADD facility");
-              setFacilities((prev) => [
-                ...prev,
-                {
-                  id: String(Date.now()),
-                  name: "Thiết bị mới",
-                  status: "Hoạt động",
-                  roomName: name || r.room,
-                },
-              ]);
-            }}
+            onClick={() => setOpenCreateAsset(true)}
             className="inline-flex items-center gap-2 rounded-lg px-4 py-2 font-semibold text-white bg-[#5295f8] hover:bg-[#377be1] transition"
           >
             <AddRoundedIcon sx={{ fontSize: 18 }} />
             Thêm thiết bị
           </button>
         </div>
-
+        <CreateRoomAssetModal
+          open={openCreateAsset}
+          onClose={() => setOpenCreateAsset(false)}
+          roomId={r.id}
+          onCreated={() => refetchAssets()}
+        />
+        <EditRoomAssetModal
+          open={openEditAsset}
+          onClose={() => setOpenEditAsset(false)}
+          roomId={r.id}
+          asset={selectedAsset}
+          onUpdated={() => {
+            setSelectedAsset(null);
+            refetchAssets();
+          }}
+        />
         <div className="border-t border-gray-100">
           <MaterialReactTable table={facilitiesTable} />
         </div>
@@ -694,7 +754,7 @@ export default function RoomDetails({ room, onBack, buildings, onUpdated }: Prop
                 ...prev,
                 {
                   id: String(Date.now()),
-                  facilityName: facilities[0]?.name ?? "Thiết bị",
+                  facilityName: facilitiesFromApi[0]?.name ?? "Thiết bị",
                   description: "Mô tả sự việc...",
                   happenedAt: new Date().toLocaleString("vi-VN"),
                   status: "Chưa xử lý",

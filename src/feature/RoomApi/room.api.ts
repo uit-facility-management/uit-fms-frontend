@@ -1,5 +1,11 @@
 import { appApi } from "@/lib/appApi";
-import type { RoomResponse, CreateRoomRequest, BuildingDTO } from "./type";
+import type { 
+  RoomResponse, 
+  CreateRoomRequest, 
+  BuildingDTO, 
+  RoomAssetResponse, 
+  CreateRoomAssetRequest 
+} from "./type";
 
 export const roomApi = appApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -29,7 +35,47 @@ export const roomApi = appApi.injectEndpoints({
       }),
     }),
 
+    getRoomAssets: builder.query<RoomAssetResponse[], void>({
+      query: () => "/room-assets",
+      keepUnusedDataFor: 60,
+    }),
+
+    createRoomAsset: builder.mutation<RoomAssetResponse, CreateRoomAssetRequest>({
+      query: (body) => ({
+        url: "/room-assets",
+        method: "POST",
+        body,
+      }),
+    }),
+
+    updateRoomAsset: builder.mutation<
+      RoomAssetResponse,
+      { id: string; body: CreateRoomAssetRequest }
+    >({
+      query: ({ id, body }) => ({
+        url: `/room-assets/${id}`,
+        method: "PATCH",
+        body,
+      }),
+    }),
+
+    deleteRoomAsset: builder.mutation<{ message?: string } | void, { id: string }>({
+      query: ({ id }) => ({
+        url: `/room-assets/${id}`,
+        method: "DELETE",
+      }),
+    }),
+
   }),
 });
 
-export const { useGetRoomQuery, useCreateRoomMutation, useGetBuildingsQuery , useUpdateRoomMutation,} = roomApi;
+export const { 
+  useGetRoomQuery, 
+  useCreateRoomMutation, 
+  useGetBuildingsQuery , 
+  useUpdateRoomMutation,
+  useGetRoomAssetsQuery,
+  useCreateRoomAssetMutation,
+  useUpdateRoomAssetMutation,
+  useDeleteRoomAssetMutation,
+} = roomApi;
