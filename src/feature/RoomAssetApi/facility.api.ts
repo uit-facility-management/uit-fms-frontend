@@ -6,6 +6,7 @@ import type {
 } from "./type";
 
 export const roomAssetApi = appApi.injectEndpoints({
+  overrideExisting: true,
   endpoints: (builder) => ({
     // ---------- GET ----------
     getRoomAssets: builder.query<RoomAssetResponse[], void>({
@@ -25,14 +26,17 @@ export const roomAssetApi = appApi.injectEndpoints({
     }),
 
     // ---------- PATCH ----------
-    updateFacility: builder.mutation<RoomAssetResponse, { id: string; body: UpdateFacilityRequest }>({
+    updateFacility: builder.mutation<
+      RoomAssetResponse,
+      { id: string; body: UpdateFacilityRequest }
+    >({
       query: ({ id, body }) => ({
         url: `/room-assets/${id}`,
         method: "PATCH",
         body,
       }),
       //  refetch update
-      invalidatesTags: ["RoomAsset"]
+      invalidatesTags: ["RoomAsset"],
     }),
   }),
 });
@@ -40,5 +44,5 @@ export const roomAssetApi = appApi.injectEndpoints({
 export const {
   useGetRoomAssetsQuery,
   useCreateFacilityMutation,
-  useUpdateFacilityMutation, // 👈 export thêm hook
+  useUpdateFacilityMutation,
 } = roomAssetApi;
