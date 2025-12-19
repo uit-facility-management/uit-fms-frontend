@@ -8,13 +8,16 @@ import {
   Check,
   X,
 } from "lucide-react";
+import { selectCurrentUser } from "@/feature/auth/auth.slice";
+import { useSelector } from "react-redux";
 
 type DashboardTab = "requests" | "tools";
 type RequestStatus = "Chờ duyệt" | "Chấp nhận" | "Từ chối";
 
 export default function DashboardHome() {
   const [activeTab, setActiveTab] = useState<DashboardTab>("requests");
-
+  const user = useSelector(selectCurrentUser);
+  console.log("Current User:", user);
   // Mock data for booking requests
   const requestsData = [
     {

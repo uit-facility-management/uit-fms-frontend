@@ -2,39 +2,52 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import { useRouter } from "next/navigation"; // 1. Import router
 import { FaUser, FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
 import { useLoginMutation } from "@/feature/auth/auth.api";
 import Swal from "sweetalert2";
+import Cookies from "js-cookie";
+import { useDispatch } from "react-redux";
+import { setCredentials } from "@/feature/auth/auth.slice";
+
 const UIT_BLUE = "#2563EB";
+
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const canSubmit = email.trim() !== "" && password.trim() !== "";
+  const dispatch = useDispatch();
+  const router = useRouter(); // Khởi tạo router
+  // const dispatch = useDispatch();
+
   const [login, { isLoading }] = useLoginMutation();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       const res = await login({ email, password }).unwrap();
-      localStorage.setItem("access_token", res.access_token);
-      if (res.access_token) {
-        await Swal.fire({
-          icon: "success",
-          title: "Đăng nhập thành công",
-          confirmButtonColor: "#2563EB",
-        });
+      Cookies.set("access_token", res.access_token, { expires: 1 });
+      localStorage.setItem("user", JSON.stringify(res.user));
+      dispatch(
+        setCredentials({
+          user: res.user,
+          token: res.access_token,
+        })
+      );
+      await Swal.fire({
+        icon: "success",
+        title: "Đăng nhập thành công",
+        confirmButtonColor: "#2563EB",
+        timer: 1500, // Tự tắt sau 1.5s cho nhanh
+        showConfirmButton: false,
+      });
 
-        window.location.href = "/homepage";
-      } else {
-        Swal.fire({
-          icon: "error",
-          title: "Đăng nhập thất bại",
-          text: "Vui lòng kiểm tra lại thông tin",
-          confirmButtonColor: "#2563EB",
-        });
-      }
+      // 3. Chuyển trang mượt mà (không load lại trang)
+      router.push("/homepage");
+
+      // ----------------------
     } catch (error) {
+      console.error(error); // Log lỗi ra để debug
       Swal.fire({
         icon: "error",
         title: "Đăng nhập thất bại",
