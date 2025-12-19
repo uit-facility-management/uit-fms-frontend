@@ -14,6 +14,8 @@ export const appApi = createApi({
       return headers;
     },
   }),
+  tagTypes: ["RoomAsset", "Room"],
+
 
   endpoints: () => ({}),
 });

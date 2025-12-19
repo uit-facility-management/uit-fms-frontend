@@ -9,11 +9,20 @@ import {
 import { IconButton, Tooltip, Chip } from "@mui/material";
 import { Visibility } from "@mui/icons-material";
 import FacilityDetails from "./FacilityDetails";
+import { useGetRoomAssetsQuery, useCreateFacilityMutation } from "@/feature/RoomAssetApi/facility.api";
+import { useGetRoomQuery } from "@/feature/RoomApi/room.api";
+import { RoomAssetResponse } from "@/feature/RoomAssetApi/type";
+import type { RoomResponse } from "@/feature/RoomApi/type";
+import CreateFacilityModal, { CreateFacilityPayload } from "./CreateFacilityModal";
+import type { RoomOption } from "./CreateFacilityModal";
 
-type FacilityType = "Điều khiển" | "Mic" | "Máy chiếu" | "Loa" | "PC" | "Máy lạnh";
-type FacilityStatus = "Đang sử dụng" | "Chưa sử dụng" | "Hư hỏng";
+export type FacilityType = "Đồ điện tử" | "Đồ nội thất" | "Văn phòng phẩm" | "Khác";
+export type FacilityStatus = "Đang sử dụng" | "Chưa sử dụng" | "Hư hỏng";
 
 export type FacilityRow = {
+  id: string;       
+  roomId: string; 
+  name: string;
   type: FacilityType;
   room: string;
   building: string;
@@ -21,98 +30,18 @@ export type FacilityRow = {
   actions?: string;
 };
 
-const MOCK_DATA: FacilityRow[] = [
-  {
-    type: "Máy chiếu",
-    room: "A101",
-    building: "A",
-    status: "Đang sử dụng",
-  },
-  {
-    type: "Loa",
-    room: "A101",
-    building: "A",
-    status: "Chưa sử dụng",
-  },
-  {
-    type: "Mic",
-    room: "A102",
-    building: "A",
-    status: "Hư hỏng",
-  },
-  {
-    type: "PC",
-    room: "A102",
-    building: "A",
-    status: "Đang sử dụng",
-  },
-  {
-    type: "Máy lạnh",
-    room: "A201",
-    building: "A",
-    status: "Chưa sử dụng",
-  },
-  {
-    type: "Điều khiển",
-    room: "A201",
-    building: "A",
-    status: "Hư hỏng",
-  },
-  {
-    type: "Máy chiếu",
-    room: "B101",
-    building: "B",
-    status: "Chưa sử dụng",
-  },
-  {
-    type: "Loa",
-    room: "B101",
-    building: "B",
-    status: "Đang sử dụng",
-  },
-  {
-    type: "PC",
-    room: "B201",
-    building: "B",
-    status: "Đang sử dụng",
-  },
-  {
-    type: "Mic",
-    room: "B202",
-    building: "B",
-    status: "Chưa sử dụng",
-  },
-  {
-    type: "Máy lạnh",
-    room: "C101",
-    building: "C",
-    status: "Đang sử dụng",
-  },
-  {
-    type: "Máy chiếu",
-    room: "C201",
-    building: "C",
-    status: "Hư hỏng",
-  },
-  {
-    type: "Loa",
-    room: "C301",
-    building: "C",
-    status: "Hư hỏng",
-  },
-  {
-    type: "PC",
-    room: "D101",
-    building: "D",
-    status: "Chưa sử dụng",
-  },
-  {
-    type: "Máy lạnh",
-    room: "D201",
-    building: "D",
-    status: "Đang sử dụng",
-  },
-];
+export const mapType: Record<RoomAssetResponse["type"], FacilityType> = {
+  Electronics: "Đồ điện tử",
+  Furniture: "Đồ nội thất",
+  Stationery: "Văn phòng phẩm",
+  Other: "Khác",
+};
+
+export const mapStatus: Record<RoomAssetResponse["status"], FacilityStatus> = {
+  ACTIVE: "Đang sử dụng",
+  INACTIVE: "Chưa sử dụng",
+  MAINTENANCE: "Hư hỏng",
+};
 
 
 const facilityStatusChipSx = (s: FacilityStatus) => {
@@ -139,12 +68,82 @@ const facilityStatusChipSx = (s: FacilityStatus) => {
 };
 
 export default function ToolsComponent() {
-  const handleAddFacility = () => console.log("Thêm thiết bi");
+  // get api room assets data
+  const { data, isLoading, error } = useGetRoomAssetsQuery();
+  
+  // console.log("API data room asset:", data);
+  // console.log("API error room asset:", error);
 
+  // selected facility để xem chi tiết
   const [selectedFacility, setSelectedFacility] = useState<FacilityRow | null>(null);
+
+  // modal thêm thiết bị
+  const [openCreateModal, setOpenCreateModal] = useState(false);
+  const [createFacility] = useCreateFacilityMutation();
+  const { data: roomsRes } = useGetRoomQuery();
+
+  // console.log("API data rooms for facility:", roomsRes);
+
+  // map rooms data thành options cho select trong modal tạo thiết bị
+  const roomOptions: RoomOption[] = useMemo(() => {
+    if (!roomsRes) return [];
+
+    return roomsRes.map((r: RoomResponse) => ({
+      id: r.id,
+      name: `${r.name} - Tầng ${r.stage}`,
+    }));
+  }, [roomsRes]);
+
+  // console.log("Room options for facility:", roomOptions);
+
+  // handle submit tạo thiết bị
+  const handleSubmitCreateFacility = async (payload: CreateFacilityPayload) => {
+    try {
+      await createFacility(payload).unwrap();
+      setOpenCreateModal(false);
+    } catch (err) {
+      console.error("Create facility failed", err);
+    }
+  };
+
+
+
+  // map data to table row
+    const facilities: FacilityRow[] = useMemo(() => {
+      if (!data) return [];
+
+      return data.map((asset) => ({
+        id: asset.id,
+        roomId: asset.room.id,
+        name: asset.name,
+
+        type: mapType[
+          asset.type as RoomAssetResponse["type"]
+        ] ?? "Khác",
+
+        room: asset.room.name,
+        building: asset.room.building.name,
+
+        status: mapStatus[
+          asset.status as RoomAssetResponse["status"]
+        ] ?? "Chưa sử dụng",
+      }));
+    }, [data]);
+
+
 
   const columns = useMemo<MRT_ColumnDef<FacilityRow>[]>(
   () => [
+    {
+      accessorKey: "name",
+      header: "Tên thiết bị",
+      size: 150,
+      Cell: ({ cell }) => (
+        <span className="font-medium text-gray-900">
+          {cell.getValue<string>()}
+        </span>
+      ),
+    },
     {
       accessorKey: "type",
       header: "Loại thiết bị",
@@ -243,7 +242,7 @@ export default function ToolsComponent() {
 
   const table = useMaterialReactTable({
     columns,
-    data: MOCK_DATA,
+    data: facilities,
     enableSorting: true,
     enableTopToolbar: false,
     enableColumnActions: false,
@@ -305,32 +304,59 @@ export default function ToolsComponent() {
       density: "comfortable",
     },
   });
+  
+    if (isLoading) {
+      return (
+        <div className="py-10 text-center text-gray-500">
+          Đang tải dữ liệu...
+        </div>
+      );
+    }
+
+    if (error) {
+      return (
+        <div className="py-10 text-center text-red-500">
+          Không thể tải dữ liệu
+        </div>
+      );
+    }
+
 
   return (
     <div className="w-full">
       {selectedFacility ? (
-        <FacilityDetails facility={selectedFacility} onBack={() => setSelectedFacility(null)} />
+        <FacilityDetails
+          facility={selectedFacility}
+          onBack={() => setSelectedFacility(null)}
+          onUpdate={(newFacility) => setSelectedFacility(newFacility)}
+        />
       ) : (
-        <>
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-bold text-gray-900">
-              Danh sách cơ sở vật chất
-            </h2>
+        <><>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-bold text-gray-900">
+                Danh sách cơ sở vật chất
+              </h2>
 
-            <div className="flex gap-3">
-              <button
-                onClick={handleAddFacility}
-                className="rounded-lg px-5 py-2.5 text-sm font-semibold text-white bg-[#0B4DBA] hover:bg-[#0940A3] transition-all shadow-sm"
-              >
-                Thêm thiết bị
-              </button>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setOpenCreateModal(true)}
+                  className="rounded-lg px-5 py-2.5 text-sm font-semibold text-white bg-[#0B4DBA] hover:bg-[#0940A3] transition-all shadow-sm"
+                >
+                  Thêm thiết bị
+                </button>
+              </div>
             </div>
-          </div>
 
-          <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-            <MaterialReactTable table={table} />
-          </div>
-        </>
+            <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+              <MaterialReactTable table={table} />
+            </div>
+          </><CreateFacilityModal
+              open={openCreateModal}
+              onClose={() => setOpenCreateModal(false)}
+              onSubmit={handleSubmitCreateFacility}
+              rooms={roomOptions}
+            /></>
+
       )}
     </div>
   );
