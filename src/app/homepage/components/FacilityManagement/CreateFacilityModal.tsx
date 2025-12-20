@@ -28,6 +28,8 @@ export type FacilityStatus =
 export type RoomOption = {
   id: string;
   name: string;
+  buildingId: string;
+  buildingName: string;
 };
 
 export type CreateFacilityPayload = {
@@ -42,7 +44,7 @@ export type CreateFacilityPayload = {
 const BLUE = "#0B4DBA";
 const BORDER = "#D1D5DB";
 
-const textFieldSx = {
+export const textFieldSx = {
   "& .MuiOutlinedInput-root": {
     "& fieldset": { borderColor: BORDER },
     "&:hover fieldset": { borderColor: BORDER },

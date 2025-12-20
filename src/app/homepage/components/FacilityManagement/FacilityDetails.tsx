@@ -1,37 +1,23 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { TextField,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  SelectChangeEvent,
+import { TextField, FormControl, InputLabel, Select, MenuItem, SelectChangeEvent,
   Chip, 
-  Box,
-  IconButton,
-  Tooltip} from '@mui/material';
+  } from '@mui/material';
 import ArrowBackIosNewRoundedIcon from '@mui/icons-material/ArrowBackIosNewRounded';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
-import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
 import { FacilityRow, FacilityType, FacilityStatus } from './FacilityComponent';
-import { MaterialReactTable, MRT_ColumnDef, useMaterialReactTable } from 'material-react-table';
+import { RoomOption, textFieldSx } from './CreateFacilityModal';
+import FacilityIncident from './FacilityIncident';
+import FacilityDelete from './FacilityDelete';
 import { useUpdateFacilityMutation } from "@/feature/RoomAssetApi/facility.api";
 import { RoomAssetResponse } from '@/feature/RoomAssetApi/type';
-
 
 type Props = {
   facility: FacilityRow;
   onBack: () => void;
   onUpdate: (newFacility: FacilityRow) => void;
-};
-
-export type FacilityIssue = {
-  name: string;
-  type: string;
-  title: string;
-  description: string;
-  createdAt: string;
+  rooms: RoomOption[];
 };
 
 export const reverseMapType: Record<FacilityType, RoomAssetResponse["type"]> = {
@@ -46,8 +32,6 @@ export const reverseMapStatus: Record<FacilityStatus, RoomAssetResponse["status"
   "Chưa sử dụng": "INACTIVE",
   "Hư hỏng": "MAINTENANCE",
 };
-
-
 
 const statusChipSx = (s: FacilityRow['status']) => {
   switch (s) {
@@ -118,22 +102,27 @@ function InfoRow({
   );
 }
 
-export default function FacilityDetails({ facility, onBack, onUpdate }: Props) {
+export default function FacilityDetails({ facility, onBack, onUpdate, rooms }: Props) {
   const [isEditing, setIsEditing] = useState(false);
+
+  // facilityincident form
+  const [showIncidentForm, setShowIncidentForm] = useState(false);
 
   // update
   const [updateFacility, { isLoading }] = useUpdateFacilityMutation();
 
+  // delete
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
 
   const handleUpdateFacility = async () => {
     try {
       await updateFacility({
         id: facility.id, 
         body: {
-          name: form.name!,
+          name: form.name,
           type: reverseMapType[form.type],
           status: reverseMapStatus[form.status],
-          room_id: facility.roomId,
+          room_id: form.roomId,
         },
       }).unwrap();
 
@@ -148,183 +137,11 @@ export default function FacilityDetails({ facility, onBack, onUpdate }: Props) {
   const [form, setForm] = useState({
     name: facility.name,
     type: facility.type,
+    status: facility.status,
     room: facility.room,
     building: facility.building,
-    status: facility.status,
+    roomId: facility.roomId
   });
-
-
-  // const handleSave = (field: keyof FacilityRow) => {
-  //   console.log('UPDATE FIELD:', field, 'VALUE:', editedValue);
-  //   setEditingField(null);
-  // };
-
-  // Lịch sử hư hỏng
-  const [showIssueForm, setShowIssueForm] = useState(false);
-  const [issues, setIssues] = useState<FacilityIssue[]>([]);
-  const [issueForm, setIssueForm] = useState({
-    title: '',
-    description: '',
-  });
-
-  const handleAddIssue = () => {
-    if (!issueForm.title || !issueForm.description) return;
-
-    const newIssue: FacilityIssue = {
-      name: facility.name,
-      type: facility.type,
-      title: issueForm.title,
-      description: issueForm.description,
-      createdAt: new Date().toLocaleString('vi-VN'),
-    };
-
-    setIssues((prev) => [newIssue, ...prev]);
-
-    // reset form
-    setIssueForm({ title: '', description: '' });
-  };
-
-  // table of lịch sử hư hỏng
-  const issueColumns = useMemo<MRT_ColumnDef<FacilityIssue>[]>(() => [
-    {
-      accessorKey: "type",
-      header: "Loại thiết bị",
-      size: 160,
-      Cell: ({ cell }) => (
-        <span className="font-medium text-gray-900">
-          {cell.getValue<string>()}
-        </span>
-      ),
-    },
-    {
-      accessorKey: "title",
-      header: "Tiêu đề",
-      size: 200,
-      Cell: ({ cell }) => (
-        <span className="font-semibold text-gray-800">
-          {cell.getValue<string>()}
-        </span>
-      ),
-    },
-    {
-      accessorKey: "description",
-      header: "Mô tả",
-      size: 300,
-      Cell: ({ cell }) => (
-        <span className="text-gray-600">
-          {cell.getValue<string>()}
-        </span>
-      ),
-    },
-    {
-      accessorKey: "createdAt",
-      header: "Thời gian",
-      size: 160,
-      Cell: ({ cell }) => (
-        <span className="text-gray-500">
-          {cell.getValue<string>()}
-        </span>
-      ),
-    },
-    {
-      id: "actions",
-      header: "Thao tác",
-      size: 120,
-      enableSorting: false,
-      muiTableHeadCellProps: { align: "center" },
-      muiTableBodyCellProps: { align: "center" },
-      Cell: ({ row }) => (
-        <Box sx={{ display: "flex", gap: 0.5, justifyContent: "center" }}>
-          <Tooltip title="Chỉnh sửa">
-            <IconButton
-              size="small"
-              onClick={() => console.log("EDIT incident", row.original)}
-              sx={{ color: "#2563eb" }}
-            >
-              <EditOutlinedIcon fontSize="small" />
-            </IconButton>
-          </Tooltip>
-
-          <Tooltip title="Xóa">
-            <IconButton
-              size="small"
-              onClick={() =>
-                console.log("DELETE incident", row.original)
-              }
-              sx={{ color: "#dc2626" }}
-            >
-              <DeleteOutlineOutlinedIcon fontSize="small" />
-            </IconButton>
-          </Tooltip>
-        </Box>
-      ),
-    },
-  ], []);
-
-  const issueTable = useMaterialReactTable({
-    columns: issueColumns,
-    data: issues, // issues: IssueRow[]
-    enableSorting: true,
-    enableTopToolbar: false,
-    enableColumnActions: false,
-    enablePagination: true,
-    enableColumnFilters: false,
-    enableGlobalFilter: false,
-
-    muiTableHeadCellProps: {
-      sx: {
-        backgroundColor: "#F9FAFB",
-        color: "#6B7280",
-        fontWeight: 700,
-        fontSize: "13px",
-        textTransform: "uppercase",
-        letterSpacing: "0.05em",
-        borderBottom: "none",
-        py: 3,
-        px: 3,
-      },
-    },
-
-    muiTableBodyCellProps: {
-      sx: {
-        fontSize: "14px",
-        fontWeight: 500,
-        color: "#374151",
-        py: 3,
-        px: 3,
-        borderBottom: "1px solid #F3F4F6",
-      },
-    },
-
-    muiTableBodyRowProps: {
-      sx: {
-        transition: "all 0.15s ease",
-        "&:hover": {
-          backgroundColor: "#FAFBFC",
-        },
-        "&:last-child td": {
-          borderBottom: "none",
-        },
-      },
-    },
-
-    muiTablePaperProps: {
-      elevation: 0,
-      sx: {
-        borderRadius: "0px",
-        border: "none",
-        boxShadow: "none",
-        overflow: "hidden",
-        backgroundColor: "#ffffff",
-      },
-    },
-
-    initialState: {
-      pagination: { pageIndex: 0, pageSize: 5 },
-      density: "comfortable",
-    },
-  });
-
 
   return (
     <div className="w-full">
@@ -414,21 +231,37 @@ export default function FacilityDetails({ facility, onBack, onUpdate }: Props) {
 
             {/* Phòng */}
             <TextField
-              size="small"
+              select
               label="Phòng"
-              value={form.room}
-              onChange={(e) => setForm({ ...form, room: e.target.value })}
+              value={form.roomId}
+              onChange={(e) =>
+                setForm({ ...form, roomId: e.target.value })
+              }
               fullWidth
-            />
+              size="small"
+              sx={textFieldSx}
+            >
+              <MenuItem value="">Chọn phòng</MenuItem>
+
+              {rooms.map((r) => (
+                <MenuItem key={r.id} value={r.id}>
+                  {r.name}
+                </MenuItem>
+              ))}
+            </TextField>
+
 
             {/* Tòa */}
             <TextField
-              size="small"
               label="Tòa"
-              value={form.building}
-              onChange={(e) => setForm({ ...form, building: e.target.value })}
+              value={
+                rooms.find((r) => r.id === form.roomId)?.buildingName || ""
+              }
               fullWidth
+              size="small"
+              disabled
             />
+
 
             {/* Trạng thái */}
             <FormControl size="small" fullWidth>
@@ -460,6 +293,7 @@ export default function FacilityDetails({ facility, onBack, onUpdate }: Props) {
                     room: facility.room,
                     building: facility.building,
                     status: facility.status,
+                    roomId: facility.roomId
                   });
                   setIsEditing(false);
                 }}
@@ -471,12 +305,15 @@ export default function FacilityDetails({ facility, onBack, onUpdate }: Props) {
               <button
                 onClick={async () => {
                   await handleUpdateFacility();
-
+                  const selectedRoom = rooms.find(r => r.id === form.roomId);
                   onUpdate({
                     ...facility,
                     name: form.name!,
                     type: form.type,
                     status: form.status,
+                    roomId: form.roomId,
+                    room: selectedRoom?.name ?? "",
+                    building: selectedRoom?.buildingName ?? "",
                   });
                 }}
                 disabled={isLoading}
@@ -500,15 +337,15 @@ export default function FacilityDetails({ facility, onBack, onUpdate }: Props) {
 
           <div className="p-5 space-y-3">
             <button
+              onClick={() => setShowIncidentForm(true)}
               className="w-full rounded-xl px-4 py-2.5 font-semibold text-white bg-[#F79009] hover:bg-[#dc6803] transition"
-              onClick={() => setShowIssueForm(true)}
             >
               Báo hư thiết bị
             </button>
 
             <button
               className="w-full rounded-xl px-4 py-2.5 font-semibold text-[#ff6666] bg-[#ffe5e5] hover:bg-[#ffcccc] transition"
-              onClick={() => console.log('Xóa thiết bị:', facility)}
+              onClick={() => setOpenDeleteDialog(true)}
             >
               Xóa thiết bị
             </button>
@@ -517,85 +354,25 @@ export default function FacilityDetails({ facility, onBack, onUpdate }: Props) {
       </div>
 
       {/* báo hư thiết bị */}
-      { showIssueForm && (
-        <div className="rounded-2xl border border-gray-100 bg-white shadow-sm overflow-hidden mt-4">
-        <div className="px-5 py-4 bg-[#f8f9fa] border-b border-gray-100">
-          <p className="text-sm font-semibold text-gray-700">Báo hư thiết bị</p>
-        </div>
-
-        <div className="p-5 space-y-4">
-          <div>
-            <label className="text-sm text-gray-500">Loại thiết bị</label>
-            <input
-              value={facility.type}
-              disabled
-              className="mt-1 w-full rounded-lg border px-3 py-2 text-sm bg-gray-100"
-            />
-          </div>
-
-          {/* Title */}
-          <div>
-            <label className="text-sm text-gray-500">Tiêu đề</label>
-            <input
-              value={issueForm.title}
-              onChange={(e) =>
-                setIssueForm({ ...issueForm, title: e.target.value })
-              }
-              className="mt-1 w-full rounded-lg border px-3 py-2 text-sm"
-              placeholder="VD: Máy hỏng"
-            />
-          </div>
-
-          {/* Description */}
-          <div>
-            <label className="text-sm text-gray-500">Mô tả</label>
-            <textarea
-              value={issueForm.description}
-              onChange={(e) =>
-                setIssueForm({ ...issueForm, description: e.target.value })
-              }
-              rows={3}
-              className="mt-1 w-full rounded-lg border px-3 py-2 text-sm"
-              placeholder="Mô tả chi tiết lỗi..."
-            />
-          </div>
-
-          <div className='flex gap-3'>
-            <button
-              onClick={() => setShowIssueForm(false)}
-              className="flex-1 rounded-lg px-5 py-2.5 text-sm font-semibold border-2 border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400 transition-all"
-            >
-              Hủy bỏ
-            </button>
-
-            <button
-              onClick={handleAddIssue}
-              className="flex-1 w-full rounded-xl px-4 py-2.5 font-semibold text-white bg-[#F79009] hover:bg-[#dc6803] transition"
-            >
-              Thêm
-            </button>
-          </div>
-        </div>
-      </div>
-      )}
       
       {/* Bảng lịch sử hư hỏng */}
-      <div className="mt-6 rounded-2xl border border-gray-100 bg-white shadow-sm overflow-hidden">
-        <div className="px-5 py-4 bg-[#f8f9fa] border-b border-gray-100">
-          <p className="text-sm font-semibold text-blue-700">
-            Lịch sử hư hỏng
-          </p>
-        </div>
+      
+      <FacilityIncident
+        facilityName={facility.name}
+        facilityType={facility.type}
+        open={showIncidentForm}
+        onClose={() => setShowIncidentForm(false)}
+      />
 
-        {issues.length === 0 ? (
-          <div className="py-8 text-center text-gray-400 text-sm">
-            Chưa có lịch sử hư hỏng
-          </div>
-        ) : (
-          <MaterialReactTable table={issueTable} />
-        )}
-      </div>
 
+      <FacilityDelete
+        open={openDeleteDialog}
+        onClose={() => setOpenDeleteDialog(false)}
+        facilityId={facility.id}
+        facilityName={facility.name}
+        onDeleted={onBack}
+      />
     </div>
+    
   );
 }
