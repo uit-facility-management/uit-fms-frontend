@@ -1,6 +1,5 @@
 import { RoomResponse } from "../RoomApi/type";
 
-// GET /api/v1/room-assets
 
 export interface RoomAssetResponse {
   id: string;
@@ -9,7 +8,6 @@ export interface RoomAssetResponse {
   status: "ACTIVE" | "INACTIVE" | "MAINTENANCE" | string;
   room: RoomResponse;
 }
-// POST /api/v1/room-assets
 
 export interface CreateFacilityRequest {
   name: string;
@@ -18,7 +16,6 @@ export interface CreateFacilityRequest {
   status: "ACTIVE" | "INACTIVE" | "MAINTENANCE" | string;
 }
 
-// PATCH /api/v1/room-assets/{id}
 export interface UpdateFacilityRequest {
   name: string;
   type: "Electronics" | "Furniture" | "Stationery" | "Other" | string;
@@ -26,6 +23,30 @@ export interface UpdateFacilityRequest {
   status: "ACTIVE" | "INACTIVE" | "MAINTENANCE" | string;
 }
 
+export interface CreateIncidentRequest {
+  description: string;
+  room_asset_id: string;
+  created_by: string;
+  status: "pending" | "resolved";
+}
 
-// ---------- API wrapper ----------
+export interface RoomIncidentResponse {
+  id: string;
+  description: string;
+  room_asset_id: string;
+  created_by: string;
+  status: "pending" | "resolved";
+  createdAt: string;
+  updatedAt: string;
+  room_asset?: RoomAssetResponse;
+}
+
+export interface UpdateIncidentRequest {
+  description: string;
+  room_asset_id: string;
+  created_by: string;
+  status: "pending" | "resolved";
+}
+
 export type GetRoomAssetsResponse = RoomAssetResponse[];
+export type GetRoomIncidentsResponse = RoomIncidentResponse[];
