@@ -91,6 +91,8 @@ export default function ToolsComponent() {
     return roomsRes.map((r: RoomResponse) => ({
       id: r.id,
       name: `${r.name} - Tầng ${r.stage}`,
+      buildingId: r.building.id,
+      buildingName: r.building.name,
     }));
   }, [roomsRes]);
 
@@ -329,6 +331,7 @@ export default function ToolsComponent() {
           facility={selectedFacility}
           onBack={() => setSelectedFacility(null)}
           onUpdate={(newFacility) => setSelectedFacility(newFacility)}
+          rooms={roomOptions}
         />
       ) : (
         <><>

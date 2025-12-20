@@ -38,6 +38,16 @@ export const roomAssetApi = appApi.injectEndpoints({
       //  refetch update
       invalidatesTags: ["RoomAsset"],
     }),
+
+     // ---------- DELETE ----------
+    deleteFacility: builder.mutation<void, string>({
+      query: (id) => ({
+        url: `/room-assets/${id}`,
+        method: "DELETE",
+      }),
+      // Xóa xong refetch 
+      invalidatesTags: ["RoomAsset"],
+    }),
   }),
 });
 
@@ -45,4 +55,5 @@ export const {
   useGetRoomAssetsQuery,
   useCreateFacilityMutation,
   useUpdateFacilityMutation,
+  useDeleteFacilityMutation,
 } = roomAssetApi;
