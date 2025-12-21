@@ -65,7 +65,7 @@ type RoomRowWithName = RoomRow & {
   building_id?: string;
 };
 type FacilityStatus = "Hoạt động" | "Hư hỏng";
-type IncidentStatus = "Đã xử lý" | "Chưa xử lý";
+export type IncidentStatus = "Đã xử lý" | "Chưa xử lý";
 
 type FacilityRow = {
   id: string;
@@ -108,7 +108,7 @@ const facilityStatusChipSx = (s: FacilityStatus) => {
   }
 };
 
-const incidentStatusChipSx = (s: IncidentStatus) => {
+export const incidentStatusChipSx = (s: IncidentStatus) => {
   switch (s) {
     case "Đã xử lý":
       return { backgroundColor: "#d4edda", color: "#155724" };
@@ -157,7 +157,7 @@ const mapAssetStatusToUI = (s: RoomAssetResponse["status"]): FacilityStatus =>
 const mapIncidentStatusToUI = (s: string): IncidentStatus =>
   s === "resolved" ? "Đã xử lý" : "Chưa xử lý";
 
-const mapIncidentStatusToApi = (s: "Đã xử lý" | "Chưa xử lý") =>
+export const mapIncidentStatusToApi = (s: "Đã xử lý" | "Chưa xử lý") =>
   s === "Đã xử lý" ? "resolved" : "pending";
 
 export default function RoomDetails({

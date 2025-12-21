@@ -150,10 +150,10 @@ export default function CreateFacilityModal({
             size="small"
             sx={textFieldSx}
           >
-            <MenuItem value="Đồ điện tử">Đồ điện tử</MenuItem>
-            <MenuItem value="Đồ nội thất">Đồ nội thất</MenuItem>
-            <MenuItem value="Văn phòng phẩm">Văn phòng phẩm</MenuItem>
-            <MenuItem value="Khác">Khác</MenuItem>
+            <MenuItem value="Electronics">Đồ điện tử</MenuItem>
+            <MenuItem value="Furniture">Đồ nội thất</MenuItem>
+            <MenuItem value="Stationery">Văn phòng phẩm</MenuItem>
+            <MenuItem value="Other">Khác</MenuItem>
           </TextField>
 
           <TextField

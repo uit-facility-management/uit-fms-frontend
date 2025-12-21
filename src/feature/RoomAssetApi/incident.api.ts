@@ -11,12 +11,24 @@ export const incidentApi = appApi.injectEndpoints({
       }),
     }),
 
+    getRoomIncidents: build.query<RoomIncidentResponse[], { roomId: string }>({
+      query: ({ roomId }) => ({
+        url: `/room/${roomId}/incidents`,
+        method: "GET",
+      }),
+      providesTags: (result, error, arg) =>
+        result
+          ? [...result.map(({ id }) => ({ type: "Incident" as const, id })), { type: "Incident", id: "LIST" }]
+          : [{ type: "Incident", id: "LIST" }],
+    }),
+
     createIncident: build.mutation<RoomIncidentResponse, CreateIncidentRequest>({
       query: (body) => ({
         url: "/incident",
         method: "POST",
         body,
       }),
+       invalidatesTags: [{ type: "Incident", id: "LIST" }],
     }),
 
     updateIncident: build.mutation<
@@ -28,6 +40,10 @@ export const incidentApi = appApi.injectEndpoints({
         method: "PATCH",
         body,
       }),
+      invalidatesTags: (result, error, arg) => [
+        { type: "Incident", id: arg.id },    
+        { type: "Incident", id: "LIST" },    
+      ],
     }),
 
     deleteIncident: build.mutation<void, { id: string }>({
@@ -35,6 +51,10 @@ export const incidentApi = appApi.injectEndpoints({
         url: `/incident/${id}`,
         method: "DELETE",
       }),
+      invalidatesTags: (result, error, arg) => [
+        { type: "Incident", id: arg.id },    
+        { type: "Incident", id: "LIST" },    
+      ],
     }),
 
   }),
@@ -45,4 +65,5 @@ export const {
   useCreateIncidentMutation,
   useUpdateIncidentMutation,
   useDeleteIncidentMutation,
+  useGetRoomIncidentsQuery,
 } = incidentApi;
