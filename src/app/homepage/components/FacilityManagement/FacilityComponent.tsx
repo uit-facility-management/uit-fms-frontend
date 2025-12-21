@@ -9,19 +9,28 @@ import {
 import { IconButton, Tooltip, Chip } from "@mui/material";
 import { Visibility } from "@mui/icons-material";
 import FacilityDetails from "./FacilityDetails";
-import { useGetRoomAssetsQuery, useCreateFacilityMutation } from "@/feature/RoomAssetApi/facility.api";
+import {
+  useGetRoomAssetsQuery,
+  useCreateFacilityMutation,
+} from "@/feature/RoomAssetApi/facility.api";
 import { useGetRoomQuery } from "@/feature/RoomApi/room.api";
 import { RoomAssetResponse } from "@/feature/RoomAssetApi/type";
 import type { RoomResponse } from "@/feature/RoomApi/type";
-import CreateFacilityModal, { CreateFacilityPayload } from "./CreateFacilityModal";
+import CreateFacilityModal, {
+  CreateFacilityPayload,
+} from "./CreateFacilityModal";
 import type { RoomOption } from "./CreateFacilityModal";
 
-export type FacilityType = "Đồ điện tử" | "Đồ nội thất" | "Văn phòng phẩm" | "Khác";
-export type FacilityStatus = "Đang sử dụng" | "Chưa sử dụng" | "Hư hỏng";
+export type FacilityType =
+  | "Đồ điện tử"
+  | "Đồ nội thất"
+  | "Văn phòng phẩm"
+  | "Khác";
+export type FacilityStatus = "Hoạt động" | "Chưa sử dụng" | "Hư hỏng";
 
 export type FacilityRow = {
-  id: string;       
-  roomId: string; 
+  id: string;
+  roomId: string;
   name: string;
   type: FacilityType;
   room: string;
@@ -38,15 +47,14 @@ export const mapType: Record<RoomAssetResponse["type"], FacilityType> = {
 };
 
 export const mapStatus: Record<RoomAssetResponse["status"], FacilityStatus> = {
-  ACTIVE: "Đang sử dụng",
+  ACTIVE: "Hoạt động",
   INACTIVE: "Chưa sử dụng",
   MAINTENANCE: "Hư hỏng",
 };
 
-
 const facilityStatusChipSx = (s: FacilityStatus) => {
   switch (s) {
-    case "Đang sử dụng":
+    case "Hoạt động":
       return {
         backgroundColor: "#ECFDF3",
         color: "#027A48",
@@ -70,12 +78,14 @@ const facilityStatusChipSx = (s: FacilityStatus) => {
 export default function ToolsComponent() {
   // get api room assets data
   const { data, isLoading, error } = useGetRoomAssetsQuery();
-  
+
   // console.log("API data room asset:", data);
   // console.log("API error room asset:", error);
 
   // selected facility để xem chi tiết
-  const [selectedFacility, setSelectedFacility] = useState<FacilityRow | null>(null);
+  const [selectedFacility, setSelectedFacility] = useState<FacilityRow | null>(
+    null
+  );
 
   // modal thêm thiết bị
   const [openCreateModal, setOpenCreateModal] = useState(false);
@@ -108,139 +118,131 @@ export default function ToolsComponent() {
     }
   };
 
-
-
   // map data to table row
-    const facilities: FacilityRow[] = useMemo(() => {
-      if (!data) return [];
+  const facilities: FacilityRow[] = useMemo(() => {
+    if (!data) return [];
 
-      return data.map((asset) => ({
-        id: asset.id,
-        roomId: asset.room.id,
-        name: asset.name,
+    return data.map((asset) => ({
+      id: asset.id,
+      roomId: asset.room.id,
+      name: asset.name,
 
-        type: mapType[
-          asset.type as RoomAssetResponse["type"]
-        ] ?? "Khác",
+      type: mapType[asset.type as RoomAssetResponse["type"]] ?? "Khác",
 
-        room: asset.room.name,
-        building: asset.room.building.name,
+      room: asset.room.name,
+      building: asset.room.building.name,
 
-        status: mapStatus[
-          asset.status as RoomAssetResponse["status"]
-        ] ?? "Chưa sử dụng",
-      }));
-    }, [data]);
-
-
+      status:
+        mapStatus[asset.status as RoomAssetResponse["status"]] ??
+        "Chưa sử dụng",
+    }));
+  }, [data]);
 
   const columns = useMemo<MRT_ColumnDef<FacilityRow>[]>(
-  () => [
-    {
-      accessorKey: "name",
-      header: "Tên thiết bị",
-      size: 150,
-      Cell: ({ cell }) => (
-        <span className="font-medium text-gray-900">
-          {cell.getValue<string>()}
-        </span>
-      ),
-    },
-    {
-      accessorKey: "type",
-      header: "Loại thiết bị",
-      size: 150,
-      Cell: ({ cell }) => (
-        <span className="font-medium text-gray-900">
-          {cell.getValue<string>()}
-        </span>
-      ),
-    },
-    {
-      accessorKey: "room",
-      header: "Phòng",
-      size: 100,
-      Cell: ({ cell }) => (
-        <span className="font-semibold text-gray-800">
-          {cell.getValue<string>()}
-        </span>
-      ),
-    },
-    {
-      accessorKey: "building",
-      header: "Tòa",
-      size: 80,
-      Cell: ({ cell }) => (
-        <span className="text-gray-700">
-          {cell.getValue<string>()}
-        </span>
-      ),
-    },
-    {
-      accessorKey: "status",
-      header: "Trạng thái",
-      size: 140,
-      Cell: ({ row }) => {
-        const s = row.original.status;
-
-        return (
-          <Chip
-            size="small"
-            sx={{
-              ...facilityStatusChipSx(s),
-              fontWeight: 600,
-              fontSize: "13px",
-              height: 28,
-              borderRadius: "8px",
-            }}
-            label={
-              <span className="flex items-center gap-1.5">
-                <span
-                  style={{
-                    width: 6,
-                    height: 6,
-                    borderRadius: "50%",
-                    backgroundColor:
-                      s === "Đang sử dụng"
-                        ? "#12B76A"
-                        : s === "Chưa sử dụng"
-                        ? "#3080ff"
-                        : "#F04438",
-                  }}
-                />
-                {s}
-              </span>
-            }
-          />
-        );
+    () => [
+      {
+        accessorKey: "name",
+        header: "Tên thiết bị",
+        size: 150,
+        Cell: ({ cell }) => (
+          <span className="font-medium text-gray-900">
+            {cell.getValue<string>()}
+          </span>
+        ),
       },
-    },
-    {
-      id: "actions",
-      header: "Thao tác",
-      size: 100,
-      enableSorting: false,
-      Cell: ({ row }) => (
-        <Tooltip title="Xem chi tiết">
-          <IconButton
-            size="small"
-            onClick={() => setSelectedFacility(row.original)}
-            sx={{
-              color: "#6B7280",
-              "&:hover": {
-                backgroundColor: "#F3F4F6",
-                color: "#111827",
-              },
-            }}
-          >
-            <Visibility fontSize="small" />
-          </IconButton>
-        </Tooltip>
-      ),
-    },
-  ],
-  []
-);
+      {
+        accessorKey: "type",
+        header: "Loại thiết bị",
+        size: 150,
+        Cell: ({ cell }) => (
+          <span className="font-medium text-gray-900">
+            {cell.getValue<string>()}
+          </span>
+        ),
+      },
+      {
+        accessorKey: "room",
+        header: "Phòng",
+        size: 100,
+        Cell: ({ cell }) => (
+          <span className="font-semibold text-gray-800">
+            {cell.getValue<string>()}
+          </span>
+        ),
+      },
+      {
+        accessorKey: "building",
+        header: "Tòa",
+        size: 80,
+        Cell: ({ cell }) => (
+          <span className="text-gray-700">{cell.getValue<string>()}</span>
+        ),
+      },
+      {
+        accessorKey: "status",
+        header: "Trạng thái",
+        size: 140,
+        Cell: ({ row }) => {
+          const s = row.original.status;
+
+          return (
+            <Chip
+              size="small"
+              sx={{
+                ...facilityStatusChipSx(s),
+                fontWeight: 600,
+                fontSize: "13px",
+                height: 28,
+                borderRadius: "8px",
+              }}
+              label={
+                <span className="flex items-center gap-1.5">
+                  <span
+                    style={{
+                      width: 6,
+                      height: 6,
+                      borderRadius: "50%",
+                      backgroundColor:
+                        s === "Hoạt động"
+                          ? "#12B76A"
+                          : s === "Chưa sử dụng"
+                          ? "#3080ff"
+                          : "#F04438",
+                    }}
+                  />
+                  {s}
+                </span>
+              }
+            />
+          );
+        },
+      },
+      {
+        id: "actions",
+        header: "Thao tác",
+        size: 100,
+        enableSorting: false,
+        Cell: ({ row }) => (
+          <Tooltip title="Xem chi tiết">
+            <IconButton
+              size="small"
+              onClick={() => setSelectedFacility(row.original)}
+              sx={{
+                color: "#6B7280",
+                "&:hover": {
+                  backgroundColor: "#F3F4F6",
+                  color: "#111827",
+                },
+              }}
+            >
+              <Visibility fontSize="small" />
+            </IconButton>
+          </Tooltip>
+        ),
+      },
+    ],
+    []
+  );
 
   const table = useMaterialReactTable({
     columns,
@@ -252,7 +254,7 @@ export default function ToolsComponent() {
     enableRowSelection: false,
     enablePagination: true,
     enableColumnFilters: true,
-    
+
     muiTableHeadCellProps: {
       sx: {
         backgroundColor: "#F9FAFB",
@@ -306,23 +308,20 @@ export default function ToolsComponent() {
       density: "comfortable",
     },
   });
-  
-    if (isLoading) {
-      return (
-        <div className="py-10 text-center text-gray-500">
-          Đang tải dữ liệu...
-        </div>
-      );
-    }
 
-    if (error) {
-      return (
-        <div className="py-10 text-center text-red-500">
-          Không thể tải dữ liệu
-        </div>
-      );
-    }
+  if (isLoading) {
+    return (
+      <div className="py-10 text-center text-gray-500">Đang tải dữ liệu...</div>
+    );
+  }
 
+  if (error) {
+    return (
+      <div className="py-10 text-center text-red-500">
+        Không thể tải dữ liệu
+      </div>
+    );
+  }
 
   return (
     <div className="w-full">
@@ -334,7 +333,8 @@ export default function ToolsComponent() {
           rooms={roomOptions}
         />
       ) : (
-        <><>
+        <>
+          <>
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-bold text-gray-900">
                 Danh sách cơ sở vật chất
@@ -353,13 +353,14 @@ export default function ToolsComponent() {
             <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
               <MaterialReactTable table={table} />
             </div>
-          </><CreateFacilityModal
-              open={openCreateModal}
-              onClose={() => setOpenCreateModal(false)}
-              onSubmit={handleSubmitCreateFacility}
-              rooms={roomOptions}
-            /></>
-
+          </>
+          <CreateFacilityModal
+            open={openCreateModal}
+            onClose={() => setOpenCreateModal(false)}
+            onSubmit={handleSubmitCreateFacility}
+            rooms={roomOptions}
+          />
+        </>
       )}
     </div>
   );

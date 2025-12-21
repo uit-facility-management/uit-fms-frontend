@@ -13,7 +13,7 @@ import {
 import CloseIcon from "@mui/icons-material/Close";
 
 type RoomType = "Phòng học" | "Thực hành" | "Hội trường";
-type RoomStatus = "Đang sử dụng" | "Hư hỏng" | "Bảo trì";
+type RoomStatus = "Hoạt động" | "Hư hỏng" | "Bảo trì";
 
 export type BuildingOption = { id: string; name: string }; // A/B/C...
 
@@ -57,7 +57,7 @@ export default function CreateRoomModal({
   const [stage, setStage] = useState<string>("");
   const [type, setType] = useState<RoomType>("Phòng học");
   const [capacity, setCapacity] = useState<string>("");
-  const [status, setStatus] = useState<RoomStatus>("Đang sử dụng");
+  const [status, setStatus] = useState<RoomStatus>("Hoạt động");
 
   useEffect(() => {
     if (open) {
@@ -66,7 +66,7 @@ export default function CreateRoomModal({
       setStage("");
       setType("Phòng học");
       setCapacity("");
-      setStatus("Đang sử dụng");
+      setStatus("Hoạt động");
     }
   }, [open]);
 
@@ -97,7 +97,9 @@ export default function CreateRoomModal({
         <div className="flex items-center justify-between">
           <div>
             <p className="text-lg font-bold text-gray-900">Tạo phòng mới</p>
-            <p className="text-sm text-gray-500 mt-1">Nhập thông tin để tạo phòng.</p>
+            <p className="text-sm text-gray-500 mt-1">
+              Nhập thông tin để tạo phòng.
+            </p>
           </div>
 
           <IconButton onClick={onClose} size="small">
@@ -157,7 +159,7 @@ export default function CreateRoomModal({
             fullWidth
             size="small"
             slotProps={{
-              input: { inputProps: { min: 1 }},
+              input: { inputProps: { min: 1 } },
             }}
             sx={textFieldSx}
           />
@@ -185,7 +187,7 @@ export default function CreateRoomModal({
             size="small"
             sx={textFieldSx}
           >
-            <MenuItem value="Đang sử dụng">Đang sử dụng</MenuItem>
+            <MenuItem value="Hoạt động">Hoạt động</MenuItem>
             <MenuItem value="Hư hỏng">Hư hỏng</MenuItem>
             <MenuItem value="Bảo trì">Bảo trì</MenuItem>
           </TextField>
@@ -215,7 +217,9 @@ export default function CreateRoomModal({
             })
           }
           className={`rounded-lg px-4 py-2 text-sm font-semibold text-white transition ${
-            canSubmit ? "bg-[#0B4DBA] hover:bg-[#0940A3]" : "bg-[#93B4E6] cursor-not-allowed"
+            canSubmit
+              ? "bg-[#0B4DBA] hover:bg-[#0940A3]"
+              : "bg-[#93B4E6] cursor-not-allowed"
           }`}
         >
           Tạo phòng

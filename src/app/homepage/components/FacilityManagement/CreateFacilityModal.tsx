@@ -20,10 +20,7 @@ export type FacilityType =
   | "Văn phòng phẩm"
   | "Khác";
 
-export type FacilityStatus =
-  | "Đang sử dụng"
-  | "Chưa sử dụng"
-  | "Hư hỏng";
+export type FacilityStatus = "Hoạt động" | "Chưa sử dụng" | "Hư hỏng";
 
 export type RoomOption = {
   id: string;
@@ -71,7 +68,7 @@ export default function CreateFacilityModal({
 }) {
   const [name, setName] = useState("");
   const [type, setType] = useState<FacilityType>("Đồ điện tử");
-  const [status, setStatus] = useState<FacilityStatus>("Đang sử dụng");
+  const [status, setStatus] = useState<FacilityStatus>("Hoạt động");
   const [roomId, setRoomId] = useState("");
 
   /* reset form khi mở modal */
@@ -79,7 +76,7 @@ export default function CreateFacilityModal({
     if (open) {
       setName("");
       setType("Đồ điện tử");
-      setStatus("Đang sử dụng");
+      setStatus("Hoạt động");
       setRoomId("");
     }
   }, [open]);
@@ -102,9 +99,7 @@ export default function CreateFacilityModal({
       <DialogTitle sx={{ pb: 1 }}>
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-lg font-bold text-gray-900">
-              Thêm thiết bị mới
-            </p>
+            <p className="text-lg font-bold text-gray-900">Thêm thiết bị mới</p>
             <p className="text-sm text-gray-500 mt-1">
               Nhập thông tin cơ sở vật chất.
             </p>
@@ -150,9 +145,7 @@ export default function CreateFacilityModal({
             select
             label="Loại thiết bị"
             value={type}
-            onChange={(e) =>
-              setType(e.target.value as FacilityType)
-            }
+            onChange={(e) => setType(e.target.value as FacilityType)}
             fullWidth
             size="small"
             sx={textFieldSx}
@@ -167,14 +160,12 @@ export default function CreateFacilityModal({
             select
             label="Trạng thái"
             value={status}
-            onChange={(e) =>
-              setStatus(e.target.value as FacilityStatus)
-            }
+            onChange={(e) => setStatus(e.target.value as FacilityStatus)}
             fullWidth
             size="small"
             sx={textFieldSx}
           >
-            <MenuItem value="ACTIVE">Đang sử dụng</MenuItem>
+            <MenuItem value="ACTIVE">Hoạt động</MenuItem>
             <MenuItem value="INACTIVE">Chưa sử dụng</MenuItem>
             <MenuItem value="MAINTENANCE">Hư hỏng</MenuItem>
           </TextField>

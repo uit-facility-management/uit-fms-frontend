@@ -14,14 +14,17 @@ import {
 } from "@mui/icons-material";
 import RoomDetails from "./RoomDetails";
 import CreateRoomModal, { CreateRoomPayload } from "./CreateRoomModal";
-import { useGetRoomQuery, useCreateRoomMutation, useGetBuildingsQuery } from "@/feature/RoomApi/room.api";
+import {
+  useGetRoomQuery,
+  useCreateRoomMutation,
+  useGetBuildingsQuery,
+} from "@/feature/RoomApi/room.api";
 import { RoomResponse } from "@/feature/RoomApi/type";
 import type { CreateRoomRequest } from "@/feature/RoomApi/type";
 import type { BuildingOption } from "./CreateRoomModal";
 
-
 type RoomType = "Phòng học" | "Thực hành" | "Hội trường";
-type RoomStatus = "Đang sử dụng" | "Hư hỏng" | "Bảo trì";
+type RoomStatus = "Hoạt động" | "Hư hỏng" | "Bảo trì";
 
 export type RoomRow = {
   id: string;
@@ -37,7 +40,7 @@ export type RoomRow = {
 const mapStatus = (s: RoomResponse["status"]): RoomStatus => {
   switch (s) {
     case "active":
-      return "Đang sử dụng";
+      return "Hoạt động";
     case "inactive":
       return "Hư hỏng";
     case "maintenance":
@@ -64,7 +67,7 @@ export const toRoomRow = (r: RoomResponse): RoomRow => ({
   id: r.id,
   room: r.name,
   building: r.building?.name ?? "",
-  building_id: r.building?.id ?? "", 
+  building_id: r.building?.id ?? "",
   stage: r.stage,
   capacity: r.capacity,
   status: mapStatus(r.status),
@@ -73,7 +76,7 @@ export const toRoomRow = (r: RoomResponse): RoomRow => ({
 
 const statusChipSx = (s: RoomStatus) => {
   switch (s) {
-    case "Đang sử dụng":
+    case "Hoạt động":
       return { backgroundColor: "#ECFDF3", color: "#027A48", border: "none" };
     case "Hư hỏng":
       return { backgroundColor: "#FEE2E2", color: "#B91C1C", border: "none" };
@@ -90,7 +93,6 @@ export default function RoomComponent() {
 
   const [selectedRoom, setSelectedRoom] = useState<RoomRow | null>(null);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
-  
 
   // search + filter UI state
   const [searchText, setSearchText] = useState("");
@@ -103,7 +105,8 @@ export default function RoomComponent() {
   const [filterStage, setFilterStage] = useState<string>("");
   const [filterCapacity, setFilterCapacity] = useState<string>("");
 
-  const { data, isLoading, isError, error, isFetching, refetch } = useGetRoomQuery();
+  const { data, isLoading, isError, error, isFetching, refetch } =
+    useGetRoomQuery();
 
   const roomsData = useMemo<RoomResponse[]>(() => {
     if (!data) return [];
@@ -117,18 +120,18 @@ export default function RoomComponent() {
 
   const showLoader = isLoading || isFetching;
 
-
   const [createRoom, { isLoading: isCreating }] = useCreateRoomMutation();
-  const { data: buildingsRes, isLoading: isBuildingsLoading } = useGetBuildingsQuery();
+  const { data: buildingsRes, isLoading: isBuildingsLoading } =
+    useGetBuildingsQuery();
 
   const buildings: BuildingOption[] = useMemo(() => {
     if (!buildingsRes) return [];
     return buildingsRes.map((b) => ({ id: b.id, name: b.name }));
   }, [buildingsRes]);
 
-  const mapStatusToApi = (s: "Đang sử dụng" | "Hư hỏng" | "Bảo trì") => {
+  const mapStatusToApi = (s: "Hoạt động" | "Hư hỏng" | "Bảo trì") => {
     switch (s) {
-      case "Đang sử dụng":
+      case "Hoạt động":
         return "active" as const;
       case "Bảo trì":
         return "maintenance" as const;
@@ -149,7 +152,6 @@ export default function RoomComponent() {
         return "classroom" as const;
     }
   };
-
 
   const handleSubmitCreate = async (payload: CreateRoomPayload) => {
     const body: CreateRoomRequest = {
@@ -238,7 +240,7 @@ export default function RoomComponent() {
                       height: 6,
                       borderRadius: "50%",
                       backgroundColor:
-                        s === "Đang sử dụng"
+                        s === "Hoạt động"
                           ? "#12B76A"
                           : s === "Hư hỏng"
                           ? "#EF4444"
@@ -344,9 +346,11 @@ export default function RoomComponent() {
   return (
     <div className="w-full">
       {selectedRoom ? (
-        <RoomDetails room={selectedRoom} onBack={() => setSelectedRoom(null)} 
-        buildings={buildings}
-        onUpdated={() => refetch()}
+        <RoomDetails
+          room={selectedRoom}
+          onBack={() => setSelectedRoom(null)}
+          buildings={buildings}
+          onUpdated={() => refetch()}
         />
       ) : (
         <>
@@ -439,7 +443,7 @@ export default function RoomComponent() {
                     className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-700 outline-none"
                   >
                     <option value="">Tất cả</option>
-                    <option value="Đang sử dụng">Đang sử dụng</option>
+                    <option value="Hoạt động">Hoạt động</option>
                     <option value="Hư hỏng">Hư hỏng</option>
                     <option value="Bảo trì">Bảo trì</option>
                   </select>
@@ -519,12 +523,12 @@ export default function RoomComponent() {
               <MaterialReactTable table={table} />
             )}
           </div>
-              <CreateRoomModal
-                open={isCreateOpen}
-                onClose={() => setIsCreateOpen(false)}
-                onSubmit={handleSubmitCreate}
-                buildings={buildings}
-              />
+          <CreateRoomModal
+            open={isCreateOpen}
+            onClose={() => setIsCreateOpen(false)}
+            onSubmit={handleSubmitCreate}
+            buildings={buildings}
+          />
         </>
       )}
     </div>
