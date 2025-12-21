@@ -52,3 +52,35 @@ export type CreateRoomAssetRequest = {
   room_id: string;
   status: "ACTIVE" | "INACTIVE";
 };
+
+
+export type GetFreeRoomsParams = {
+  start_time: string;
+  end_time: string;  
+  period_start: number;
+  period_end: number;
+};
+
+export type CreateScheduleRequest = {
+  room_id: string;
+  created_by: string;          
+  start_time: string;          
+  end_time: string;            
+  period_start: number;
+  period_end: number;
+  status: "pending" | "approved" | "rejected";
+};
+
+export type ScheduleResponse = {
+  id: string;
+  room_id: string;
+  created_by: string;
+  start_time: string;
+  end_time: string;
+  period_start: number;
+  period_end: number;
+  status: string;
+  created_at: string;
+};
+
+

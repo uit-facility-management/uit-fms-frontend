@@ -22,6 +22,8 @@ import {
 import { RoomResponse } from "@/feature/RoomApi/type";
 import type { CreateRoomRequest } from "@/feature/RoomApi/type";
 import type { BuildingOption } from "./CreateRoomModal";
+import RoomBookComponent from "./RoomBookComponent";
+
 
 type RoomType = "Phòng học" | "Thực hành" | "Hội trường";
 type RoomStatus = "Hoạt động" | "Hư hỏng" | "Bảo trì";
@@ -88,7 +90,8 @@ const statusChipSx = (s: RoomStatus) => {
 };
 
 export default function RoomComponent() {
-  const handleBookRoom = () => console.log("Đặt phòng");
+  const [isBookingOpen, setIsBookingOpen] = useState(false);
+  const handleBookRoom = () => setIsBookingOpen(true);
   const handleCreateRoom = () => setIsCreateOpen(true);
 
   const [selectedRoom, setSelectedRoom] = useState<RoomRow | null>(null);
@@ -345,7 +348,9 @@ export default function RoomComponent() {
 
   return (
     <div className="w-full">
-      {selectedRoom ? (
+      {isBookingOpen ? (
+        <RoomBookComponent onBack={() => setIsBookingOpen(false)} />
+      ) : selectedRoom ? (
         <RoomDetails
           room={selectedRoom}
           onBack={() => setSelectedRoom(null)}
