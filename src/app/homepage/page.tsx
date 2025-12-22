@@ -11,7 +11,6 @@ import {
 import Image from "next/image";
 import SidebarNav from "./components/SidebarNav";
 import DashboardHome from "./components/DashboardHome";
-import CalendarComponent from "./components/CalendarComponent";
 import RoomComponent from "./components/RoomManagement/RoomComponent";
 import ToolsComponent from "./components/ToolManagement/ToolsComponent";
 import FacilityComponent from "./components/FacilityManagement/FacilityComponent";
@@ -239,7 +238,6 @@ export default function HomePage() {
             {tab !== "home" && (
               <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
                 <div className={tab === "calendar" ? "" : "p-10"}>
-                  {tab === "calendar" && <CalendarComponent />}
                   {tab === "management" && <ManagementComponent />}
                   {tab === "personal" && user && (
                     <PersonalComponent

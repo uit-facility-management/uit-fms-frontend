@@ -34,7 +34,6 @@ export default function SidebarNav({ active, onChange }: SidebarNavProps) {
       icon: SquareChartGantt,
     },
     { key: "personal" as TabKey, label: "Cá nhân", icon: DoorClosedLocked },
-    { key: "calendar" as TabKey, label: "Lịch sử dụng", icon: Calendar },
     { key: "room" as TabKey, label: "Quản lý phòng", icon: DoorOpen },
     { key: "tools" as TabKey, label: "Quản lý dụng cụ", icon: Wrench },
     {
