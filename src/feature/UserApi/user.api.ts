@@ -20,7 +20,7 @@ export const userApi = appApi.injectEndpoints({
     // post
     createUser: builder.mutation<UserResponse, CreateUserRequest>({
       query: (body) => ({
-        url: "/user",
+        url: "/auth/register",
         method: "POST",
         body,
       }),
