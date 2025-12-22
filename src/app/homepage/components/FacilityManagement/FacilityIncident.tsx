@@ -9,12 +9,9 @@ import {
   MRT_ColumnDef,
   useMaterialReactTable,
 } from 'material-react-table';
-
 import { useGetRoomIncidentsQuery, 
-  useGetIncidentsQuery, 
   useCreateIncidentMutation,
-  useUpdateIncidentMutation,
-  useDeleteIncidentMutation,  } from '@/feature/RoomAssetApi/incident.api';
+  useUpdateIncidentMutation, } from '@/feature/RoomAssetApi/incident.api';
 import { incidentStatusChipSx, IncidentStatus } from '../RoomManagement/RoomDetails';
 import CreateIncidentModal from '../RoomManagement/CreateIncidentModal';
 import EditIncidentModal, {EditIncidentPayload,} from "../RoomManagement/EditIncidentModal";

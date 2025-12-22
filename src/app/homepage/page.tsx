@@ -1,6 +1,13 @@
 "use client";
 import { useState } from "react";
-import { LogOut, Search, Bell, User, ChevronDown } from "lucide-react";
+import {
+  LogOut,
+  Search,
+  Bell,
+  User,
+  ChevronDown,
+  UserCircle,
+} from "lucide-react";
 import Image from "next/image";
 import SidebarNav from "./components/SidebarNav";
 import DashboardHome from "./components/DashboardHome";
@@ -12,25 +19,30 @@ import UserComponent from "./components/UserManagement/UserComponent";
 import { useSelector } from "react-redux";
 import { selectCurrentUser } from "@/feature/auth/auth.slice";
 import Cookies from "js-cookie";
+import ManagementComponent from "./components/Management/ManagementComponent";
 
 export type TabKey =
   | "home"
+  | "personal"
   | "calendar"
   | "room"
   | "tools"
   | "facility"
-  | "user";
+  | "user"
+  | "management";
 
 export default function HomePage() {
   const [tab, setTab] = useState<TabKey>("home");
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const user = useSelector(selectCurrentUser);
   console.log("Current User:", user);
+
   const handleLogout = async () => {
     localStorage.removeItem("access_token");
     (await Cookies).remove("access_token");
     window.location.href = "/login";
   };
+
   const mapUserRole = (role: string) => {
     switch (role) {
       case "admin":
@@ -43,12 +55,15 @@ export default function HomePage() {
         return "Nhân sự";
     }
   };
+
   const getPageTitle = () => {
     switch (tab) {
       case "home":
         return "Trang chủ";
       case "room":
         return "Quản lý phòng";
+      case "personal":
+        return "Trang cá nhân";
       case "tools":
         return "Quản lý dụng cụ";
       case "calendar":
@@ -140,7 +155,7 @@ export default function HomePage() {
                   </div>
                   <div className="hidden md:block text-left">
                     <p className="text-sm font-semibold text-gray-900">
-                      {user?.fullName || "Admin User1"}
+                      {user?.fullName || "Admin User"}
                     </p>
                     <p className="text-xs text-gray-500">
                       {mapUserRole(user?.role)}
@@ -181,6 +196,19 @@ export default function HomePage() {
                       {/* Menu Items */}
                       <div className="p-2">
                         <button
+                          onClick={() => {
+                            setIsUserMenuOpen(false);
+                            setTab("personal");
+                          }}
+                          className="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-xl transition-all duration-200 group mb-1"
+                        >
+                          <div className="w-8 h-8 bg-blue-50 rounded-lg flex items-center justify-center group-hover:bg-blue-100 transition-colors">
+                            <UserCircle className="w-4 h-4 text-[#0B4DBA]" />
+                          </div>
+                          <span>Trang cá nhân</span>
+                        </button>
+
+                        <button
                           onClick={handleLogout}
                           className="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-red-600 hover:bg-red-50 rounded-xl transition-all duration-200 group"
                         >
@@ -209,6 +237,8 @@ export default function HomePage() {
               <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
                 <div className={tab === "calendar" ? "" : "p-10"}>
                   {tab === "calendar" && <CalendarComponent />}
+                  {tab === "management" && <ManagementComponent />}
+                  {tab === "personal" && <UserComponent />}
                   {tab === "room" && <RoomComponent />}
                   {tab === "tools" && <ToolsComponent />}
                   {tab === "facility" && <FacilityComponent />}

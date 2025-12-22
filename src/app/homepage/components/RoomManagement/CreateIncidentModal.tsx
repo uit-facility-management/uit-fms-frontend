@@ -51,14 +51,14 @@ export default function CreateIncidentModal({
 
   const [facilityId, setFacilityId] = useState<string>(defaultFacilityId ?? firstId);
   const [description, setDescription] = useState<string>("");
-  const [status, setStatus] = useState<IncidentStatus>("Chưa xử lý");
+  // const [status, setStatus] = useState<IncidentStatus>("Chưa xử lý");
 
   // mỗi lần mở modal thì reset form cho “sạch”
   useEffect(() => {
     if (!open) return;
     setFacilityId(defaultFacilityId ?? firstId);
     setDescription("");
-    setStatus("Chưa xử lý");
+    // setStatus("Chưa xử lý");
   }, [open, defaultFacilityId, firstId]);
 
   const canSubmit = facilityId.trim() !== "" && description.trim() !== "";
@@ -73,7 +73,7 @@ export default function CreateIncidentModal({
       facilityId,
       facilityName,
       description: description.trim(),
-      status,
+      status: "Chưa xử lý",
     });
 
     onClose(); // ✅ nên đóng modal ở đây cho nhất quán
@@ -120,7 +120,20 @@ export default function CreateIncidentModal({
             placeholder="Ví dụ: Máy chiếu không lên hình..."
           />
 
-          <FormControl size="small" fullWidth>
+          <TextField
+            size="small"
+            label="Trạng thái"
+            value="Chưa xử lý"
+            fullWidth
+            disabled
+            sx={{
+              "& .MuiInputBase-input.Mui-disabled": {
+                WebkitTextFillColor: "#6b7280 !important",
+                color: "#6b7280 ",
+              },
+            }}
+          />
+          {/* <FormControl size="small" fullWidth>
             <InputLabel id="status-label">Trạng thái</InputLabel>
             <Select
               labelId="status-label"
@@ -131,7 +144,7 @@ export default function CreateIncidentModal({
               <MenuItem value="Chưa xử lý">Chưa xử lý</MenuItem>
               <MenuItem value="Đã xử lý">Đã xử lý</MenuItem>
             </Select>
-          </FormControl>
+          </FormControl> */}
         </Box>
       </DialogContent>
 
