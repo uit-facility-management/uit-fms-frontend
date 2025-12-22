@@ -1,3 +1,270 @@
- export default function ToolsComponent() {
-  return <div className="text-lg">🧰 Component: Quản lý dụng cụ</div>;
+"use client";
+
+import { useMemo, useState } from "react";
+import {
+  MaterialReactTable,
+  useMaterialReactTable,
+  type MRT_ColumnDef,
+} from "material-react-table";
+import { IconButton, Tooltip, Chip } from "@mui/material";
+import { Visibility, Search as SearchIcon } from "@mui/icons-material";
+import ToolDetails from "./ToolDetails";
+
+
+/* ================== Types ================== */
+type ToolStatus = "Sẵn sàng" | "Đang mượn" | "Hư hỏng";
+
+type ToolRow = {
+  id: string;
+  name: string;
+  description: string;
+  status: ToolStatus;
+};
+
+/* ================== Mock data ================== */
+const mockTools: ToolRow[] = [
+  {
+    id: "1",
+    name: "Máy chiếu Epson X20",
+    description: "Máy chiếu dùng cho phòng học",
+    status: "Sẵn sàng",
+  },
+  {
+    id: "2",
+    name: "Micro không dây",
+    description: "Micro dùng cho hội trường",
+    status: "Đang mượn",
+  },
+  {
+    id: "3",
+    name: "Laptop Dell Latitude",
+    description: "Laptop phục vụ giảng dạy",
+    status: "Hư hỏng",
+  },
+];
+
+/* ================== Status Chip ================== */
+const statusChipSx = (s: ToolStatus) => {
+  switch (s) {
+    case "Sẵn sàng":
+      return { backgroundColor: "#ECFDF3", color: "#027A48", border: "none" };
+    case "Đang mượn":
+      return { backgroundColor: "#EFF6FF", color: "#1D4ED8", border: "none" };
+    case "Hư hỏng":
+      return { backgroundColor: "#FEE2E2", color: "#B91C1C", border: "none" };
+    default:
+      return { backgroundColor: "#F3F4F6", color: "#4B5563", border: "none" };
+  }
+};
+
+
+/* ================== Component ================== */
+export default function ToolsComponent() {
+  const [searchText, setSearchText] = useState("");
+  const [selectedTool, setSelectedTool] = useState<ToolRow | null>(null);
+  
+
+  /* FE-only search */
+  const tableData = useMemo(() => {
+    if (!searchText) return mockTools;
+    const q = searchText.toLowerCase();
+    return mockTools.filter(
+      (t) =>
+        t.name.toLowerCase().includes(q) ||
+        t.description.toLowerCase().includes(q)
+    );
+  }, [searchText]);
+
+  const columns = useMemo<MRT_ColumnDef<ToolRow>[]>(
+    () => [
+      {
+        accessorKey: "name",
+        header: "Tên dụng cụ",
+        size: 180,
+        Cell: ({ cell }) => (
+          <span className="font-bold text-gray-900 text-base">
+            {cell.getValue<string>()}
+          </span>
+        ),
+      },
+      {
+        accessorKey: "description",
+        header: "Mô tả",
+        size: 320,
+        Cell: ({ cell }) => (
+          <span className="text-gray-700">
+            {cell.getValue<string>()}
+          </span>
+        ),
+      },
+      {
+        accessorKey: "status",
+        header: "Trạng thái",
+        size: 160,
+        Cell: ({ row }) => {
+          const s = row.original.status;
+          return (
+            <Chip
+              size="small"
+              sx={{
+                ...statusChipSx(s),
+                fontWeight: 600,
+                fontSize: "13px",
+                height: 28,
+                borderRadius: "8px",
+              }}
+              label={
+                <span className="flex items-center gap-1.5">
+                  <span
+                    style={{
+                      width: 6,
+                      height: 6,
+                      borderRadius: "50%",
+                      backgroundColor:
+                        s === "Sẵn sàng"
+                          ? "#12B76A"
+                          : s === "Hư hỏng"
+                          ? "#EF4444"
+                          : "#2563EB",
+                    }}
+                  />
+                  {s}
+                </span>
+              }
+            />
+          );
+        },
+      },
+      {
+        id: "actions",
+        header: "Thao tác",
+        size: 100,
+        enableSorting: false,
+        Cell: ({ row }) => (
+          <Tooltip title="Xem chi tiết">
+            <IconButton
+              size="small"
+              onClick={() => setSelectedTool(row.original)}
+              sx={{
+                color: "#6B7280",
+                "&:hover": {
+                  backgroundColor: "#F3F4F6",
+                  color: "#111827",
+                },
+              }}
+            >
+              <Visibility fontSize="small" />
+            </IconButton>
+          </Tooltip>
+        ),
+      },
+    ],
+    []
+  );
+
+  const table = useMaterialReactTable({
+    columns,
+    data: tableData,
+
+    enableSorting: true,
+    enableTopToolbar: false,
+    enableColumnActions: false,
+    enableRowSelection: false,
+    enablePagination: true,
+    enableColumnFilters: true,
+
+    enableGlobalFilter: false,
+
+    muiTableHeadCellProps: {
+      sx: {
+        backgroundColor: "#F9FAFB",
+        color: "#6B7280",
+        fontWeight: 700,
+        fontSize: "13px",
+        textTransform: "uppercase",
+        letterSpacing: "0.05em",
+        borderBottom: "none",
+        py: 3,
+        px: 3,
+      },
+    },
+    muiTableBodyCellProps: {
+      sx: {
+        fontSize: "14px",
+        fontWeight: 500,
+        color: "#374151",
+        py: 3,
+        px: 3,
+        borderBottom: "1px solid #F3F4F6",
+      },
+    },
+    muiTableBodyRowProps: {
+      sx: {
+        transition: "all 0.15s ease",
+        "&:hover": { backgroundColor: "#FAFBFC" },
+        "&:last-child td": { borderBottom: "none" },
+      },
+    },
+    muiTablePaperProps: {
+      elevation: 0,
+      sx: {
+        borderRadius: "0px",
+        border: "none",
+        boxShadow: "none",
+        overflow: "hidden",
+        backgroundColor: "#ffffff",
+      },
+    },
+    initialState: {
+      pagination: { pageIndex: 0, pageSize: 10 },
+      density: "comfortable",
+    },
+  });
+
+
+  return (
+    <div className="w-full">
+      {selectedTool ? (
+        <ToolDetails
+          tool={selectedTool}
+          onBack={() => setSelectedTool(null)}
+        />
+      ) : (
+        <>
+          {/* Header */}
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-bold text-gray-900">
+              Danh sách dụng cụ
+            </h2>
+
+            <div className="flex gap-3">
+              <button className="rounded-lg px-5 py-2.5 text-sm font-semibold border-2 border-gray-300 text-gray-700 hover:bg-gray-50">
+                Tạo công cụ
+              </button>
+
+              <button className="rounded-lg px-5 py-2.5 text-sm font-semibold text-white bg-[#0B4DBA] hover:bg-[#0940A3]">
+                Phiếu mượn
+              </button>
+            </div>
+          </div>
+
+          {/* Search */}
+          <div className="flex items-center gap-2 max-w-md mb-6 bg-white border border-gray-200 rounded-lg px-3 py-2">
+            <SearchIcon sx={{ fontSize: 20, color: "#6B7280" }} />
+            <input
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
+              placeholder="Search..."
+              className="w-full text-sm outline-none text-gray-700 placeholder:opacity-70"
+            />
+          </div>
+
+          {/* Table */}
+          <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+            <MaterialReactTable table={table} />
+          </div>
+        </>
+      )}
+    </div>
+  );
 }
