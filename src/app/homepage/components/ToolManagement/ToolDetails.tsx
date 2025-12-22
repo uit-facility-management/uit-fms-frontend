@@ -15,8 +15,9 @@ import {
   TextField,
 } from "@mui/material";
 import ArrowBackIosNewRoundedIcon from "@mui/icons-material/ArrowBackIosNewRounded";
+import { useUpdateToolMutation } from "@/feature/ToolsApi/tool.api";
 
-/* ================== Types ================== */
+
 type ToolStatus = "Sẵn sàng" | "Đang mượn" | "Hư hỏng";
 
 export type ToolRow = {
@@ -40,6 +41,31 @@ type Props = {
   tool: ToolRow;
   onBack: () => void;
 };
+
+type ToolStatusApi = "ACTIVE" | "BORROWING" | "INACTIVE";
+
+const uiToApiStatus = (s: ToolStatus): ToolStatusApi => {
+  switch (s) {
+    case "Sẵn sàng":
+      return "ACTIVE";
+    case "Đang mượn":
+      return "BORROWING";
+    default:
+      return "INACTIVE";
+  }
+};
+
+const apiToUiStatus = (s: ToolStatusApi): ToolStatus => {
+  switch (s) {
+    case "ACTIVE":
+      return "Sẵn sàng";
+    case "BORROWING":
+      return "Đang mượn";
+    default:
+      return "Hư hỏng";
+  }
+};
+
 
 /* ================== Mock history ================== */
 const mockUsageHistory: ToolUsageRow[] = [
@@ -83,11 +109,6 @@ const usageStatusChipSx = (s: UsageStatus) => {
   }
 };
 
-/* ================== InfoRow ================== */
-type InfoRowProps = {
-  label: string;
-  value: React.ReactNode;
-};
 
 function InfoRow({ label, value }: { label: string; value: React.ReactNode }) {
   return (
@@ -106,8 +127,9 @@ export default function ToolDetails({ tool, onBack }: Props) {
   const [name, setName] = useState(tool.name);
   const [description, setDescription] = useState(tool.description);
   const [status, setStatus] = useState<ToolStatus>(tool.status);
+  const [updateTool, { isLoading: isUpdating }] = useUpdateToolMutation();
 
-  /* ================== Usage table ================== */
+
   const columns = useMemo<MRT_ColumnDef<ToolUsageRow>[]>(
     () => [
       { accessorKey: "borrower", header: "Người mượn", size: 180 },
@@ -278,10 +300,25 @@ export default function ToolDetails({ tool, onBack }: Props) {
                 Hủy
               </button>
               <button
-                onClick={() => setIsEditing(false)}
-                className="rounded-lg px-4 py-2 font-semibold text-white bg-[#5295f8] hover:bg-[#377be1]"
+                disabled={isUpdating}
+                onClick={async () => {
+                  try {
+                    await updateTool({
+                      id: tool.id,
+                      body: {
+                        name: name.trim(),
+                        description: description.trim(),
+                        status: uiToApiStatus(status),
+                      },
+                    }).unwrap();
+                    setIsEditing(false);
+                  } catch (err) {
+                    console.error("Update tool failed", err);
+                  }
+                }}
+                className="rounded-lg px-4 py-2 font-semibold text-white bg-[#5295f8] hover:bg-[#377be1] disabled:opacity-60"
               >
-                Lưu
+                {isUpdating ? "Đang lưu..." : "Lưu"}
               </button>
             </div>
           )}

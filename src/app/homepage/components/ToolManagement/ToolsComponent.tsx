@@ -9,10 +9,26 @@ import {
 import { IconButton, Tooltip, Chip } from "@mui/material";
 import { Visibility, Search as SearchIcon } from "@mui/icons-material";
 import ToolDetails from "./ToolDetails";
+import type { ToolsResponse } from "@/feature/ToolsApi/type";
+import { useCreateToolMutation, useGetToolsQuery } from "@/feature/ToolsApi/tool.api";
+import CreateToolModal from "./CreateToolModal";
 
 
-/* ================== Types ================== */
 type ToolStatus = "Sẵn sàng" | "Đang mượn" | "Hư hỏng";
+
+const mapStatusToUI = (
+  s: ToolsResponse["status"]
+): ToolStatus => {
+  switch (s) {
+    case "ACTIVE":
+      return "Sẵn sàng";
+    case "BORROWING":
+      return "Đang mượn";
+    case "INACTIVE":
+    default:
+      return "Hư hỏng";
+  }
+};
 
 type ToolRow = {
   id: string;
@@ -21,29 +37,6 @@ type ToolRow = {
   status: ToolStatus;
 };
 
-/* ================== Mock data ================== */
-const mockTools: ToolRow[] = [
-  {
-    id: "1",
-    name: "Máy chiếu Epson X20",
-    description: "Máy chiếu dùng cho phòng học",
-    status: "Sẵn sàng",
-  },
-  {
-    id: "2",
-    name: "Micro không dây",
-    description: "Micro dùng cho hội trường",
-    status: "Đang mượn",
-  },
-  {
-    id: "3",
-    name: "Laptop Dell Latitude",
-    description: "Laptop phục vụ giảng dạy",
-    status: "Hư hỏng",
-  },
-];
-
-/* ================== Status Chip ================== */
 const statusChipSx = (s: ToolStatus) => {
   switch (s) {
     case "Sẵn sàng":
@@ -62,18 +55,39 @@ const statusChipSx = (s: ToolStatus) => {
 export default function ToolsComponent() {
   const [searchText, setSearchText] = useState("");
   const [selectedTool, setSelectedTool] = useState<ToolRow | null>(null);
-  
+
+  const [openCreateTool, setOpenCreateTool] = useState(false);
+  const [createTool, { isLoading }] = useCreateToolMutation();
+
+  const {
+    data,
+    isFetching,
+    isError,
+    refetch,
+  } = useGetToolsQuery();
+
+  const toolsFromApi: ToolRow[] = useMemo(() => {
+    if (!Array.isArray(data)) return [];
+    return data.map((t) => ({
+      id: t.id,
+      name: t.name,
+      description: t.description,
+      status: mapStatusToUI(t.status),
+    }));
+  }, [data]);
+
 
   /* FE-only search */
   const tableData = useMemo(() => {
-    if (!searchText) return mockTools;
+    if (!searchText) return toolsFromApi;
     const q = searchText.toLowerCase();
-    return mockTools.filter(
+    return toolsFromApi.filter(
       (t) =>
         t.name.toLowerCase().includes(q) ||
         t.description.toLowerCase().includes(q)
     );
-  }, [searchText]);
+  }, [searchText, toolsFromApi]);
+
 
   const columns = useMemo<MRT_ColumnDef<ToolRow>[]>(
     () => [
@@ -166,6 +180,15 @@ export default function ToolsComponent() {
     columns,
     data: tableData,
 
+    state: {
+      isLoading: isLoading || isFetching,
+      showAlertBanner: isError,
+    },
+
+    muiToolbarAlertBannerProps: isError
+      ? { color: "error", children: "Không tải được danh sách dụng cụ" }
+      : undefined,
+
     enableSorting: true,
     enableTopToolbar: false,
     enableColumnActions: false,
@@ -238,7 +261,10 @@ export default function ToolsComponent() {
             </h2>
 
             <div className="flex gap-3">
-              <button className="rounded-lg px-5 py-2.5 text-sm font-semibold border-2 border-gray-300 text-gray-700 hover:bg-gray-50">
+              <button
+                className="rounded-lg px-5 py-2.5 text-sm font-semibold border-2 border-gray-300 text-gray-700 hover:bg-gray-50"
+                onClick={() => setOpenCreateTool(true)}
+              >
                 Tạo công cụ
               </button>
 
@@ -247,6 +273,20 @@ export default function ToolsComponent() {
               </button>
             </div>
           </div>
+          <CreateToolModal
+            open={openCreateTool}
+            onClose={() => setOpenCreateTool(false)}
+            isSubmitting={isLoading}
+            onSubmit={async (payload) => {
+              try {
+                await createTool(payload).unwrap();
+                setOpenCreateTool(false);
+                refetch();
+              } catch (err) {
+                console.error("Create tool failed", err);
+              }
+            }}
+          />
 
           {/* Search */}
           <div className="flex items-center gap-2 max-w-md mb-6 bg-white border border-gray-200 rounded-lg px-3 py-2">
