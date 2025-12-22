@@ -15,6 +15,16 @@ export const roomAssetApi = appApi.injectEndpoints({
       providesTags: ["RoomAsset"],
     }),
 
+    // ---------- GET BY ID ----------
+    getRoomAssetById: builder.query<RoomAssetResponse, string>({
+      query: (id) => `/room-assets/${id}`,
+      keepUnusedDataFor: 60,
+      providesTags: (result, error, id) => [
+        { type: "RoomAsset", id },
+      ],
+    }),
+
+
     // ---------- POST ----------
     createFacility: builder.mutation<RoomAssetResponse, CreateFacilityRequest>({
       query: (body) => ({
@@ -26,10 +36,7 @@ export const roomAssetApi = appApi.injectEndpoints({
     }),
 
     // ---------- PATCH ----------
-    updateFacility: builder.mutation<
-      RoomAssetResponse,
-      { id: string; body: UpdateFacilityRequest }
-    >({
+    updateFacility: builder.mutation<RoomAssetResponse,{ id: string; body: UpdateFacilityRequest }>({
       query: ({ id, body }) => ({
         url: `/room-assets/${id}`,
         method: "PATCH",
@@ -53,6 +60,7 @@ export const roomAssetApi = appApi.injectEndpoints({
 
 export const {
   useGetRoomAssetsQuery,
+  useGetRoomAssetByIdQuery,
   useCreateFacilityMutation,
   useUpdateFacilityMutation,
   useDeleteFacilityMutation,

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   TextField,
   FormControl,
@@ -16,13 +16,15 @@ import { FacilityRow, FacilityType, FacilityStatus } from "./FacilityComponent";
 import { RoomOption, textFieldSx } from "./CreateFacilityModal";
 import FacilityIncident from "./FacilityIncident";
 import FacilityDelete from "./FacilityDelete";
+import { mapType, mapStatus } from "./FacilityComponent";
+import { useGetRoomAssetByIdQuery } from "@/feature/RoomAssetApi/facility.api";
 import { useUpdateFacilityMutation } from "@/feature/RoomAssetApi/facility.api";
 import { RoomAssetResponse } from "@/feature/RoomAssetApi/type";
-
+import CreateIncidentModal from "../RoomManagement/CreateIncidentModal";
 type Props = {
-  facility: FacilityRow;
-  onBack: () => void;
   onUpdate: (newFacility: FacilityRow) => void;
+  facilityId: string;
+  onBack: () => void;
   rooms: RoomOption[];
 };
 
@@ -110,49 +112,83 @@ function InfoRow({
 }
 
 export default function FacilityDetails({
-  facility,
+  facilityId,
   onBack,
   onUpdate,
   rooms,
 }: Props) {
   const [isEditing, setIsEditing] = useState(false);
+  // get by id
+  const {
+    data,
+    isLoading: isFetching,
+    error,
+  } = useGetRoomAssetByIdQuery(facilityId);
+  console.log("data get by id:", data);
 
   // facilityincident form
-  const [showIncidentForm, setShowIncidentForm] = useState(false);
+  // const [showIncidentForm, setShowIncidentForm] = useState(false);
+  const [openCreateIncident, setOpenCreateIncident] = useState(false);
 
   // update
-  const [updateFacility, { isLoading }] = useUpdateFacilityMutation();
+  const [updateFacility, { isLoading: isUpdating }] =
+    useUpdateFacilityMutation();
 
   // delete
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
 
   const handleUpdateFacility = async () => {
-    try {
-      await updateFacility({
-        id: facility.id,
-        body: {
-          name: form.name,
-          type: reverseMapType[form.type],
-          status: reverseMapStatus[form.status],
-          room_id: form.roomId,
-        },
-      }).unwrap();
+    if (!form) return;
 
-      setIsEditing(false);
-    } catch (err) {
-      console.error("Update facility failed", err);
-    }
+    await updateFacility({
+      id: facilityId,
+      body: {
+        name: form.name,
+        type: reverseMapType[form.type],
+        status: reverseMapStatus[form.status],
+        room_id: form.roomId,
+      },
+    }).unwrap();
+
+    onUpdate(form);
+    setIsEditing(false);
   };
 
-  const [form, setForm] = useState({
-    name: facility.name,
-    type: facility.type,
-    status: facility.status,
-    room: facility.room,
-    building: facility.building,
-    roomId: facility.roomId,
-  });
+  /* map api - facility */
+  const facility = useMemo<FacilityRow | null>(() => {
+    if (!data) return null;
 
+    const matchedRoom = rooms.find((r) => r.id === data.room.id);
+
+    return {
+      id: data.id,
+      roomId: data.room.id,
+      name: data.name,
+      type: mapType[data.type],
+      status: mapStatus[data.status],
+      room: data.room.name,
+      building: matchedRoom?.buildingName ?? "",
+    };
+  }, [data, rooms]);
+
+  useEffect(() => {
+    if (facility) setForm(facility);
+  }, [facility]);
+
+  const [form, setForm] = useState<FacilityRow | null>(null);
+
+  /* ================= STATES ================= */
+  if (isFetching) {
+    return <div className="py-10 text-center">Đang tải chi tiết...</div>;
+  }
+
+  if (error || !facility || !form) {
+    return (
+      <div className="py-10 text-center text-red-500">
+        Không thể tải thiết bị
+      </div>
+    );
+  }
   return (
     <div className="w-full">
       {/* Header */}
@@ -296,6 +332,7 @@ export default function FacilityDetails({
                   <button
                     onClick={() => {
                       setForm({
+                        id: facility.id,
                         name: facility.name,
                         type: facility.type,
                         room: facility.room,
@@ -326,10 +363,10 @@ export default function FacilityDetails({
                         building: selectedRoom?.buildingName ?? "",
                       });
                     }}
-                    disabled={isLoading}
+                    disabled={isUpdating}
                     className="rounded-lg px-5 py-2.5 text-sm font-semibold text-white bg-[#5295f8] hover:bg-[#377be1]"
                   >
-                    {isLoading ? "Đang lưu..." : "Lưu thay đổi"}
+                    {isUpdating ? "Đang lưu..." : "Lưu thay đổi"}
                   </button>
                 </div>
               </div>
@@ -345,7 +382,7 @@ export default function FacilityDetails({
 
           <div className="p-5 space-y-3">
             <button
-              onClick={() => setShowIncidentForm(true)}
+              onClick={() => setOpenCreateIncident(true)}
               className="w-full rounded-xl px-4 py-2.5 font-semibold text-white bg-[#F79009] hover:bg-[#dc6803] transition"
             >
               Báo hư thiết bị
@@ -366,16 +403,18 @@ export default function FacilityDetails({
       {/* Bảng lịch sử hư hỏng */}
 
       <FacilityIncident
+        facilityId={facility.id}
         facilityName={facility.name}
         facilityType={facility.type}
-        open={showIncidentForm}
-        onClose={() => setShowIncidentForm(false)}
+        roomId={facility.roomId}
+        open={openCreateIncident}
+        onClose={() => setOpenCreateIncident(false)}
       />
 
       <FacilityDelete
         open={openDeleteDialog}
         onClose={() => setOpenDeleteDialog(false)}
-        facilityId={facility.id}
+        facilityId={facilityId}
         facilityName={facility.name}
         onDeleted={onBack}
       />
