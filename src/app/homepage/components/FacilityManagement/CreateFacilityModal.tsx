@@ -11,6 +11,7 @@ import {
   MenuItem,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
+import { FacilityStatus } from "./FacilityComponent";
 
 /* ================= TYPES ================= */
 
@@ -20,7 +21,7 @@ export type FacilityType =
   | "Văn phòng phẩm"
   | "Khác";
 
-export type FacilityStatus = "Hoạt động" | "Chưa sử dụng" | "Hư hỏng";
+// export type FacilityStatus = "Hoạt động" | "Không hoạt động" | "Hư hỏng";
 
 export type RoomOption = {
   id: string;
@@ -166,7 +167,7 @@ export default function CreateFacilityModal({
             sx={textFieldSx}
           >
             <MenuItem value="ACTIVE">Hoạt động</MenuItem>
-            <MenuItem value="INACTIVE">Chưa sử dụng</MenuItem>
+            <MenuItem value="INACTIVE">Không hoạt động</MenuItem>
             <MenuItem value="MAINTENANCE">Hư hỏng</MenuItem>
           </TextField>
         </div>
