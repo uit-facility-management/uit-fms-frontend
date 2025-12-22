@@ -174,6 +174,10 @@ export default function RoomDetails({
   const [deleteRoomAsset, { isLoading: isDeletingAsset }] =
     useDeleteRoomAssetMutation();
 
+  // báo hỏng facility
+  const [incidentFacilityId, setIncidentFacilityId] = useState<string | undefined>(undefined);
+
+
   const [name, setName] = useState<string>(r.name ?? r.room);
   const [stage, setStage] = useState<number>(Number(r.stage));
   const [capacity, setCapacity] = useState<number>(r.capacity);
@@ -315,6 +319,18 @@ export default function RoomDetails({
         muiTableBodyCellProps: { align: "center" },
         Cell: ({ row }) => (
           <Box sx={{ display: "flex", gap: 0.5, justifyContent: "center" }}>
+            <Tooltip title="Báo hỏng">
+              <IconButton
+                size="small"
+                onClick={() => {
+                  setIncidentFacilityId(row.original.id);
+                  setOpenCreateIncident(true);           
+                }}
+                sx={{ color: "#f97316" }} // cam (warning)
+              >
+                <AddRoundedIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
             <Tooltip title="Chỉnh sửa">
               <IconButton
                 size="small"
@@ -800,22 +816,26 @@ export default function RoomDetails({
         <div className="px-5 py-4 bg-[#f8f9fa] border-b border-gray-100 flex items-center justify-between">
           <p className="text-sm font-semibold text-gray-700">Sự việc</p>
 
-          <button
+          {/* <button
             type="button"
             onClick={() => setOpenCreateIncident(true)}
             className="inline-flex items-center gap-2 rounded-lg px-4 py-2 font-semibold text-white bg-[#5295f8] hover:bg-[#377be1] transition"
           >
             <AddRoundedIcon sx={{ fontSize: 18 }} />
             Thêm sự việc
-          </button>
+          </button> */}
         </div>
         <CreateIncidentModal
           open={openCreateIncident}
-          onClose={() => setOpenCreateIncident(false)}
+          onClose={() => {
+            setOpenCreateIncident(false);
+            setIncidentFacilityId(undefined);
+          }}
           facilities={facilitiesFromApi.map((f) => ({
             id: f.id,
             name: f.name,
           }))}
+          defaultFacilityId={incidentFacilityId}
           onCreated={async (payload: CreateIncidentPayload) => {
             try {
               const userStr = localStorage.getItem("user");
@@ -841,6 +861,7 @@ export default function RoomDetails({
 
               setOpenCreateIncident(false);
               refetchIncidents();
+              refetchAssets();
             } catch (e) {
               console.error("Create incident failed:", e);
             }

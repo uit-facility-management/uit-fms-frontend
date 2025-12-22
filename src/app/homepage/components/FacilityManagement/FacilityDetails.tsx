@@ -40,7 +40,7 @@ export const reverseMapStatus: Record<
   RoomAssetResponse["status"]
 > = {
   "Hoạt động": "ACTIVE",
-  "Chưa sử dụng": "INACTIVE",
+  "Không hoạt động": "INACTIVE",
   "Hư hỏng": "MAINTENANCE",
 };
 
@@ -48,7 +48,7 @@ const statusChipSx = (s: FacilityRow["status"]) => {
   switch (s) {
     case "Hoạt động":
       return { backgroundColor: "#ECFDF3", color: "#027A48" };
-    case "Chưa sử dụng":
+    case "Không hoạt động":
       return { backgroundColor: "#dbeafe", color: "#155dfc" };
     case "Hư hỏng":
       return { backgroundColor: "#ffe5e5", color: "#ff1919" };
@@ -270,10 +270,10 @@ export default function FacilityDetails({
                       setForm({ ...form, type: e.target.value as FacilityType })
                     }
                   >
-                    <MenuItem value="Đồ điện tử">Đồ điện tử</MenuItem>
-                    <MenuItem value="Đồ nội thất">Đồ nội thất</MenuItem>
-                    <MenuItem value="Văn phòng phẩm">Văn phòng phẩm</MenuItem>
-                    <MenuItem value="Khác">Khác</MenuItem>
+                    <MenuItem value="Electronics">Đồ điện tử</MenuItem>
+                    <MenuItem value="Furniture">Đồ nội thất</MenuItem>
+                    <MenuItem value="Stationery">Văn phòng phẩm</MenuItem>
+                    <MenuItem value="Other">Khác</MenuItem>
                   </Select>
                 </FormControl>
 
@@ -321,9 +321,9 @@ export default function FacilityDetails({
                       })
                     }
                   >
-                    <MenuItem value="Hoạt động">Hoạt động</MenuItem>
-                    <MenuItem value="Chưa sử dụng">Chưa sử dụng</MenuItem>
-                    <MenuItem value="Hư hỏng">Hư hỏng</MenuItem>
+                    <MenuItem value="ACTIVE">Hoạt động</MenuItem>
+                    <MenuItem value="INACTIVE">Không hoạt động</MenuItem>
+                    <MenuItem value="MAINTENANCE">Hư hỏng</MenuItem>
                   </Select>
                 </FormControl>
 

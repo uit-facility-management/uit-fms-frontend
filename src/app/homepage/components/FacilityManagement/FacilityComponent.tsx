@@ -26,7 +26,7 @@ export type FacilityType =
   | "Đồ nội thất"
   | "Văn phòng phẩm"
   | "Khác";
-export type FacilityStatus = "Hoạt động" | "Chưa sử dụng" | "Hư hỏng";
+export type FacilityStatus = "Hoạt động" | "Không hoạt động" | "Hư hỏng";
 
 export type FacilityRow = {
   id: string;
@@ -48,7 +48,7 @@ export const mapType: Record<RoomAssetResponse["type"], FacilityType> = {
 
 export const mapStatus: Record<RoomAssetResponse["status"], FacilityStatus> = {
   ACTIVE: "Hoạt động",
-  INACTIVE: "Chưa sử dụng",
+  INACTIVE: "Không hoạt động",
   MAINTENANCE: "Hư hỏng",
 };
 
@@ -60,7 +60,7 @@ const facilityStatusChipSx = (s: FacilityStatus) => {
         color: "#027A48",
         border: "none",
       };
-    case "Chưa sử dụng":
+    case "Không hoạt động":
       return {
         backgroundColor: "#dbeafe",
         color: "#155dfc",
@@ -133,7 +133,7 @@ export default function ToolsComponent() {
 
       status:
         mapStatus[asset.status as RoomAssetResponse["status"]] ??
-        "Chưa sử dụng",
+        "Không hoạt động",
     }));
   }, [data]);
 
@@ -204,7 +204,7 @@ export default function ToolsComponent() {
                     backgroundColor:
                       s === "Hoạt động"
                         ? "#12B76A"
-                        : s === "Chưa sử dụng"
+                        : s === "Không hoạt động"
                         ? "#3080ff"
                         : "#F04438",
                   }}
