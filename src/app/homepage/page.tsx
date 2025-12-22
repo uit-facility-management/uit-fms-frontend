@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { LogOut, Search, Bell, User } from "lucide-react";
+import { LogOut, Search, Bell, User, ChevronDown } from "lucide-react";
 import Image from "next/image";
 import SidebarNav from "./components/SidebarNav";
 import DashboardHome from "./components/DashboardHome";
@@ -9,17 +9,38 @@ import RoomComponent from "./components/RoomManagement/RoomComponent";
 import ToolsComponent from "./components/ToolManagement/ToolsComponent";
 import FacilityComponent from "./components/FacilityManagement/FacilityComponent";
 import UserComponent from "./components/UserManagement/UserComponent";
+import { useSelector } from "react-redux";
+import { selectCurrentUser } from "@/feature/auth/auth.slice";
 
-export type TabKey = "home" | "calendar" | "room" | "tools" | "facility" | "user";
+export type TabKey =
+  | "home"
+  | "calendar"
+  | "room"
+  | "tools"
+  | "facility"
+  | "user";
 
 export default function HomePage() {
   const [tab, setTab] = useState<TabKey>("home");
-
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const user = useSelector(selectCurrentUser);
+  console.log("Current User:", user);
   const handleLogout = () => {
     localStorage.removeItem("access_token");
     window.location.href = "/login";
   };
-
+  const mapUserRole = (role: string) => {
+    switch (role) {
+      case "admin":
+        return "Quản trị viên";
+      case "manager":
+        return "Quản lý";
+      case "user":
+        return "Nhân sự";
+      default:
+        return "Nhân sự";
+    }
+  };
   const getPageTitle = () => {
     switch (tab) {
       case "home":
@@ -33,7 +54,7 @@ export default function HomePage() {
       case "facility":
         return "Quản lý cơ sở vật chất";
       case "user":
-        return "Quản lý người dùng"
+        return "Quản lý người dùng";
     }
   };
 
@@ -71,21 +92,6 @@ export default function HomePage() {
         <nav className="flex-1 px-3 py-6">
           <SidebarNav active={tab} onChange={setTab} />
         </nav>
-
-        {/* User Section */}
-        <div className="px-3 py-4 border-t border-gray-100">
-          <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-gray-50">
-            <div className="w-9 h-9 bg-gradient-to-br from-gray-400 to-gray-500 rounded-full flex items-center justify-center">
-              <User className="w-5 h-5 text-white" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-gray-900 truncate">
-                Admin User
-              </p>
-              <p className="text-xs text-gray-500">admin@uit.edu.vn</p>
-            </div>
-          </div>
-        </div>
       </aside>
 
       {/* Main Content */}
@@ -121,14 +127,71 @@ export default function HomePage() {
                 <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white" />
               </button>
 
-              {/* Logout */}
-              <button
-                onClick={handleLogout}
-                className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors border border-red-100"
-              >
-                <LogOut className="w-4 h-4" />
-                <span className="hidden sm:inline">Đăng xuất</span>
-              </button>
+              {/* User Menu */}
+              <div className="relative">
+                <button
+                  onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                  className="flex items-center gap-3 pl-1 pr-3 py-1 hover:bg-gray-50 rounded-full transition-all duration-200 border border-transparent hover:border-gray-200 group"
+                >
+                  <div className="w-9 h-9 bg-gradient-to-br from-[#0B4DBA] to-[#0847A8] rounded-full flex items-center justify-center shadow-md group-hover:shadow-lg transition-shadow">
+                    <User className="w-5 h-5 text-white" />
+                  </div>
+                  <div className="hidden md:block text-left">
+                    <p className="text-sm font-semibold text-gray-900">
+                      {user?.fullName || "Admin User1"}
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      {mapUserRole(user?.role)}
+                    </p>
+                  </div>
+                  <ChevronDown
+                    className={`w-4 h-4 text-gray-400 transition-all duration-300 ${
+                      isUserMenuOpen ? "rotate-180 text-[#0B4DBA]" : ""
+                    }`}
+                  />
+                </button>
+
+                {/* Dropdown Menu */}
+                {isUserMenuOpen && (
+                  <>
+                    <div
+                      className="fixed inset-0 z-10"
+                      onClick={() => setIsUserMenuOpen(false)}
+                    />
+                    <div className="absolute right-0 mt-3 w-72 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden z-20 animate-in fade-in slide-in-from-top-2 duration-200">
+                      {/* User Info Card */}
+                      <div className="px-5 py-4 bg-gradient-to-br from-[#0B4DBA] to-[#0847A8]">
+                        <div className="flex items-center gap-3">
+                          <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center ring-2 ring-white/30">
+                            <User className="w-6 h-6 text-white" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-bold text-white truncate">
+                              {user?.fullName || "Admin User"}
+                            </p>
+                            <p className="text-xs text-blue-100 truncate">
+                              {user?.email}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Menu Items */}
+                      <div className="p-2">
+                        <button
+                          onClick={handleLogout}
+                          className="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-red-600 hover:bg-red-50 rounded-xl transition-all duration-200 group"
+                        >
+                          <div className="w-8 h-8 bg-red-50 rounded-lg flex items-center justify-center group-hover:bg-red-100 transition-colors">
+                            <LogOut className="w-4 h-4" />
+                          </div>
+                          <span>Đăng xuất</span>
+                        </button>
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
             </div>
           </div>
         </header>
@@ -147,7 +210,7 @@ export default function HomePage() {
                   {tab === "room" && <RoomComponent />}
                   {tab === "tools" && <ToolsComponent />}
                   {tab === "facility" && <FacilityComponent />}
-                  {tab === "user" && <UserComponent/>}
+                  {tab === "user" && <UserComponent />}
                 </div>
               </div>
             )}
