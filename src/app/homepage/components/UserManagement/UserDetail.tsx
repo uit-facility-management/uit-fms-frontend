@@ -9,6 +9,7 @@ import UserDelete from "./UserDelete";
 type Props = {
   userId: string;
   onBack: () => void;
+  showDelete?: boolean;
 };
 
 type UserRole = "ADMIN" | "USER";
@@ -43,7 +44,7 @@ const roleChipSx = (role: UserRole) => {
 };
 
 
-export default function UserDetail({ userId, onBack }: Props) {
+export default function UserDetail({ userId, onBack, showDelete = true }: Props) {
   const { data, isLoading, isError } = useGetUserByIdQuery(userId);
 
   const [isEditing, setIsEditing] = useState(false);
@@ -143,12 +144,14 @@ export default function UserDetail({ userId, onBack }: Props) {
         </div>
 
         <div className="flex items-center gap-3">
-          <button
-            className="rounded-xl px-4 py-2 font-semibold text-[#ff6666] bg-[#ffe5e5] hover:bg-[#ffcccc] transition"
-            onClick={() => setIsDeleteOpen(true)}
-          >
-            Xóa người dùng
-          </button>
+          {showDelete && (
+            <button
+              className="rounded-xl px-4 py-2 font-semibold text-[#ff6666] bg-[#ffe5e5] hover:bg-[#ffcccc] transition"
+              onClick={() => setIsDeleteOpen(true)}
+            >
+              Xóa người dùng
+            </button>
+          )}
           <button
             onClick={onBack}
             className="inline-flex items-center gap-2 rounded-lg px-4 py-2 font-medium text-white bg-[#5295f8] hover:bg-[#377be1] transition"
@@ -271,13 +274,15 @@ export default function UserDetail({ userId, onBack }: Props) {
 
         </div>
       </div>
-      <UserDelete
-        open={isDeleteOpen}
-        onClose={() => setIsDeleteOpen(false)}
-        userId={data.id}
-        username={data.username}
-        onDeleted={onBack}
-      />
+      {showDelete && (
+        <UserDelete
+          open={isDeleteOpen}
+          onClose={() => setIsDeleteOpen(false)}
+          userId={data.id}
+          username={data.username}
+          onDeleted={onBack}
+        />
+      )}
     </div>
   );
 }

@@ -20,6 +20,7 @@ import { useSelector } from "react-redux";
 import { selectCurrentUser } from "@/feature/auth/auth.slice";
 import Cookies from "js-cookie";
 import ManagementComponent from "./components/Management/ManagementComponent";
+import PersonalComponent from "./components/UserManagement/PersonalComponent";
 
 export type TabKey =
   | "home"
@@ -35,7 +36,9 @@ export default function HomePage() {
   const [tab, setTab] = useState<TabKey>("home");
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const user = useSelector(selectCurrentUser);
-  console.log("Current User:", user);
+  const userID = user.id;
+  console.log("Current User hien tại:", userID);
+  
 
   const handleLogout = async () => {
     localStorage.removeItem("access_token");
@@ -238,7 +241,12 @@ export default function HomePage() {
                 <div className={tab === "calendar" ? "" : "p-10"}>
                   {tab === "calendar" && <CalendarComponent />}
                   {tab === "management" && <ManagementComponent />}
-                  {tab === "personal" && <UserComponent />}
+                  {tab === "personal" && user && (
+                    <PersonalComponent
+                      userId={userID}
+                      onBack={() => setTab("home")}
+                    />
+                  )}
                   {tab === "room" && <RoomComponent />}
                   {tab === "tools" && <ToolsComponent />}
                   {tab === "facility" && <FacilityComponent />}
