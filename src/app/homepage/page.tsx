@@ -11,6 +11,7 @@ import FacilityComponent from "./components/FacilityManagement/FacilityComponent
 import UserComponent from "./components/UserManagement/UserComponent";
 import { useSelector } from "react-redux";
 import { selectCurrentUser } from "@/feature/auth/auth.slice";
+import Cookies from "js-cookie";
 
 export type TabKey =
   | "home"
@@ -25,8 +26,9 @@ export default function HomePage() {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const user = useSelector(selectCurrentUser);
   console.log("Current User:", user);
-  const handleLogout = () => {
+  const handleLogout = async () => {
     localStorage.removeItem("access_token");
+    (await Cookies).remove("access_token");
     window.location.href = "/login";
   };
   const mapUserRole = (role: string) => {
