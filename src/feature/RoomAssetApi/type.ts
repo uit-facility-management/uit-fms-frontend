@@ -1,4 +1,5 @@
 import { RoomResponse } from "../RoomApi/type";
+import { UserResponse } from "../UserApi/type";
 
 
 export interface RoomAssetResponse {
@@ -34,7 +35,7 @@ export interface RoomIncidentResponse {
   id: string;
   description: string;
   room_asset_id: string;
-  created_by: string;
+  created_user: UserResponse;
   status: "pending" | "resolved";
   createdAt: string;
   updatedAt: string;

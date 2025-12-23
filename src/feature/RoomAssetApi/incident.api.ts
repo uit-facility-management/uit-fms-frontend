@@ -1,5 +1,9 @@
 import { appApi } from "@/lib/appApi";
-import type { RoomIncidentResponse, CreateIncidentRequest, UpdateIncidentRequest } from "./type"; 
+import type {
+  RoomIncidentResponse,
+  CreateIncidentRequest,
+  UpdateIncidentRequest,
+} from "./type";
 
 export const incidentApi = appApi.injectEndpoints({
   endpoints: (build) => ({
@@ -7,8 +11,9 @@ export const incidentApi = appApi.injectEndpoints({
       query: () => ({
         url: "/incident",
         method: "GET",
-        keepUnusedDataFor: 60,
       }),
+      keepUnusedDataFor: 60,
+      providesTags: ["Incident"],
     }),
 
     getRoomIncidents: build.query<RoomIncidentResponse[], { roomId: string }>({
@@ -18,18 +23,23 @@ export const incidentApi = appApi.injectEndpoints({
       }),
       providesTags: (result, error, arg) =>
         result
-          ? [...result.map(({ id }) => ({ type: "Incident" as const, id })), { type: "Incident", id: "LIST" }]
+          ? [
+              ...result.map(({ id }) => ({ type: "Incident" as const, id })),
+              { type: "Incident", id: "LIST" },
+            ]
           : [{ type: "Incident", id: "LIST" }],
     }),
 
-    createIncident: build.mutation<RoomIncidentResponse, CreateIncidentRequest>({
-      query: (body) => ({
-        url: "/incident",
-        method: "POST",
-        body,
-      }),
-       invalidatesTags: [{ type: "Incident", id: "LIST" }],
-    }),
+    createIncident: build.mutation<RoomIncidentResponse, CreateIncidentRequest>(
+      {
+        query: (body) => ({
+          url: "/incident",
+          method: "POST",
+          body,
+        }),
+        invalidatesTags: [{ type: "Incident", id: "LIST" }],
+      }
+    ),
 
     updateIncident: build.mutation<
       RoomIncidentResponse,
@@ -41,8 +51,8 @@ export const incidentApi = appApi.injectEndpoints({
         body,
       }),
       invalidatesTags: (result, error, arg) => [
-        { type: "Incident", id: arg.id },    
-        { type: "Incident", id: "LIST" },    
+        { type: "Incident", id: arg.id },
+        { type: "Incident", id: "LIST" },
       ],
     }),
 
@@ -52,11 +62,23 @@ export const incidentApi = appApi.injectEndpoints({
         method: "DELETE",
       }),
       invalidatesTags: (result, error, arg) => [
-        { type: "Incident", id: arg.id },    
-        { type: "Incident", id: "LIST" },    
+        { type: "Incident", id: arg.id },
+        { type: "Incident", id: "LIST" },
       ],
     }),
-
+    updateIncidentStatus: build.mutation<
+      void,
+      { incidentId: string; status: "resolved" | "pending" }
+    >({
+      query: ({ incidentId, status }) => ({
+        url: `/incident/${incidentId}/status`,
+        method: "PATCH",
+        body: {
+          status,
+        },
+      }),
+      invalidatesTags: ["Incident"],
+    }),
   }),
 });
 
@@ -66,4 +88,5 @@ export const {
   useUpdateIncidentMutation,
   useDeleteIncidentMutation,
   useGetRoomIncidentsQuery,
+  useUpdateIncidentStatusMutation,
 } = incidentApi;

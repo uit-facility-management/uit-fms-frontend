@@ -1,16 +1,20 @@
+import {
+  useGetIncidentsQuery,
+  useUpdateIncidentStatusMutation,
+} from "@/feature/RoomAssetApi/incident.api";
 import { Check } from "lucide-react";
 
 type MaintenanceStatus = "pending" | "resolved";
 
 interface MaintenanceReport {
-  id: string;
-  description: string;
-  room_asset_id: string;
-  created_by: string;
-  status: MaintenanceStatus;
-  createdAt: string;
-  updatedAt: string;
-  room_asset: {
+  id?: string;
+  description?: string;
+  room_asset_id?: string;
+  created_by?: string;
+  status?: MaintenanceStatus;
+  createdAt?: string;
+  updatedAt?: string;
+  room_asset?: {
     id: string;
     name: string;
     type: string;
@@ -24,7 +28,7 @@ interface MaintenanceReport {
       capacity: number;
     };
   };
-  created_user: {
+  created_user?: {
     id: string;
     email: string;
     username: string;
@@ -34,101 +38,21 @@ interface MaintenanceReport {
 }
 
 export default function MaintenanceTab() {
-  const maintenanceReports: MaintenanceReport[] = [
-    {
-      id: "1c530b89-60de-4c9b-b377-7a5ce8f5c952",
-      description: "Hỏng cánh",
-      room_asset_id: "efc47c88-a70e-4e90-bf59-b9143e8ac953",
-      created_by: "ebae473a-1a93-4969-b481-533f267db64b",
-      status: "pending",
-      createdAt: "2025-12-20T06:59:04.956Z",
-      updatedAt: "2025-12-20T06:59:04.956Z",
-      room_asset: {
-        id: "efc47c88-a70e-4e90-bf59-b9143e8ac953",
-        name: "Quạt",
-        type: "Stationery",
-        status: "INACTIVE",
-        room: {
-          id: "fa819163-964a-4a63-9fd3-8814c86631e1",
-          name: "Conference Room ABC",
-          status: "active",
-          stage: 3,
-          type: "meeting",
-          capacity: 10,
-        },
-      },
-      created_user: {
-        id: "ebae473a-1a93-4969-b481-533f267db64b",
-        email: "22520604@gm.uit.edu.vn",
-        username: "khi",
-        fullName: "Nguyễn Quang Khải",
-        role: "admin",
-      },
-    },
-    {
-      id: "2d641c9a-71ef-5dac-c488-8b6df9g6d063",
-      description: "Màn hình bị vỡ góc dưới bên phải",
-      room_asset_id: "asset-002",
-      created_by: "user-002",
-      status: "pending",
-      createdAt: "2025-12-21T10:30:15.441Z",
-      updatedAt: "2025-12-21T10:30:15.441Z",
-      room_asset: {
-        id: "asset-002",
-        name: "Máy chiếu",
-        type: "Electronics",
-        status: "INACTIVE",
-        room: {
-          id: "room-002",
-          name: "Phòng A101",
-          status: "active",
-          stage: 2,
-          type: "classroom",
-          capacity: 30,
-        },
-      },
-      created_user: {
-        id: "user-002",
-        email: "nguyenvana@example.com",
-        username: "nguyenvana",
-        fullName: "Nguyễn Văn A",
-        role: "user",
-      },
-    },
-    {
-      id: "3e752d0b-82fg-6ebd-d599-9c7eg0h7e174",
-      description: "Không kết nối được với máy tính",
-      room_asset_id: "asset-003",
-      created_by: "user-003",
-      status: "resolved",
-      createdAt: "2025-12-19T14:20:30.331Z",
-      updatedAt: "2025-12-20T09:15:20.551Z",
-      room_asset: {
-        id: "asset-003",
-        name: "Bàn phím",
-        type: "Electronics",
-        status: "ACTIVE",
-        room: {
-          id: "room-003",
-          name: "Phòng B202",
-          status: "active",
-          stage: 1,
-          type: "lab",
-          capacity: 25,
-        },
-      },
-      created_user: {
-        id: "user-003",
-        email: "tranthib@example.com",
-        username: "tranthib",
-        fullName: "Trần Thị B",
-        role: "user",
-      },
-    },
-  ];
+  const { data: incidents = [], isLoading, isError } = useGetIncidentsQuery();
+  const [updateIncidentStatus, { isLoading: isUpdating }] =
+    useUpdateIncidentStatusMutation();
+  const maintainanceData = incidents;
 
-  const handleResolve = (id: string) => {
-    console.log("Xác nhận hoàn tất sửa chữa:", id);
+  const handleResolve = async (id: string) => {
+    try {
+      await updateIncidentStatus({
+        incidentId: id,
+        status: "resolved",
+      }).unwrap();
+      console.log("Đã hoàn tất sửa chữa:", id);
+    } catch (error) {
+      console.error("Lỗi khi hoàn tất sửa chữa:", error);
+    }
   };
 
   const formatDate = (dateString: string) => {
@@ -160,6 +84,33 @@ export default function MaintenanceTab() {
     );
   };
 
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-8">
+        <div className="text-gray-500">Đang tải dữ liệu...</div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (isError) {
+    return (
+      <div className="flex items-center justify-center py-8">
+        <div className="text-red-500">Có lỗi xảy ra khi tải dữ liệu</div>
+      </div>
+    );
+  }
+
+  // Empty state
+  if (incidents.length === 0) {
+    return (
+      <div className="flex items-center justify-center py-8">
+        <div className="text-gray-500">Không có báo cáo hỏng hóc nào</div>
+      </div>
+    );
+  }
+
   return (
     <div className="overflow-x-auto">
       <table className="w-full">
@@ -186,31 +137,34 @@ export default function MaintenanceTab() {
           </tr>
         </thead>
         <tbody>
-          {maintenanceReports.map((report) => (
+          {maintainanceData.map((report) => (
             <tr
               key={report.id}
               className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
             >
               <td className="py-4 px-4">
                 <span className="font-semibold text-gray-900">
-                  {report.room_asset.name}
+                  {report.room_asset?.name}
                 </span>
               </td>
               <td className="py-4 px-4 text-gray-700">
-                {report.room_asset.room.name}
+                {report.room_asset?.room?.name}
               </td>
               <td className="py-4 px-4 text-gray-700">
-                {report.created_user.fullName}
+                {report.created_user?.fullName}
               </td>
               <td className="py-4 px-4 text-gray-700">
-                {formatDate(report.createdAt)}
+                {report.createdAt && formatDate(report.createdAt)}
               </td>
-              <td className="py-4 px-4">{getStatusBadge(report.status)}</td>
+              <td className="py-4 px-4">
+                {report.status && getStatusBadge(report.status)}
+              </td>
               <td className="py-4 px-4">
                 {report.status === "pending" ? (
                   <button
-                    onClick={() => handleResolve(report.id)}
-                    className="p-1.5 bg-green-100 hover:bg-green-200 text-green-700 rounded-lg transition-colors"
+                    onClick={() => handleResolve(report.id!)}
+                    disabled={isUpdating}
+                    className="p-1.5 bg-green-100 hover:bg-green-200 text-green-700 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     title="Hoàn tất sửa chữa"
                   >
                     <Check className="w-4 h-4" />
