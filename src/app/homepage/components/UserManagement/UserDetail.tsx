@@ -12,7 +12,7 @@ type Props = {
   showDelete?: boolean;
 };
 
-type UserRole = "ADMIN" | "USER";
+type UserRole = "admin" | "user";
 
 function InfoRow({
   label,
@@ -34,10 +34,10 @@ function InfoRow({
 
 const roleChipSx = (role: UserRole) => {
   switch (role) {
-    case "ADMIN":
-      return { backgroundColor: "#fee2e2", color: "#b91c1c" };
-    case "USER":
-      return { backgroundColor: "#e0f2fe", color: "#0369a1" };
+    case "admin":
+      return { backgroundColor: "#358597", color: "white" };
+    case "user":
+      return { backgroundColor: "#f4a896", color: "white" };
     default:
       return { backgroundColor: "#dcfce7", color: "#166534" };
   }
@@ -52,7 +52,7 @@ export default function UserDetail({ userId, onBack, showDelete = true }: Props)
   const [email, setEmail] = useState("");
   const [username, setUsername] = useState("");
   const [fullName, setFullName] = useState("");
-  const [role, setRole] = useState<UserRole>("USER");
+  const [role, setRole] = useState<UserRole>("user");
 
   // delete
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);

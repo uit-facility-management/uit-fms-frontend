@@ -29,14 +29,14 @@ const roleChipSx = (role: string) => {
   switch (role) {
     case "admin":
       return {
-        backgroundColor: "#FEF3C7",
-        color: "#92400E",
+        backgroundColor: "#358597",
+        color: "white",
         border: "none",
       };
     case "user":
       return {
-        backgroundColor: "#ECFDF3",
-        color: "#027A48",
+        backgroundColor: "#f4a896",
+        color: "white",
         border: "none",
       };
     default:

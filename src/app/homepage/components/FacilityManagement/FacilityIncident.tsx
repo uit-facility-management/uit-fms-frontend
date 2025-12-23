@@ -47,9 +47,10 @@ type Props = {
   roomId: string;
   open: boolean;
   onClose: () => void;
+  onCreated?: () => void;
 };
 
-export default function FacilityIncident({ facilityId, facilityName, facilityType, roomId, open, onClose }: Props) {
+export default function FacilityIncident({ facilityId, facilityName, facilityType, roomId, open, onClose, onCreated }: Props) {
   // create incident
   const [createIncident] = useCreateIncidentMutation();
 
@@ -299,6 +300,8 @@ export default function FacilityIncident({ facilityId, facilityName, facilityTyp
               status: payload.status === "Đã xử lý" ? "resolved" : "pending",
             }).unwrap();
 
+            
+            onCreated?.();
             onClose();
           } catch (e) {
             console.error("Create incident failed", e);
