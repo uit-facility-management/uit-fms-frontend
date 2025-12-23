@@ -16,7 +16,7 @@ export const scheduleApi = appApi.injectEndpoints({
     // GET /api/v1/schedule
     getSchedules: builder.query<ScheduleResponseByIdUser[], void>({
       query: () => `/schedule`,
-      keepUnusedDataFor: 60,
+      keepUnusedDataFor: 5,
       providesTags: ["Schedule"],
     }),
 

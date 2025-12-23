@@ -1,5 +1,6 @@
 "use client";
-import { useState } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
+import { Suspense, useState } from "react";
 import {
   LogOut,
   Search,
@@ -31,13 +32,19 @@ export type TabKey =
   | "user"
   | "management";
 
-export default function HomePage() {
-  const [tab, setTab] = useState<TabKey>("home");
+function HomePageContent() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const tab = (searchParams.get("tab") as TabKey) || "home";
+  
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const user = useSelector(selectCurrentUser);
   const userID = user.id;
-  console.log("Current User hien tại:", userID);
-  
+
+  // Function to change tab
+  const setTab = (newTab: TabKey) => {
+    router.push(`?tab=${newTab}`);
+  };
 
   const handleLogout = async () => {
     localStorage.removeItem("access_token");
@@ -74,6 +81,10 @@ export default function HomePage() {
         return "Quản lý cơ sở vật chất";
       case "user":
         return "Quản lý người dùng";
+      case "management":
+        return "Quản lý";
+      default:
+        return "Trang chủ";
     }
   };
 
@@ -232,23 +243,24 @@ export default function HomePage() {
         <main className="flex-1 p-8 overflow-auto">
           <div className="max-w-[1800px] mx-auto">
             {/* Dashboard Home - Show on home tab */}
-            {tab === "home" && <DashboardHome />}
+            {tab === "home" && <DashboardHome key="home" />}
 
             {/* Main Content Card */}
             {tab !== "home" && (
               <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
                 <div className={tab === "calendar" ? "" : "p-10"}>
-                  {tab === "management" && <ManagementComponent />}
+                  {tab === "management" && <ManagementComponent key="management" />}
                   {tab === "personal" && user && (
                     <PersonalComponent
+                      key="personal"
                       userId={userID}
                       onBack={() => setTab("home")}
                     />
                   )}
-                  {tab === "room" && <RoomComponent />}
-                  {tab === "tools" && <ToolsComponent />}
-                  {tab === "facility" && <FacilityComponent />}
-                  {tab === "user" && <UserComponent />}
+                  {tab === "room" && <RoomComponent key="room" />}
+                  {tab === "tools" && <ToolsComponent key="tools" />}
+                  {tab === "facility" && <FacilityComponent key="facility" />}
+                  {tab === "user" && <UserComponent key="user" />}
                 </div>
               </div>
             )}
@@ -256,5 +268,14 @@ export default function HomePage() {
         </main>
       </div>
     </div>
+  );
+}
+
+// Wrap with Suspense for useSearchParams
+export default function HomePage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <HomePageContent />
+    </Suspense>
   );
 }

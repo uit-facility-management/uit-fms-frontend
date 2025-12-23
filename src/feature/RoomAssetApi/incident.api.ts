@@ -12,7 +12,7 @@ export const incidentApi = appApi.injectEndpoints({
         url: "/incident",
         method: "GET",
       }),
-      keepUnusedDataFor: 60,
+      keepUnusedDataFor: 5,
       providesTags: ["Incident"],
     }),
 
