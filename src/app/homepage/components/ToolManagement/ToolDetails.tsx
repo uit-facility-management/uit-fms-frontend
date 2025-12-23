@@ -114,6 +114,8 @@ export default function ToolDetails({ tool, onBack }: Props) {
   const [updateTool, { isLoading: isUpdating }] = useUpdateToolMutation();
 
   const { data: borrowHistory, isLoading: isLoadingBorrowHistory, isError: isErrorBorrowHistory } = useGetBorrowTicketsQuery(tool.id);
+  console.log("tool.id", tool.id);
+
 
   const transformedHistory = useMemo(() => {
     if (!borrowHistory) return [];

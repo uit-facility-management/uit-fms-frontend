@@ -8,6 +8,10 @@ import {
 } from "material-react-table";
 import { Chip } from "@mui/material";
 
+import { useGetAllBorrowTicketsQuery, } from "@/feature/ToolsApi/borrow.api";
+import type { BorrowTicket } from "@/feature/ToolsApi/type";
+
+
 /* ================== Types ================== */
 type BorrowStatus = "Đang mượn" | "Đã trả";
 
@@ -21,7 +25,12 @@ type BorrowTicketRow = {
   status: BorrowStatus;
 };
 
-/* ================== Status UI ================== */
+const apiToUiBorrowStatus = (
+  s: BorrowTicket["status"]
+): BorrowStatus => {
+  return s === "BORROWING" ? "Đang mượn" : "Đã trả";
+};
+
 const statusChipSx = (s: BorrowStatus) => {
   switch (s) {
     case "Đang mượn":
@@ -33,30 +42,25 @@ const statusChipSx = (s: BorrowStatus) => {
   }
 };
 
-/* ================== Mock data ================== */
-const MOCK_DATA: BorrowTicketRow[] = [
-  {
-    id: "1",
-    borrower: "Nguyễn Văn A",
-    toolName: "Máy chiếu Epson",
-    roomName: "Phòng A101",
-    borrowTime: "10/12/2025 08:30",
-    returnTime: "-",
-    status: "Đang mượn",
-  },
-  {
-    id: "2",
-    borrower: "Trần Thị B",
-    toolName: "Laptop Dell",
-    roomName: "Phòng B203",
-    borrowTime: "09/12/2025 13:00",
-    returnTime: "09/12/2025 16:30",
-    status: "Đã trả",
-  },
-];
-
-/* ================== Component ================== */
 export default function BorrowTicket() {
+  const { data, isLoading, isError } = useGetAllBorrowTicketsQuery();
+
+  const tableData = useMemo<BorrowTicketRow[]>(() => {
+    if (!data) return [];
+
+    return data.map((t) => ({
+      id: t.id,
+      borrower: t.student.name,
+      toolName: t.device.name,
+      roomName: t.room.name,
+      borrowTime: new Date(t.borrowed_at).toLocaleString("vi-VN"),
+      returnTime: t.returned_at
+        ? new Date(t.returned_at).toLocaleString("vi-VN")
+        : "-",
+      status: apiToUiBorrowStatus(t.status),
+    }));
+  }, [data]);
+
   const columns = useMemo<MRT_ColumnDef<BorrowTicketRow>[]>(
     () => [
       {
@@ -134,7 +138,7 @@ export default function BorrowTicket() {
 
   const table = useMaterialReactTable({
     columns,
-    data: MOCK_DATA,
+    data: tableData,
 
     enableSorting: true,
     enableTopToolbar: false,
@@ -192,7 +196,15 @@ export default function BorrowTicket() {
 
   return (
     <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-      <MaterialReactTable table={table} />
+      {isLoading ? (
+        <div className="p-6 text-sm text-gray-500">Đang tải dữ liệu...</div>
+      ) : isError ? (
+        <div className="p-6 text-sm text-red-500">
+          Không tải được danh sách phiếu mượn
+        </div>
+      ) : (
+        <MaterialReactTable table={table} />
+      )}
     </div>
   );
 }
