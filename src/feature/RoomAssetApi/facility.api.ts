@@ -11,19 +11,16 @@ export const roomAssetApi = appApi.injectEndpoints({
     // ---------- GET ----------
     getRoomAssets: builder.query<RoomAssetResponse[], void>({
       query: () => "/room-assets",
-      keepUnusedDataFor: 60,
+      keepUnusedDataFor: 1,
       providesTags: ["RoomAsset"],
     }),
 
     // ---------- GET BY ID ----------
     getRoomAssetById: builder.query<RoomAssetResponse, string>({
       query: (id) => `/room-assets/${id}`,
-      keepUnusedDataFor: 60,
-      providesTags: (result, error, id) => [
-        { type: "RoomAsset", id },
-      ],
+      keepUnusedDataFor: 1,
+      providesTags: (result, error, id) => [{ type: "RoomAsset", id }],
     }),
-
 
     // ---------- POST ----------
     createFacility: builder.mutation<RoomAssetResponse, CreateFacilityRequest>({
@@ -36,7 +33,10 @@ export const roomAssetApi = appApi.injectEndpoints({
     }),
 
     // ---------- PATCH ----------
-    updateFacility: builder.mutation<RoomAssetResponse,{ id: string; body: UpdateFacilityRequest }>({
+    updateFacility: builder.mutation<
+      RoomAssetResponse,
+      { id: string; body: UpdateFacilityRequest }
+    >({
       query: ({ id, body }) => ({
         url: `/room-assets/${id}`,
         method: "PATCH",
@@ -46,13 +46,13 @@ export const roomAssetApi = appApi.injectEndpoints({
       invalidatesTags: ["RoomAsset"],
     }),
 
-     // ---------- DELETE ----------
+    // ---------- DELETE ----------
     deleteFacility: builder.mutation<void, string>({
       query: (id) => ({
         url: `/room-assets/${id}`,
         method: "DELETE",
       }),
-      // Xóa xong refetch 
+      // Xóa xong refetch
       invalidatesTags: ["RoomAsset"],
     }),
   }),
