@@ -77,7 +77,7 @@ const facilityStatusChipSx = (s: FacilityStatus) => {
 
 export default function ToolsComponent() {
   // get api room assets data
-  const { data, isLoading, error } = useGetRoomAssetsQuery();
+  const { data, isLoading, error, refetch: refetchFacilities, } = useGetRoomAssetsQuery();
 
   // console.log("API data room asset:", data);
   // console.log("API error room asset:", error);
@@ -330,6 +330,9 @@ export default function ToolsComponent() {
           onBack={() => setSelectedFacilityId(null)}
           onUpdate={() => {}}
           rooms={roomOptions}
+          onIncidentCreated={() => {
+            refetchFacilities(); 
+          }}
         />
       ) : (
         <>

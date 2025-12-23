@@ -17,8 +17,7 @@ import { RoomOption, textFieldSx } from "./CreateFacilityModal";
 import FacilityIncident from "./FacilityIncident";
 import FacilityDelete from "./FacilityDelete";
 import { mapType, mapStatus } from "./FacilityComponent";
-import { useGetRoomAssetByIdQuery } from "@/feature/RoomAssetApi/facility.api";
-import { useUpdateFacilityMutation } from "@/feature/RoomAssetApi/facility.api";
+import { useGetRoomAssetByIdQuery,useUpdateFacilityMutation } from "@/feature/RoomAssetApi/facility.api";
 import { RoomAssetResponse } from "@/feature/RoomAssetApi/type";
 import CreateIncidentModal from "../RoomManagement/CreateIncidentModal";
 type Props = {
@@ -26,6 +25,7 @@ type Props = {
   facilityId: string;
   onBack: () => void;
   rooms: RoomOption[];
+  onIncidentCreated?: () => void;
 };
 
 export const reverseMapType: Record<FacilityType, RoomAssetResponse["type"]> = {
@@ -116,6 +116,7 @@ export default function FacilityDetails({
   onBack,
   onUpdate,
   rooms,
+  onIncidentCreated
 }: Props) {
   const [isEditing, setIsEditing] = useState(false);
   // get by id
@@ -123,6 +124,7 @@ export default function FacilityDetails({
     data,
     isLoading: isFetching,
     error,
+    refetch,
   } = useGetRoomAssetByIdQuery(facilityId);
   console.log("data get by id:", data);
 
@@ -270,10 +272,10 @@ export default function FacilityDetails({
                       setForm({ ...form, type: e.target.value as FacilityType })
                     }
                   >
-                    <MenuItem value="Electronics">Đồ điện tử</MenuItem>
-                    <MenuItem value="Furniture">Đồ nội thất</MenuItem>
-                    <MenuItem value="Stationery">Văn phòng phẩm</MenuItem>
-                    <MenuItem value="Other">Khác</MenuItem>
+                    <MenuItem value="Đồ điện tử">Đồ điện tử</MenuItem>
+                    <MenuItem value="Đồ nội thất">Đồ nội thất</MenuItem>
+                    <MenuItem value="Văn phòng phẩm">Văn phòng phẩm</MenuItem>
+                    <MenuItem value="Khác">Khác</MenuItem>
                   </Select>
                 </FormControl>
 
@@ -321,9 +323,9 @@ export default function FacilityDetails({
                       })
                     }
                   >
-                    <MenuItem value="ACTIVE">Hoạt động</MenuItem>
-                    <MenuItem value="INACTIVE">Không hoạt động</MenuItem>
-                    <MenuItem value="MAINTENANCE">Hư hỏng</MenuItem>
+                    <MenuItem value="Hoạt động">Hoạt động</MenuItem>
+                    <MenuItem value="Không hoạt động">Không hoạt động</MenuItem>
+                    <MenuItem value="Hư hỏng">Hư hỏng</MenuItem>
                   </Select>
                 </FormControl>
 
@@ -409,6 +411,11 @@ export default function FacilityDetails({
         roomId={facility.roomId}
         open={openCreateIncident}
         onClose={() => setOpenCreateIncident(false)}
+        onCreated={() => {
+          refetch(); 
+          onIncidentCreated?.();
+        }}
+        
       />
 
       <FacilityDelete
