@@ -2,12 +2,13 @@
 import { useState } from "react";
 import { ClipboardList, Package, Wrench } from "lucide-react";
 import BookingRequestsTab from "./BookingRequestsTab";
+import BorrowRequestsTab from "./BorrowRequestsTab";
+import MaintenanceTab from "./MaintenanceTab";
 
 type ManagementTab = "bookings" | "borrows" | "maintenance";
 
 export default function AdminManagement() {
   const [activeTab, setActiveTab] = useState<ManagementTab>("bookings");
-  
 
   const tabs = [
     {
@@ -66,12 +67,8 @@ export default function AdminManagement() {
           {/* Tab Content with Fixed Height and Scroll */}
           <div className="h-[600px] overflow-y-auto p-6">
             {activeTab === "bookings" && <BookingRequestsTab />}
-            {activeTab === "borrows" && (
-              <div className="text-gray-500">Component Phiếu mượn sẽ ở đây</div>
-            )}
-            {activeTab === "maintenance" && (
-              <div className="text-gray-500">Component Báo hỏng sẽ ở đây</div>
-            )}
+            {activeTab === "borrows" && <BorrowRequestsTab />}
+            {activeTab === "maintenance" && <MaintenanceTab />}
           </div>
         </div>
       </div>

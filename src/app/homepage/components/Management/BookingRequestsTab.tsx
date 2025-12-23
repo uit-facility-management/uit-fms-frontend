@@ -1,4 +1,8 @@
 import { Check, X } from "lucide-react";
+import {
+  useGetSchedulesQuery,
+  useUpdateScheduleStatusMutation,
+} from "@/feature/ScheduleApi/schedule.api";
 
 type BookingStatus = "pending" | "approved" | "rejected";
 
@@ -8,7 +12,7 @@ interface BookingRequest {
   end_time: string;
   period_start: number;
   period_end: number;
-  status: BookingStatus;
+  status: "pending" | "approved" | "rejected" | string;
   room: {
     id: string;
     name: string;
@@ -27,153 +31,37 @@ interface BookingRequest {
 }
 
 export default function BookingRequestsTab() {
-  const bookingRequests: BookingRequest[] = [
-    {
-      id: "3e7de074-2ebf-4bb6-85b8-0832a6d2fdc9",
-      start_time: "2024-07-01T10:00:00.000Z",
-      end_time: "2024-07-01T12:00:00.000Z",
-      period_start: 1,
-      period_end: 1,
-      status: "approved",
-      room: {
-        id: "fa819163-964a-4a63-9fd3-8814c86631e1",
-        name: "Conference Room ABC",
-        status: "active",
-        stage: 3,
-        type: "meeting",
-        capacity: 10,
-      },
-      createdBy: {
-        id: "6616d07f-c900-4b23-8e81-a06a97951a40",
-        email: "22520716@gm.uit.edu.vn",
-        username: "kietlac",
-        fullName: "Hoàng Thế Kiệt",
-        role: "admin",
-      },
-    },
-    {
-      id: "bdcb45b7-2d72-40c8-af00-e1a6cbe923f6",
-      start_time: "2024-07-01T10:00:00.000Z",
-      end_time: "2024-07-01T12:00:00.000Z",
-      period_start: 1,
-      period_end: 1,
-      status: "pending",
-      room: {
-        id: "fa819163-964a-4a63-9fd3-8814c86631e1",
-        name: "Conference Room ABC",
-        status: "active",
-        stage: 3,
-        type: "meeting",
-        capacity: 10,
-      },
-      createdBy: {
-        id: "3f792df0-9249-43e5-89bf-f338e78b662f",
-        email: "khoadaubuu@gmail.com",
-        username: "JohnDoe",
-        fullName: "John Doe",
-        role: "admin",
-      },
-    },
-    {
-      id: "a1b2c3d4-5e6f-7g8h-9i0j-k1l2m3n4o5p6",
-      start_time: "2024-07-02T14:00:00.000Z",
-      end_time: "2024-07-02T16:00:00.000Z",
-      period_start: 3,
-      period_end: 4,
-      status: "pending",
-      room: {
-        id: "room-002",
-        name: "Phòng A101",
-        status: "active",
-        stage: 2,
-        type: "classroom",
-        capacity: 30,
-      },
-      createdBy: {
-        id: "user-003",
-        email: "nguyenvana@example.com",
-        username: "nguyenvana",
-        fullName: "Nguyễn Văn A",
-        role: "user",
-      },
-    },
-    {
-      id: "q1r2s3t4-5u6v-7w8x-9y0z-a1b2c3d4e5f6",
-      start_time: "2024-07-03T08:00:00.000Z",
-      end_time: "2024-07-03T10:00:00.000Z",
-      period_start: 1,
-      period_end: 2,
-      status: "rejected",
-      room: {
-        id: "room-003",
-        name: "Phòng B202",
-        status: "active",
-        stage: 1,
-        type: "lab",
-        capacity: 25,
-      },
-      createdBy: {
-        id: "user-004",
-        email: "tranthib@example.com",
-        username: "tranthib",
-        fullName: "Trần Thị B",
-        role: "user",
-      },
-    },
-    {
-      id: "q1r2s3t4-5u6v-7w8x-9y0z-a1b2c3d4e5f3",
-      start_time: "2024-07-03T08:00:00.000Z",
-      end_time: "2024-07-03T10:00:00.000Z",
-      period_start: 1,
-      period_end: 2,
-      status: "rejected",
-      room: {
-        id: "room-003",
-        name: "Phòng B202",
-        status: "active",
-        stage: 1,
-        type: "lab",
-        capacity: 25,
-      },
-      createdBy: {
-        id: "user-004",
-        email: "tranthib@example.com",
-        username: "tranthib",
-        fullName: "Trần Thị B",
-        role: "user",
-      },
-    },
-    {
-      id: "q1r2s3t4-5u6v-7w8x-9y4z-a1b2c3d4e5f6",
-      start_time: "2024-07-03T08:00:00.000Z",
-      end_time: "2024-07-03T10:00:00.000Z",
-      period_start: 1,
-      period_end: 2,
-      status: "rejected",
-      room: {
-        id: "room-003",
-        name: "Phòng B202",
-        status: "active",
-        stage: 1,
-        type: "lab",
-        capacity: 25,
-      },
-      createdBy: {
-        id: "user-004",
-        email: "tranthib@example.com",
-        username: "tranthib",
-        fullName: "Trần Thị B",
-        role: "user",
-      },
-    },
-  ];
+  const { data: schedules = [], isLoading, isError } = useGetSchedulesQuery();
+  const [updateScheduleStatus, { isLoading: isUpdating }] =
+    useUpdateScheduleStatusMutation();
 
-  const handleApprove = (id: string) => {
-    console.log("Chấp nhận yêu cầu:", id);
+  console.log("schedules", schedules);
+
+  // Sử dụng data từ API
+  const bookingRequests = schedules;
+
+  const handleApprove = async (id: string) => {
+    try {
+      await updateScheduleStatus({
+        scheduleId: id,
+        status: "approved",
+      }).unwrap();
+      console.log("Đã chấp nhận yêu cầu:", id);
+    } catch (error) {
+      console.error("Lỗi khi chấp nhận yêu cầu:", error);
+    }
   };
 
-  const handleReject = (id: string) => {
-    console.log("Từ chối yêu cầu:", id);
+  const handleReject = async (id: string) => {
+    try {
+      await updateScheduleStatus({
+        scheduleId: id,
+        status: "rejected",
+      }).unwrap();
+      console.log("Đã từ chối yêu cầu:", id);
+    } catch (error) {
+      console.error("Lỗi khi từ chối yêu cầu:", error);
+    }
   };
 
   const formatDate = (dateString: string) => {
@@ -185,14 +73,14 @@ export default function BookingRequestsTab() {
     });
   };
 
-  const getStatusBadge = (status: BookingStatus) => {
-    const styles = {
+  const getStatusBadge = (status: string) => {
+    const styles: Record<string, string> = {
       pending: "bg-yellow-100 text-yellow-700 border-yellow-200",
       approved: "bg-green-100 text-green-700 border-green-200",
       rejected: "bg-red-100 text-red-700 border-red-200",
     };
 
-    const labels = {
+    const labels: Record<string, string> = {
       pending: "Chờ duyệt",
       approved: "Đã duyệt",
       rejected: "Từ chối",
@@ -206,6 +94,33 @@ export default function BookingRequestsTab() {
       </span>
     );
   };
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-8">
+        <div className="text-gray-500">Đang tải dữ liệu...</div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (isError) {
+    return (
+      <div className="flex items-center justify-center py-8">
+        <div className="text-red-500">Có lỗi xảy ra khi tải dữ liệu</div>
+      </div>
+    );
+  }
+
+  // Empty state
+  if (bookingRequests.length === 0) {
+    return (
+      <div className="flex items-center justify-center py-8">
+        <div className="text-gray-500">Không có yêu cầu đặt phòng nào</div>
+      </div>
+    );
+  }
 
   return (
     <div className="overflow-x-auto">
@@ -259,14 +174,16 @@ export default function BookingRequestsTab() {
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => handleApprove(booking.id)}
-                      className="p-1.5 bg-green-100 hover:bg-green-200 text-green-700 rounded-lg transition-colors"
+                      disabled={isUpdating}
+                      className="p-1.5 bg-green-100 hover:bg-green-200 text-green-700 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                       title="Chấp nhận"
                     >
                       <Check className="w-4 h-4" />
                     </button>
                     <button
                       onClick={() => handleReject(booking.id)}
-                      className="p-1.5 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg transition-colors"
+                      disabled={isUpdating}
+                      className="p-1.5 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                       title="Từ chối"
                     >
                       <X className="w-4 h-4" />
