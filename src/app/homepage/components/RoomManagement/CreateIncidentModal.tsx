@@ -85,7 +85,7 @@ export default function CreateIncidentModal({
       <DialogTitle sx={{ fontWeight: 700 }}>Thêm sự việc</DialogTitle>
 
       <DialogContent sx={{ pt: 1 }}>
-        <Box sx={{ display: "grid", gap: 2.2, mt: 0.5 }}>
+        <Box sx={{ display: "grid", gap: 2.2, mt: 1 }}>
           <FormControl size="small" fullWidth>
             <InputLabel id="facility-label">Tên thiết bị</InputLabel>
             <Select

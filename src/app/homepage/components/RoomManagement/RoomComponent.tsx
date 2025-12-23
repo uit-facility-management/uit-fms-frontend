@@ -344,6 +344,16 @@ export default function RoomComponent() {
       pagination: { pageIndex: 0, pageSize: 10 },
       density: "comfortable",
     },
+    localization: {
+      noRecordsToDisplay: "Không có dữ liệu hiển thị",
+      rowsPerPage: "Số dòng mỗi trang",
+      of: "của",
+      goToNextPage: "Trang tiếp",
+      goToPreviousPage: "Trang trước",
+      goToFirstPage: "Trang đầu",
+      goToLastPage: "Trang cuối",
+      search: "Tìm kiếm",
+    },
   });
 
   return (
