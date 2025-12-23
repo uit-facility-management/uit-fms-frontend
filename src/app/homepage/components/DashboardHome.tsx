@@ -1,365 +1,234 @@
-"use client";
-import { useState } from "react";
 import {
   DoorOpen,
   Wrench,
   CheckCircle,
   AlertTriangle,
-  Check,
-  X,
+  Clock,
+  ArrowRight,
+  TrendingUp,
 } from "lucide-react";
-import { selectCurrentUser } from "@/feature/auth/auth.slice";
-import { useSelector } from "react-redux";
-
-type DashboardTab = "requests" | "tools";
-type RequestStatus = "Chờ duyệt" | "Chấp nhận" | "Từ chối";
+import { useState } from "react";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
 
 export default function DashboardHome() {
-  const [activeTab, setActiveTab] = useState<DashboardTab>("requests");
-  const user = useSelector(selectCurrentUser);
-  // Mock data for booking requests
-  const requestsData = [
-    {
-      id: 1,
-      room: "A101",
-      time: "08:00 - 10:00",
-      date: "15/12/2024",
-      user: "Nguyễn Văn A",
-      purpose: "Họp nhóm",
-      status: "Chờ duyệt" as RequestStatus,
-    },
-    {
-      id: 2,
-      room: "B202",
-      time: "10:00 - 12:00",
-      date: "15/12/2024",
-      user: "Trần Thị B",
-      purpose: "Thuyết trình",
-      status: "Chờ duyệt" as RequestStatus,
-    },
-    {
-      id: 3,
-      room: "C301",
-      time: "13:00 - 15:00",
-      date: "16/12/2024",
-      user: "Lê Văn C",
-      purpose: "Học tập",
-      status: "Chấp nhận" as RequestStatus,
-    },
-    {
-      id: 4,
-      room: "D101",
-      time: "15:00 - 17:00",
-      date: "16/12/2024",
-      user: "Phạm Thị D",
-      purpose: "Workshop",
-      status: "Từ chối" as RequestStatus,
-    },
-    {
-      id: 5,
-      room: "A102",
-      time: "07:00 - 09:00",
-      date: "17/12/2024",
-      user: "Hoàng Văn E",
-      purpose: "Seminar",
-      status: "Chờ duyệt" as RequestStatus,
-    },
-  ];
-
-  // Mock data for tools table
-  const toolsData = [
-    {
-      id: 1,
-      tool: "Máy chiếu",
-      quantity: 15,
-      available: 8,
-      borrowed: 7,
-      status: "Chưa sử dụng",
-    },
-    {
-      id: 2,
-      tool: "Micro",
-      quantity: 25,
-      available: 20,
-      borrowed: 5,
-      status: "Chưa sử dụng",
-    },
-    {
-      id: 3,
-      tool: "Bảng viết",
-      quantity: 10,
-      available: 3,
-      borrowed: 7,
-      status: "Ít",
-    },
-    {
-      id: 4,
-      tool: "Laptop",
-      quantity: 20,
-      available: 15,
-      borrowed: 5,
-      status: "Chưa sử dụng",
-    },
-    {
-      id: 5,
-      tool: "Chuột",
-      quantity: 30,
-      available: 25,
-      borrowed: 5,
-      status: "Chưa sử dụng",
-    },
-  ];
-
-  const handleApprove = (id: number) => {
-    console.log("Chấp nhận yêu cầu:", id);
+  const [chartView, setChartView] = useState<"week" | "month">("week");
+  const stats = {
+    totalRooms: 48,
+    availableRooms: 45,
+    totalAssets: 156,
+    maintenanceNeeded: 8,
   };
 
-  const handleReject = (id: number) => {
-    console.log("Từ chối yêu cầu:", id);
-  };
+  const pendingRequests = [
+    { type: "Đặt phòng", count: 5 },
+    { type: "Phiếu mượn", count: 3 },
+    { type: "Báo hỏng", count: 2 },
+  ];
+
+  // Dữ liệu biểu đồ incident theo tuần (7 ngày gần nhất)
+  const incidentDataWeek = [
+    { date: "17/12", count: 2 },
+    { date: "18/12", count: 5 },
+    { date: "19/12", count: 3 },
+    { date: "20/12", count: 7 },
+    { date: "21/12", count: 4 },
+    { date: "22/12", count: 6 },
+    { date: "23/12", count: 3 },
+  ];
+
+  // Dữ liệu biểu đồ incident theo tháng (30 ngày, nhóm theo tuần)
+  const incidentDataMonth = [
+    { date: "Tuần 1", count: 12 },
+    { date: "Tuần 2", count: 18 },
+    { date: "Tuần 3", count: 15 },
+    { date: "Tuần 4", count: 22 },
+  ];
+
+  const incidentData =
+    chartView === "week" ? incidentDataWeek : incidentDataMonth;
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm hover:shadow-md transition-shadow">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Card 1 */}
+        <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Tổng số phòng</p>
-              <p className="text-3xl font-bold text-gray-900 mt-2">48</p>
-              <p className="text-xs text-gray-500 mt-1">Toàn bộ cơ sở</p>
+              <p className="text-3xl font-bold text-gray-900 mt-2">
+                {stats.totalRooms}
+              </p>
+              <p className="text-xs text-gray-500 mt-1">Toàn cơ sở</p>
             </div>
-            <div className="w-14 h-14 bg-blue-100 rounded-xl flex items-center justify-center">
-              <DoorOpen className="w-7 h-7 text-blue-600" />
+            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+              <DoorOpen className="w-6 h-6 text-blue-600" />
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm hover:shadow-md transition-shadow">
+        {/* Card 2 */}
+        <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">
-                Đang hoạt động
+              <p className="text-sm font-medium text-gray-600">Khả dụng</p>
+              <p className="text-3xl font-bold text-gray-900 mt-2">
+                {stats.availableRooms}
               </p>
-              <p className="text-3xl font-bold text-gray-900 mt-2">45</p>
-              <p className="text-xs text-green-600 mt-1 flex items-center gap-1">
-                <CheckCircle className="w-3 h-3" />
-                93.75% Chưa sử dụng
+              <p className="text-xs text-green-600 mt-1">
+                {((stats.availableRooms / stats.totalRooms) * 100).toFixed(1)}%
               </p>
             </div>
-            <div className="w-14 h-14 bg-green-100 rounded-xl flex items-center justify-center">
-              <CheckCircle className="w-7 h-7 text-green-600" />
+            <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+              <CheckCircle className="w-6 h-6 text-green-600" />
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm hover:shadow-md transition-shadow">
+        {/* Card 3 */}
+        <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">
-                Cơ sở vật chất
+              <p className="text-sm font-medium text-gray-600">CSVC</p>
+              <p className="text-3xl font-bold text-gray-900 mt-2">
+                {stats.totalAssets}
               </p>
-              <p className="text-3xl font-bold text-gray-900 mt-2">156</p>
               <p className="text-xs text-gray-500 mt-1">Tổng thiết bị</p>
             </div>
-            <div className="w-14 h-14 bg-orange-100 rounded-xl flex items-center justify-center">
-              <Wrench className="w-7 h-7 text-orange-600" />
+            <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
+              <Wrench className="w-6 h-6 text-orange-600" />
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm hover:shadow-md transition-shadow">
+        {/* Card 4 */}
+        <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Cần bảo trì</p>
-              <p className="text-3xl font-bold text-gray-900 mt-2">8</p>
-              <p className="text-xs text-amber-600 mt-1 flex items-center gap-1">
-                <AlertTriangle className="w-3 h-3" />3 phòng + 5 thiết bị
+              <p className="text-3xl font-bold text-gray-900 mt-2">
+                {stats.maintenanceNeeded}
+              </p>
+              <p className="text-xs text-amber-600 mt-1">
+                3 phòng + 5 thiết bị
               </p>
             </div>
-            <div className="w-14 h-14 bg-amber-100 rounded-xl flex items-center justify-center">
-              <AlertTriangle className="w-7 h-7 text-amber-600" />
+            <div className="w-12 h-12 bg-amber-100 rounded-lg flex items-center justify-center">
+              <AlertTriangle className="w-6 h-6 text-amber-600" />
             </div>
           </div>
         </div>
       </div>
 
-      {/* Tabs and Table */}
-      <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-        {/* Tab Header */}
-        <div className="border-b border-gray-200 px-6">
-          <div className="flex gap-6">
-            <button
-              onClick={() => setActiveTab("requests")}
-              className={`py-4 px-2 font-medium text-sm border-b-2 transition-colors ${
-                activeTab === "requests"
-                  ? "border-blue-600 text-blue-600"
-                  : "border-transparent text-gray-600 hover:text-gray-900"
-              }`}
-            >
-              Yêu cầu đặt phòng
-            </button>
-            <button
-              onClick={() => setActiveTab("tools")}
-              className={`py-4 px-2 font-medium text-sm border-b-2 transition-colors ${
-                activeTab === "tools"
-                  ? "border-blue-600 text-blue-600"
-                  : "border-transparent text-gray-600 hover:text-gray-900"
-              }`}
-            >
-              Dụng cụ đang mượn
-            </button>
+      {/* Pending Requests & Incident Chart */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {/* Pending Requests */}
+        <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
+          <div className="px-5 py-4 border-b border-gray-200">
+            <h3 className="text-base font-semibold text-gray-900 flex items-center gap-2">
+              <Clock className="w-5 h-5 text-blue-600" />
+              Yêu cầu chờ duyệt
+            </h3>
+          </div>
+          <div className="p-5 space-y-3">
+            {pendingRequests.map((req, i) => (
+              <div
+                key={i}
+                className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
+                  <span className="text-sm font-medium text-gray-700">
+                    {req.type}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-bold text-gray-900 bg-gray-100 px-2.5 py-1 rounded-full">
+                    {req.count}
+                  </span>
+                  <ArrowRight className="w-4 h-4 text-gray-400" />
+                </div>
+              </div>
+            ))}
           </div>
         </div>
 
-        {/* Table Content */}
-        <div className="p-6">
-          {activeTab === "requests" ? (
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-gray-200">
-                    <th className="text-left py-3 px-4 text-xs font-semibold text-gray-600 uppercase">
-                      Phòng
-                    </th>
-                    <th className="text-left py-3 px-4 text-xs font-semibold text-gray-600 uppercase">
-                      Ngày
-                    </th>
-                    <th className="text-left py-3 px-4 text-xs font-semibold text-gray-600 uppercase">
-                      Thời gian
-                    </th>
-                    <th className="text-left py-3 px-4 text-xs font-semibold text-gray-600 uppercase">
-                      Người đặt
-                    </th>
-                    <th className="text-left py-3 px-4 text-xs font-semibold text-gray-600 uppercase">
-                      Mục đích
-                    </th>
-                    <th className="text-left py-3 px-4 text-xs font-semibold text-gray-600 uppercase">
-                      Trạng thái
-                    </th>
-                    <th className="text-left py-3 px-4 text-xs font-semibold text-gray-600 uppercase">
-                      Thao tác
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {requestsData.map((item) => (
-                    <tr
-                      key={item.id}
-                      className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
-                    >
-                      <td className="py-4 px-4">
-                        <span className="font-semibold text-gray-900">
-                          {item.room}
-                        </span>
-                      </td>
-                      <td className="py-4 px-4 text-gray-700">{item.date}</td>
-                      <td className="py-4 px-4 text-gray-700">{item.time}</td>
-                      <td className="py-4 px-4 text-gray-700">{item.user}</td>
-                      <td className="py-4 px-4 text-gray-700">
-                        {item.purpose}
-                      </td>
-                      <td className="py-4 px-4">
-                        <span
-                          className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${
-                            item.status === "Chờ duyệt"
-                              ? "bg-yellow-100 text-yellow-700 border border-yellow-200"
-                              : item.status === "Chấp nhận"
-                              ? "bg-green-100 text-green-700 border border-green-200"
-                              : "bg-red-100 text-red-700 border border-red-200"
-                          }`}
-                        >
-                          {item.status}
-                        </span>
-                      </td>
-                      <td className="py-4 px-4">
-                        {item.status === "Chờ duyệt" ? (
-                          <div className="flex items-center gap-2">
-                            <button
-                              onClick={() => handleApprove(item.id)}
-                              className="p-1.5 bg-green-100 hover:bg-green-200 text-green-700 rounded-lg transition-colors"
-                              title="Chấp nhận"
-                            >
-                              <Check className="w-4 h-4" />
-                            </button>
-                            <button
-                              onClick={() => handleReject(item.id)}
-                              className="p-1.5 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg transition-colors"
-                              title="Từ chối"
-                            >
-                              <X className="w-4 h-4" />
-                            </button>
-                          </div>
-                        ) : (
-                          <span className="text-xs text-gray-400">
-                            Đã xử lý
-                          </span>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+        {/* Incident Chart */}
+        <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
+          <div className="px-5 py-4 border-b border-gray-200 flex items-center justify-between">
+            <h3 className="text-base font-semibold text-gray-900 flex items-center gap-2">
+              <TrendingUp className="w-5 h-5 text-red-600" />
+              Báo hỏng {chartView === "week" ? "7 ngày qua" : "tháng này"}
+            </h3>
+            <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-1">
+              <button
+                onClick={() => setChartView("week")}
+                className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${
+                  chartView === "week"
+                    ? "bg-white text-gray-900 shadow-sm"
+                    : "text-gray-600 hover:text-gray-900"
+                }`}
+              >
+                Tuần
+              </button>
+              <button
+                onClick={() => setChartView("month")}
+                className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${
+                  chartView === "month"
+                    ? "bg-white text-gray-900 shadow-sm"
+                    : "text-gray-600 hover:text-gray-900"
+                }`}
+              >
+                Tháng
+              </button>
             </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-gray-200">
-                    <th className="text-left py-3 px-4 text-xs font-semibold text-gray-600 uppercase">
-                      Dụng cụ
-                    </th>
-                    <th className="text-left py-3 px-4 text-xs font-semibold text-gray-600 uppercase">
-                      Tổng số
-                    </th>
-                    <th className="text-left py-3 px-4 text-xs font-semibold text-gray-600 uppercase">
-                      Chưa sử dụng
-                    </th>
-                    <th className="text-left py-3 px-4 text-xs font-semibold text-gray-600 uppercase">
-                      Đang mượn
-                    </th>
-                    <th className="text-left py-3 px-4 text-xs font-semibold text-gray-600 uppercase">
-                      Trạng thái
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {toolsData.map((item) => (
-                    <tr
-                      key={item.id}
-                      className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
-                    >
-                      <td className="py-4 px-4">
-                        <span className="font-semibold text-gray-900">
-                          {item.tool}
-                        </span>
-                      </td>
-                      <td className="py-4 px-4 text-gray-700">
-                        {item.quantity}
-                      </td>
-                      <td className="py-4 px-4 text-gray-700">
-                        {item.available}
-                      </td>
-                      <td className="py-4 px-4 text-gray-700">
-                        {item.borrowed}
-                      </td>
-                      <td className="py-4 px-4">
-                        <span
-                          className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${
-                            item.status === "Chưa sử dụng"
-                              ? "bg-green-100 text-green-700 border border-green-200"
-                              : "bg-yellow-100 text-yellow-700 border border-yellow-200"
-                          }`}
-                        >
-                          {item.status}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+          </div>
+          <div className="p-5">
+            <ResponsiveContainer width="100%" height={200}>
+              <LineChart data={incidentData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                <XAxis
+                  dataKey="date"
+                  tick={{ fontSize: 12 }}
+                  stroke="#9ca3af"
+                />
+                <YAxis tick={{ fontSize: 12 }} stroke="#9ca3af" />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: "#fff",
+                    border: "1px solid #e5e7eb",
+                    borderRadius: "8px",
+                    fontSize: "12px",
+                  }}
+                  labelStyle={{ fontWeight: "bold" }}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="count"
+                  stroke="#ef4444"
+                  strokeWidth={2}
+                  dot={{ fill: "#ef4444", r: 4 }}
+                  activeDot={{ r: 6 }}
+                  name="Số báo cáo"
+                />
+              </LineChart>
+            </ResponsiveContainer>
+            <div className="mt-4 flex items-center justify-between text-sm">
+              <span className="text-gray-600">Tổng báo cáo:</span>
+              <span className="font-bold text-gray-900">
+                {incidentData.reduce((sum, item) => sum + item.count, 0)} báo
+                cáo
+              </span>
             </div>
-          )}
+          </div>
         </div>
       </div>
     </div>
