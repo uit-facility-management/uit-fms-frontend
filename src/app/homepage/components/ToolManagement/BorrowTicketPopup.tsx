@@ -17,6 +17,8 @@ import {useGetToolsQuery} from "@/feature/ToolsApi/tool.api";
 import {useGetRoomQuery} from "@/feature/RoomApi/room.api";
 import type { RoomResponse } from "@/feature/RoomApi/type";
 import { useCreateBorrowTicketMutation } from "@/feature/ToolsApi/borrow.api";
+import { useUpdateToolMutation } from "@/feature/ToolsApi/tool.api";
+
 
 
 /* ================== Types ================== */
@@ -60,15 +62,17 @@ export default function BorrowTicketPopup({
     roomId: "",
   });
 
+  const [updateTool] = useUpdateToolMutation();
   const [createBorrowTicket, { isLoading: isCreating }] =
   useCreateBorrowTicketMutation();
-
-
   const { data: students = [], isLoading: loadingStudents } =
     useGetStudentsQuery();
-
   const { data: devices = [], isLoading: loadingDevices } =
     useGetToolsQuery();
+  const selectedDevice = useMemo(
+    () => devices.find((d) => d.id === form.deviceId),
+    [devices, form.deviceId]
+  );
 
   const { data, isLoading: loadingRooms } = useGetRoomQuery();
   const rooms = useMemo<RoomResponse[]>(() => {
@@ -101,26 +105,35 @@ export default function BorrowTicketPopup({
 
 
   const handleSubmit = async () => {
-  if (!canSubmit) return;
+    if (!canSubmit || !selectedDevice) return
 
-  try {
-    const userStr = localStorage.getItem("user");
-    const user = userStr ? JSON.parse(userStr) : null;
-    const createdBy = user?.id || user?.userId || "";
+    try {
+      const userStr = localStorage.getItem("user");
+      const user = userStr ? JSON.parse(userStr) : null;
+      const createdBy = user?.id || user?.userId || "";
 
-    await createBorrowTicket({
-      student_code: form.studentCode!,
-      create_by: createdBy,
-      device_id: form.deviceId,
-      room_id: form.roomId,
-      status: "BORROWING",
-    }).unwrap();
+      await createBorrowTicket({
+        student_code: form.studentCode!,
+        create_by: createdBy,
+        device_id: form.deviceId,
+        room_id: form.roomId,
+        status: "BORROWING",
+      }).unwrap();
 
-    onClose();
-  } catch (err: any) {
-    console.error("Create borrow ticket failed:", err);
-  }
-};
+      await updateTool({
+        id: selectedDevice.id,
+        body: {
+          name: selectedDevice.name,
+          description: selectedDevice.description,
+          status: "BORROWING",
+        },
+      }).unwrap();
+
+      onClose();
+    } catch (err: any) {
+      console.error("Create borrow ticket failed:", err);
+    }
+  };
 
 
   return (
