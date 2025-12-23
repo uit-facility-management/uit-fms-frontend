@@ -12,6 +12,12 @@ import {
 import { useGetSchedulesByUserIdQuery } from "@/feature/ScheduleApi/schedule.api";
 import type { ScheduleResponseByIdUser } from "@/feature/ScheduleApi/type";
 
+const formatDate = (value?: string) => {
+  if (!value) return "";
+  return new Date(value).toLocaleDateString("vi-VN");
+};
+
+
 export default function UserSchedule({ userId }: { userId: string }) {
     // get schedule by user id
   const { data: schedules = [], isLoading, isError } =
@@ -30,11 +36,13 @@ export default function UserSchedule({ userId }: { userId: string }) {
         accessorKey: "start_time",
         header: "Thời gian bắt đầu",
         size: 180,
+        Cell: ({ cell }) => formatDate(cell.getValue<string>()),
       },
       {
         accessorKey: "end_time",
         header: "Thời gian kết thúc",
         size: 180,
+        Cell: ({ cell }) => formatDate(cell.getValue<string>()),
       },
       {
         accessorKey: "period_start",

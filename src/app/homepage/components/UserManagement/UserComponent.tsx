@@ -206,8 +206,18 @@ export default function UserComponent() {
     },
 
     initialState: {
-      pagination: { pageIndex: 0, pageSize: 10 },
+      pagination: { pageIndex: 0, pageSize: 5 },
       density: "comfortable",
+    },
+    localization: {
+      noRecordsToDisplay: "Không có dữ liệu hiển thị",
+      rowsPerPage: "Số dòng mỗi trang",
+      of: "của",
+      goToNextPage: "Trang tiếp",
+      goToPreviousPage: "Trang trước",
+      goToFirstPage: "Trang đầu",
+      goToLastPage: "Trang cuối",
+      search: "Tìm kiếm",
     },
   });
 
