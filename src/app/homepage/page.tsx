@@ -1,6 +1,6 @@
 "use client";
 import { useSearchParams, useRouter } from "next/navigation";
-import { Suspense, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import {
   LogOut,
   Search,
@@ -16,11 +16,14 @@ import RoomComponent from "./components/RoomManagement/RoomComponent";
 import ToolsComponent from "./components/ToolManagement/ToolsComponent";
 import FacilityComponent from "./components/FacilityManagement/FacilityComponent";
 import UserComponent from "./components/UserManagement/UserComponent";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { selectCurrentUser } from "@/feature/auth/auth.slice";
 import Cookies from "js-cookie";
 import ManagementComponent from "./components/Management/ManagementComponent";
 import PersonalComponent from "./components/UserManagement/PersonalComponent";
+import { scheduleApi } from "@/feature/ScheduleApi/schedule.api";
+import { incidentApi } from "@/feature/RoomAssetApi/incident.api";
+import { roomAssetApi } from "@/feature/RoomAssetApi/facility.api";
 
 export type TabKey =
   | "home"
@@ -36,16 +39,22 @@ function HomePageContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const tab = (searchParams.get("tab") as TabKey) || "home";
-  
+
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const user = useSelector(selectCurrentUser);
   const userID = user.id;
-
+  const dispatch = useDispatch();
   // Function to change tab
   const setTab = (newTab: TabKey) => {
     router.push(`?tab=${newTab}`);
   };
-
+  useEffect(() => {
+    if (tab === "management") {
+      dispatch(scheduleApi.util.invalidateTags(["Schedule"]));
+      dispatch(incidentApi.util.invalidateTags(["Incident"]));
+      dispatch(roomAssetApi.util.invalidateTags(["RoomAsset"]));
+    }
+  }, [tab, dispatch]);
   const handleLogout = async () => {
     localStorage.removeItem("access_token");
     (await Cookies).remove("access_token");
@@ -249,7 +258,9 @@ function HomePageContent() {
             {tab !== "home" && (
               <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
                 <div className={tab === "calendar" ? "" : "p-10"}>
-                  {tab === "management" && <ManagementComponent key="management" />}
+                  {tab === "management" && (
+                    <ManagementComponent key="management" />
+                  )}
                   {tab === "personal" && user && (
                     <PersonalComponent
                       key="personal"

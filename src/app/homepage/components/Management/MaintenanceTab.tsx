@@ -6,37 +6,6 @@ import { Check } from "lucide-react";
 
 type MaintenanceStatus = "pending" | "resolved";
 
-interface MaintenanceReport {
-  id?: string;
-  description?: string;
-  room_asset_id?: string;
-  created_by?: string;
-  status?: MaintenanceStatus;
-  createdAt?: string;
-  updatedAt?: string;
-  room_asset?: {
-    id: string;
-    name: string;
-    type: string;
-    status: string;
-    room: {
-      id: string;
-      name: string;
-      status: string;
-      stage: number;
-      type: string;
-      capacity: number;
-    };
-  };
-  created_user?: {
-    id: string;
-    email: string;
-    username: string;
-    fullName: string;
-    role: string;
-  };
-}
-
 export default function MaintenanceTab() {
   const { data: incidents = [], isLoading, isError } = useGetIncidentsQuery();
   const [updateIncidentStatus, { isLoading: isUpdating }] =
@@ -45,10 +14,12 @@ export default function MaintenanceTab() {
 
   const handleResolve = async (id: string) => {
     try {
-      await updateIncidentStatus({
+      const res = await updateIncidentStatus({
         incidentId: id,
         status: "resolved",
       }).unwrap();
+
+      console.log("Response từ backend:", res);
       console.log("Đã hoàn tất sửa chữa:", id);
     } catch (error) {
       console.error("Lỗi khi hoàn tất sửa chữa:", error);
