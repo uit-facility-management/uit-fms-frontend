@@ -13,6 +13,7 @@ import type { ToolsResponse } from "@/feature/ToolsApi/type";
 import { useCreateToolMutation, useGetToolsQuery } from "@/feature/ToolsApi/tool.api";
 import CreateToolModal from "./CreateToolModal";
 import BorrowTicket from "./BorrowTicket";
+import BorrowTicketPopup from "./BorrowTicketPopup";
 
 type TabKey = "tools" | "borrow";
 type ToolStatus = "Sẵn sàng" | "Đang mượn" | "Hư hỏng";
@@ -59,6 +60,8 @@ export default function ToolsComponent() {
   const [activeTab, setActiveTab] = useState<TabKey>("tools");
   const [openCreateTool, setOpenCreateTool] = useState(false);
   const [createTool, { isLoading }] = useCreateToolMutation();
+  const [openBorrowPopup, setOpenBorrowPopup] = useState(false);
+
 
   const {
     data,
@@ -269,7 +272,10 @@ export default function ToolsComponent() {
                 Tạo công cụ
               </button>
 
-              <button className="rounded-lg px-5 py-2.5 text-sm font-semibold text-white bg-[#0B4DBA] hover:bg-[#0940A3]">
+              <button 
+                className="rounded-lg px-5 py-2.5 text-sm font-semibold text-white bg-[#0B4DBA] hover:bg-[#0940A3]"
+                onClick={() => setOpenBorrowPopup(true)}
+              >
                 Phiếu mượn
               </button>
             </div>
@@ -286,6 +292,14 @@ export default function ToolsComponent() {
               } catch (err) {
                 console.error("Create tool failed", err);
               }
+            }}
+          />
+          <BorrowTicketPopup
+            open={openBorrowPopup}
+            onClose={() => setOpenBorrowPopup(false)}
+            onSubmit={(data) => {
+              console.log("Borrow ticket data:", data);
+              // gọi API create borrow ticket tại đây
             }}
           />
 

@@ -59,3 +59,30 @@ export interface BorrowTicket {
   device: BorrowTicketDevice;
   student: BorrowTicketStudent;
 }
+
+export type Student = {
+  id: string;
+  student_code: number;
+  name: string;
+  entry_year: number;
+  created_at: string;
+  updated_at: string;
+};
+
+export type CreateBorrowTicketRequest = {
+  student_code: number;
+  create_by: string;
+  device_id: string;
+  room_id: string;
+  status: "BORROWING" | "RETURNED";
+};
+
+export type BorrowTicketResponse = {
+  id: string;
+  student_code: string;
+  device_id: string;
+  room_id: string;
+  status: string;
+  created_at: string;
+};
+
