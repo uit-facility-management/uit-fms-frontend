@@ -15,7 +15,7 @@ import {
   TextField,
 } from "@mui/material";
 import ArrowBackIosNewRoundedIcon from "@mui/icons-material/ArrowBackIosNewRounded";
-import { useUpdateToolMutation } from "@/feature/ToolsApi/tool.api";
+import { useUpdateToolMutation, useGetBorrowTicketsQuery } from "@/feature/ToolsApi/tool.api";
 
 
 type ToolStatus = "Sẵn sàng" | "Đang mượn" | "Hư hỏng";
@@ -27,15 +27,17 @@ export type ToolRow = {
   status: ToolStatus;
 };
 
+type BorrowStatusApi = "BORROWING" | "RETURNED";
 type UsageStatus = "Đã trả" | "Đang mượn";
 
 type ToolUsageRow = {
   id: string;
   borrower: string;
   borrowedAt: string;
-  returnedAt?: string;
+  returnedAt: string | null;
   status: UsageStatus;
 };
+
 
 type Props = {
   tool: ToolRow;
@@ -55,34 +57,16 @@ const uiToApiStatus = (s: ToolStatus): ToolStatusApi => {
   }
 };
 
-const apiToUiStatus = (s: ToolStatusApi): ToolStatus => {
+const apiToUsageStatus = (s: BorrowStatusApi): UsageStatus => {
   switch (s) {
-    case "ACTIVE":
-      return "Sẵn sàng";
     case "BORROWING":
       return "Đang mượn";
     default:
-      return "Hư hỏng";
+      return "Đã trả";
   }
 };
 
 
-/* ================== Mock history ================== */
-const mockUsageHistory: ToolUsageRow[] = [
-  {
-    id: "1",
-    borrower: "Nguyễn Văn A",
-    borrowedAt: "10/09/2025 08:30",
-    returnedAt: "10/09/2025 11:00",
-    status: "Đã trả",
-  },
-  {
-    id: "2",
-    borrower: "Trần Thị B",
-    borrowedAt: "12/09/2025 13:00",
-    status: "Đang mượn",
-  },
-];
 
 /* ================== Status chip style ================== */
 const statusChipSx = (s: ToolStatus) => {
@@ -129,6 +113,19 @@ export default function ToolDetails({ tool, onBack }: Props) {
   const [status, setStatus] = useState<ToolStatus>(tool.status);
   const [updateTool, { isLoading: isUpdating }] = useUpdateToolMutation();
 
+  const { data: borrowHistory, isLoading: isLoadingBorrowHistory, isError: isErrorBorrowHistory } = useGetBorrowTicketsQuery(tool.id);
+
+  const transformedHistory = useMemo(() => {
+    if (!borrowHistory) return [];
+
+    return borrowHistory.map((ticket) => ({
+      id: ticket.id,
+      borrower: ticket.student.name,
+      borrowedAt: ticket.borrowed_at,
+      returnedAt: ticket.returned_at,
+      status: apiToUsageStatus(ticket.status),
+    }));
+  }, [borrowHistory]);
 
   const columns = useMemo<MRT_ColumnDef<ToolUsageRow>[]>(
     () => [
@@ -163,9 +160,9 @@ export default function ToolDetails({ tool, onBack }: Props) {
     []
   );
 
-  const table = useMaterialReactTable({
+  const table = useMaterialReactTable<ToolUsageRow>({
     columns,
-    data: mockUsageHistory,
+    data: transformedHistory,
 
     enableSorting: true,
     enablePagination: true,
@@ -389,7 +386,17 @@ export default function ToolDetails({ tool, onBack }: Props) {
         <div className="px-5 py-4 bg-[#f8f9fa] border-b border-gray-100">
           <p className="text-sm font-semibold text-gray-700">Lịch sử sử dụng</p>
         </div>
-        <MaterialReactTable table={table} />
+        {isLoadingBorrowHistory ? (
+          <div className="p-6 text-sm text-gray-500">
+            Đang tải lịch sử sử dụng...
+          </div>
+        ) : isErrorBorrowHistory ? (
+          <div className="p-6 text-sm text-red-500">
+            Không tải được lịch sử mượn
+          </div>
+        ) : (
+          <MaterialReactTable table={table} />
+        )}
       </div>
     </div>
   );

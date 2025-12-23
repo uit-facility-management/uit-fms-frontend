@@ -3,6 +3,7 @@ import type {
   ToolsResponse,
   CreateToolRequest,
   UpdateToolRequest,
+  BorrowTicket,
  } from "./type";
 
 export const toolApi = appApi.injectEndpoints({
@@ -32,6 +33,12 @@ export const toolApi = appApi.injectEndpoints({
       }),
       invalidatesTags: ["Tools"],
     }),
+
+    getBorrowTickets: builder.query<BorrowTicket[], string>({
+      query: (id) => `/device/${id}/borrow-tickets`,
+      providesTags: (result, error, id) => [{ type: "BorrowTickets", id }],
+    }),
+
   }),
 });
 
@@ -39,5 +46,6 @@ export const {
   useGetToolsQuery,
   useCreateToolMutation,
   useUpdateToolMutation,
+  useGetBorrowTicketsQuery,
 } = toolApi;
   

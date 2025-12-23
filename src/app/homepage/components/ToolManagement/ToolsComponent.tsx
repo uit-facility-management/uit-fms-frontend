@@ -12,8 +12,9 @@ import ToolDetails from "./ToolDetails";
 import type { ToolsResponse } from "@/feature/ToolsApi/type";
 import { useCreateToolMutation, useGetToolsQuery } from "@/feature/ToolsApi/tool.api";
 import CreateToolModal from "./CreateToolModal";
+import BorrowTicket from "./BorrowTicket";
 
-
+type TabKey = "tools" | "borrow";
 type ToolStatus = "Sẵn sàng" | "Đang mượn" | "Hư hỏng";
 
 const mapStatusToUI = (
@@ -55,7 +56,7 @@ const statusChipSx = (s: ToolStatus) => {
 export default function ToolsComponent() {
   const [searchText, setSearchText] = useState("");
   const [selectedTool, setSelectedTool] = useState<ToolRow | null>(null);
-
+  const [activeTab, setActiveTab] = useState<TabKey>("tools");
   const [openCreateTool, setOpenCreateTool] = useState(false);
   const [createTool, { isLoading }] = useCreateToolMutation();
 
@@ -299,10 +300,39 @@ export default function ToolsComponent() {
             />
           </div>
 
-          {/* Table */}
-          <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-            <MaterialReactTable table={table} />
+          {/* Tabs */}
+          <div className="flex gap-6 border-b border-gray-200 mb-4">
+            <button
+              onClick={() => setActiveTab("tools")}
+              className={`pb-3 text-sm font-semibold transition ${
+                activeTab === "tools"
+                  ? "text-[#0B4DBA] border-b-2 border-[#0B4DBA]"
+                  : "text-gray-500 hover:text-gray-700"
+              }`}
+            >
+              Quản lý dụng cụ
+            </button>
+
+            <button
+              onClick={() => setActiveTab("borrow")}
+              className={`pb-3 text-sm font-semibold transition ${
+                activeTab === "borrow"
+                  ? "text-[#0B4DBA] border-b-2 border-[#0B4DBA]"
+                  : "text-gray-500 hover:text-gray-700"
+              }`}
+            >
+              Quản lý phiếu mượn
+            </button>
           </div>
+
+        {/* Table */}
+        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+          {activeTab === "tools" ? (
+            <MaterialReactTable table={table} />
+          ) : (
+            <BorrowTicket />
+          )}
+        </div>
         </>
       )}
     </div>
