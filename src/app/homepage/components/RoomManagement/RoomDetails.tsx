@@ -319,8 +319,8 @@ export default function RoomDetails({
         muiTableBodyCellProps: { align: "center" },
         Cell: ({ row }) => (
           <Box sx={{ display: "flex", gap: 0.5, justifyContent: "center" }}>
-            <Tooltip title="Báo hỏng">
-              <IconButton
+            <Tooltip title="">
+              {/* <IconButton
                 size="small"
                 onClick={() => {
                   setIncidentFacilityId(row.original.id);
@@ -329,7 +329,16 @@ export default function RoomDetails({
                 sx={{ color: "#f97316" }} // cam (warning)
               >
                 <AddRoundedIcon fontSize="small" />
-              </IconButton>
+              </IconButton> */}
+              <button
+                onClick={() => {
+                  setIncidentFacilityId(row.original.id);
+                  setOpenCreateIncident(true);
+                }}
+                className="whitespace-nowrap text-[13px] font-semibold text-white bg-[#fe5c5c] px-2 rounded hover:bg-[#cd5c5c] transition"
+              >
+                Báo hỏng
+              </button>
             </Tooltip>
             <Tooltip title="Chỉnh sửa">
               <IconButton
