@@ -17,6 +17,7 @@ import ArrowBackIosNewRoundedIcon from "@mui/icons-material/ArrowBackIosNewRound
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
+import RoomScheduleView from "./RoomScheduleView";
 import {
   useUpdateRoomMutation,
   useGetRoomAssetsQuery,
@@ -175,8 +176,9 @@ export default function RoomDetails({
     useDeleteRoomAssetMutation();
 
   // báo hỏng facility
-  const [incidentFacilityId, setIncidentFacilityId] = useState<string | undefined>(undefined);
-
+  const [incidentFacilityId, setIncidentFacilityId] = useState<
+    string | undefined
+  >(undefined);
 
   const [name, setName] = useState<string>(r.name ?? r.room);
   const [stage, setStage] = useState<number>(Number(r.stage));
@@ -923,6 +925,9 @@ export default function RoomDetails({
         <div className="border-t border-gray-100">
           <MaterialReactTable table={incidentsTable} />
         </div>
+      </div>
+      <div className="mt-10">
+        <RoomScheduleView roomId={r.id} />
       </div>
     </div>
   );
