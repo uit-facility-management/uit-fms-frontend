@@ -97,7 +97,7 @@ export default function ToolsComponent() {
   const roomOptions: RoomOption[] = useMemo(() => {
     if (!roomsRes) return [];
 
-    return roomsRes.map((r: RoomResponse) => ({
+    return roomsRes.roomsData.map((r: RoomResponse) => ({
       id: r.id,
       name: `${r.name} - Tầng ${r.stage}`,
       buildingId: r.building.id,
