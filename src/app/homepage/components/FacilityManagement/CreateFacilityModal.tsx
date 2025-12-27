@@ -133,10 +133,35 @@ export default function CreateFacilityModal({
             fullWidth
             size="small"
             sx={textFieldSx}
+            slotProps={{
+              select: {
+                MenuProps: {
+                  disablePortal: true,
+                  PaperProps: {
+                    sx: {
+                      maxHeight: 260, 
+                      mt: 0.5,
+                    },
+                  },
+                  anchorOrigin: {
+                    vertical: "bottom",
+                    horizontal: "left",
+                  },
+                  transformOrigin: {
+                    vertical: "top",
+                    horizontal: "left",
+                  },
+                },
+              },
+            }}
           >
             <MenuItem value="">Chọn phòng</MenuItem>
             {rooms.map((r) => (
-              <MenuItem key={r.id} value={r.id}>
+              <MenuItem key={r.id} value={r.id} 
+                sx={{
+                  py: 1.3,         
+                  fontSize: "16px",
+                }}>
                 {r.name}
               </MenuItem>
             ))}

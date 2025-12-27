@@ -17,6 +17,8 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
+import Overdue from "./ToolManagement/Overdue";
+
 export default function DashboardHome() {
   const [chartView, setChartView] = useState<"week" | "month">("week");
   const stats = {
@@ -126,7 +128,7 @@ export default function DashboardHome() {
         </div>
       </div>
 
-      {/* Pending Requests & Incident Chart */}
+      {/* Pending Requests & Overdue */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Pending Requests */}
         <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
@@ -158,6 +160,10 @@ export default function DashboardHome() {
             ))}
           </div>
         </div>
+
+        {/* Overdue Borrow Table */}
+        <Overdue />
+      </div>
 
         {/* Incident Chart */}
         <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
@@ -228,7 +234,6 @@ export default function DashboardHome() {
             </div>
           </div>
         </div>
-      </div>
     </div>
   );
 }
