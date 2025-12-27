@@ -77,14 +77,21 @@ const facilityStatusChipSx = (s: FacilityStatus) => {
 
 export default function ToolsComponent() {
   // get api room assets data
-  const { data, isLoading, error, refetch: refetchFacilities, } = useGetRoomAssetsQuery();
+  const {
+    data,
+    isLoading,
+    error,
+    refetch: refetchFacilities,
+  } = useGetRoomAssetsQuery();
 
   // console.log("API data room asset:", data);
   // console.log("API error room asset:", error);
 
   // selected facility để xem chi tiết
   // const [selectedFacility, setSelectedFacility] = useState<FacilityRow | null>(null);
-  const [selectedFacilityId, setSelectedFacilityId] = useState<string | null>(null);
+  const [selectedFacilityId, setSelectedFacilityId] = useState<string | null>(
+    null
+  );
 
   // modal thêm thiết bị
   const [openCreateModal, setOpenCreateModal] = useState(false);
@@ -95,9 +102,9 @@ export default function ToolsComponent() {
 
   // map rooms data thành options cho select trong modal tạo thiết bị
   const roomOptions: RoomOption[] = useMemo(() => {
-    if (!roomsRes) return [];
+    if (!roomsRes?.roomsData) return [];
 
-    return roomsRes.roomsData.map((r: RoomResponse) => ({
+    return roomsRes.roomsData.map((r) => ({
       id: r.id,
       name: `${r.name} - Tầng ${r.stage}`,
       buildingId: r.building.id,
@@ -184,64 +191,66 @@ export default function ToolsComponent() {
         Cell: ({ row }) => {
           const s = row.original.status;
 
-        return (
-          <Chip
-            size="small"
-            sx={{
-              ...facilityStatusChipSx(s),
-              fontWeight: 600,
-              fontSize: "13px",
-              height: 28,
-              borderRadius: "8px",
-            }}
-            label={
-              <span className="flex items-center gap-1.5">
-                <span
-                  style={{
-                    width: 6,
-                    height: 6,
-                    borderRadius: "50%",
-                    backgroundColor:
-                      s === "Hoạt động"
-                        ? "#12B76A"
-                        : s === "Không hoạt động"
-                        ? "#3080ff"
-                        : "#F04438",
-                  }}
-                />
-                {s}
-              </span>
-            }
-          />
-        );
+          return (
+            <Chip
+              size="small"
+              sx={{
+                ...facilityStatusChipSx(s),
+                fontWeight: 600,
+                fontSize: "13px",
+                height: 28,
+                borderRadius: "8px",
+              }}
+              label={
+                <span className="flex items-center gap-1.5">
+                  <span
+                    style={{
+                      width: 6,
+                      height: 6,
+                      borderRadius: "50%",
+                      backgroundColor:
+                        s === "Hoạt động"
+                          ? "#12B76A"
+                          : s === "Không hoạt động"
+                          ? "#3080ff"
+                          : "#F04438",
+                    }}
+                  />
+                  {s}
+                </span>
+              }
+            />
+          );
+        },
       },
-    },
-    {
-      id: "actions",
-      header: "Thao tác",
-      size: 100,
-      enableSorting: false,
-      Cell: ({ row }) => (
-        <Tooltip title="Xem chi tiết">
-          <IconButton
-            size="small"
-            onClick={() => {setSelectedFacilityId(row.original.id)}}
-            sx={{
-              color: "#6B7280",
-              "&:hover": {
-                backgroundColor: "#F3F4F6",
-                color: "#111827",
-              },
-            }}
-          >
-            <Visibility fontSize="small" />
-          </IconButton>
-        </Tooltip>
-      ),
-    },
-  ],
-  []
-);
+      {
+        id: "actions",
+        header: "Thao tác",
+        size: 100,
+        enableSorting: false,
+        Cell: ({ row }) => (
+          <Tooltip title="Xem chi tiết">
+            <IconButton
+              size="small"
+              onClick={() => {
+                setSelectedFacilityId(row.original.id);
+              }}
+              sx={{
+                color: "#6B7280",
+                "&:hover": {
+                  backgroundColor: "#F3F4F6",
+                  color: "#111827",
+                },
+              }}
+            >
+              <Visibility fontSize="small" />
+            </IconButton>
+          </Tooltip>
+        ),
+      },
+    ],
+    []
+  );
 
   const table = useMaterialReactTable({
     columns,
@@ -341,7 +350,7 @@ export default function ToolsComponent() {
           onUpdate={() => {}}
           rooms={roomOptions}
           onIncidentCreated={() => {
-            refetchFacilities(); 
+            refetchFacilities();
           }}
         />
       ) : (
