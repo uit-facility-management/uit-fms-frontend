@@ -1,5 +1,5 @@
 import { appApi } from "@/lib/appApi";
-import type { ScheduleResponseByIdUser } from "./type";
+import type { Schedule, ScheduleResponseByIdUser } from "./type";
 
 export const scheduleApi = appApi.injectEndpoints({
   overrideExisting: true,
@@ -20,6 +20,11 @@ export const scheduleApi = appApi.injectEndpoints({
       providesTags: ["Schedule"],
     }),
 
+    getRoomSchedules: builder.query<Schedule[], string>({
+      query: (roomId) => `/room/${roomId}/schedules`,
+      keepUnusedDataFor: 5,
+      providesTags: ["Schedule"],
+    }),
     // PATCH /api/v1/schedule/{id}/status
     updateScheduleStatus: builder.mutation<
       void,
@@ -41,4 +46,5 @@ export const {
   useGetSchedulesByUserIdQuery,
   useGetSchedulesQuery,
   useUpdateScheduleStatusMutation,
+  useGetRoomSchedulesQuery
 } = scheduleApi;

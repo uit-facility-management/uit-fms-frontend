@@ -19,3 +19,13 @@ export interface ScheduleResponseByIdUser {
 
   createdBy: UserResponse;
 }
+export type Schedule = {
+  id: string;
+  start_time: string; 
+  end_time: string; 
+  period_start: number; 
+  period_end: number; 
+  day_of_week?: number; 
+  status: "approved" | "pending" | "rejected";
+  createdBy?: UserResponse
+};

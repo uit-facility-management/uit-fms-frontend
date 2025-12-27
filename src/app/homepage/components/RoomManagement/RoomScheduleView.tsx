@@ -5,19 +5,10 @@ import { IconButton } from "@mui/material";
 import ArrowBackIosNewRoundedIcon from "@mui/icons-material/ArrowBackIosNewRounded";
 import ArrowForwardIosRoundedIcon from "@mui/icons-material/ArrowForwardIosRounded";
 import ScheduleCell from "./ScheduleCell";
-
+import { Schedule } from "@/feature/ScheduleApi/type";
+import { useGetRoomSchedulesQuery } from "@/feature/ScheduleApi/schedule.api";
 type Props = {
   roomId: string;
-};
-
-// Mock type
-type Schedule = {
-  id: string;
-  start_time: string; // ISO date string
-  end_time: string; // ISO date string
-  period_start: number; // 1-12
-  period_end: number; // 1-12
-  status: "approved" | "pending" | "rejected";
 };
 
 // Mock data
@@ -27,8 +18,18 @@ const MOCK_SCHEDULES: Schedule[] = [
     start_time: "2025-12-23T00:00:00.000Z",
     end_time: "2025-12-23T00:00:00.000Z",
     period_start: 1,
-    period_end: 3, // Lịch này sẽ hiện ở tiết 1, 2 và 3
+    period_end: 3,
     status: "approved",
+    createdBy: {
+      id: "u1",
+      username: "nguyenvana",
+      fullName: "Nguyễn Văn A",
+      email: "nguyenvana@example.com",
+      password: "hashed_password",
+      role: "user",
+      createdAt: "2025-01-01T00:00:00.000Z",
+      updatedAt: "2025-01-01T00:00:00.000Z",
+    },
   },
   {
     id: "2",
@@ -36,24 +37,61 @@ const MOCK_SCHEDULES: Schedule[] = [
     end_time: "2025-12-26T00:00:00.000Z",
     period_start: 7,
     period_end: 9,
+    day_of_week: 3, // Chỉ hiện vào Thứ 4
     status: "approved",
+    createdBy: {
+      id: "u1",
+      username: "nguyenvana",
+      fullName: "Nguyễn Văn A",
+      email: "nguyenvana@example.com",
+      password: "hashed_password",
+      role: "user",
+      createdAt: "2025-01-01T00:00:00.000Z",
+      updatedAt: "2025-01-01T00:00:00.000Z",
+    },
   },
   {
     id: "3",
-    start_time: "2025-12-25T00:00:00.000Z",
-    end_time: "2025-12-25T00:00:00.000Z",
+    start_time: "2025-12-22T00:00:00.000Z",
+    end_time: "2025-12-28T00:00:00.000Z",
     period_start: 4,
     period_end: 6,
+    day_of_week: 2, // Chỉ hiện vào Thứ 3 (mỗi tuần)
     status: "pending",
+    createdBy: {
+      id: "u1",
+      username: "nguyenvana",
+      fullName: "Nguyễn Văn A",
+      email: "nguyenvana@example.com",
+      password: "hashed_password",
+      role: "user",
+      createdAt: "2025-01-01T00:00:00.000Z",
+      updatedAt: "2025-01-01T00:00:00.000Z",
+    },
+  },
+  {
+    id: "4",
+    start_time: "2025-12-25T00:00:00.000Z",
+    end_time: "2025-12-25T00:00:00.000Z",
+    period_start: 10,
+    period_end: 12,
+    status: "approved",
+    createdBy: {
+      id: "u1",
+      username: "nguyenvana",
+      fullName: "Nguyễn Văn A",
+      email: "nguyenvana@example.com",
+      password: "hashed_password",
+      role: "user",
+      createdAt: "2025-01-01T00:00:00.000Z",
+      updatedAt: "2025-01-01T00:00:00.000Z",
+    },
   },
 ];
 
 const PERIODS = Array.from({ length: 12 }, (_, i) => i + 1);
 const WEEKDAYS = ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "CN"];
 
-// --- HELPER FUNCTIONS ---
-
-// Lấy ngày thứ 2 đầu tuần
 function getMonday(date: Date): Date {
   const d = new Date(date);
   const day = d.getDay();
@@ -63,7 +101,6 @@ function getMonday(date: Date): Date {
   return d;
 }
 
-// Tạo Key chuẩn YYYY-MM-DD (Local Time) để tránh lỗi Timezone
 function getDateKey(date: Date): string {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, "0");
@@ -95,6 +132,12 @@ function isSameDay(d1: Date, d2: Date): boolean {
   );
 }
 
+
+function getDayOfWeekBE(date: Date): number {
+  const jsDay = date.getDay(); 
+  return jsDay === 0 ? 7 : jsDay;
+}
+
 function parseSchedulesForWeek(
   schedules: Schedule[],
   weekStart: Date
@@ -109,7 +152,8 @@ function parseSchedulesForWeek(
     weekDays.push(day);
   }
 
-  schedules.forEach((schedule) => {
+  const approvedSchedules = schedules.filter((s) => s.status === "approved");
+  approvedSchedules.forEach((schedule) => {
     const scheduleStart = new Date(schedule.start_time);
     scheduleStart.setHours(0, 0, 0, 0);
 
@@ -119,9 +163,16 @@ function parseSchedulesForWeek(
     weekDays.forEach((day) => {
       const currentDayCheck = new Date(day);
       currentDayCheck.setHours(0, 0, 0, 0);
-      if (currentDayCheck >= scheduleStart && currentDayCheck <= scheduleEnd) {
-        const key = getDateKey(day);
 
+      if (currentDayCheck >= scheduleStart && currentDayCheck <= scheduleEnd) {
+        if (schedule.day_of_week !== undefined) {
+          const dayOfWeek = getDayOfWeekBE(day);
+          if (dayOfWeek !== schedule.day_of_week) {
+            return; 
+          }
+        }
+
+        const key = getDateKey(day);
         if (!result.has(key)) {
           result.set(key, []);
         }
@@ -133,13 +184,13 @@ function parseSchedulesForWeek(
   return result;
 }
 
-export default function RoomScheduleView({}: Props) {
+export default function RoomScheduleView({roomId}: Props) {
   const [currentWeekStart, setCurrentWeekStart] = useState(() =>
     getMonday(new Date())
   );
-
-  const schedules = MOCK_SCHEDULES;
-
+  const { data: roomSchedules } = useGetRoomSchedulesQuery(roomId);
+  const schedules = roomSchedules || MOCK_SCHEDULES;
+  console.log("Room schedules:", schedules);
   const goToPrevWeek = () => {
     const prev = new Date(currentWeekStart);
     prev.setDate(prev.getDate() - 7);
@@ -285,7 +336,7 @@ export default function RoomScheduleView({}: Props) {
               // Cells for each day
               ...weekDays.map((day, dayIdx) => {
                 const key = getDateKey(day);
-                // Lấy toàn bộ lịch của ngày hôm đó
+                // Lấy toàn bộ lịch của ngày hôm đó (đã filter theo day_of_week)
                 const daySchedules = weekScheduleMap.get(key) || [];
 
                 // LỌC: Chỉ lấy những lịch mà "Tiết hiện tại" nằm trong khoảng [start, end]
@@ -306,22 +357,6 @@ export default function RoomScheduleView({}: Props) {
                 );
               }),
             ])}
-          </div>
-        </div>
-
-        {/* Legend */}
-        <div className="mt-4 flex items-center gap-4 justify-end">
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 rounded bg-[#d4edda] border border-[#c3e6cb]" />
-            <span className="text-xs text-gray-600">Đã duyệt</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 rounded bg-[#fff3cd] border border-[#ffeaa7]" />
-            <span className="text-xs text-gray-600">Chờ duyệt</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 rounded bg-[#f8d7da] border border-[#f5c6cb]" />
-            <span className="text-xs text-gray-600">Từ chối</span>
           </div>
         </div>
       </div>
