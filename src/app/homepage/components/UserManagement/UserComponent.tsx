@@ -7,12 +7,11 @@ import {
   type MRT_ColumnDef,
 } from "material-react-table";
 import { IconButton, Tooltip, Chip } from "@mui/material";
-import { Visibility } from "@mui/icons-material";
+import { Visibility, Search as SearchIcon } from "@mui/icons-material";
 import { useGetUsersQuery } from "@/feature/UserApi/user.api";
 import type { UserResponse } from "@/feature/UserApi/type";
 import CreateUserModal from "./CreateUserModal";
 import UserDetail from "./UserDetail";
-
 
 // ---------- Table row type ----------
 export type UserRow = {
@@ -30,42 +29,28 @@ export const roleLabelMap: Record<string, string> = {
   user: "Cán bộ",
 };
 
-
 const roleChipSx = (role: string) => {
   switch (role) {
     case "admin":
-      return {
-        backgroundColor: "#358597",
-        color: "white",
-        border: "none",
-      };
+      return { backgroundColor: "#358597", color: "white", border: "none" };
     case "user":
-      return {
-        backgroundColor: "#27a4f2",
-        color: "white",
-        border: "none",
-      };
+      return { backgroundColor: "#27a4f2", color: "white", border: "none" };
     default:
-      return {
-        backgroundColor: "#E5E7EB",
-        color: "#374151",
-        border: "none",
-      };
+      return { backgroundColor: "#E5E7EB", color: "#374151", border: "none" };
   }
 };
 
 export default function UserComponent() {
-  // get user
   const { data, isLoading, error } = useGetUsersQuery();
 
   const [selectedUser, setSelectedUser] = useState<UserRow | null>(null);
-
-  // thêm người dùng
   const [openCreateModal, setOpenCreateModal] = useState(false);
+
+  // ===== NEW: search UI state (UI only) =====
+  const [searchText, setSearchText] = useState("");
 
   const users: UserRow[] = useMemo(() => {
     if (!data) return [];
-
     return data.map((u: UserResponse) => ({
       id: u.id,
       username: u.username,
@@ -77,7 +62,6 @@ export default function UserComponent() {
     }));
   }, [data]);
 
-  // table 
   const columns = useMemo<MRT_ColumnDef<UserRow>[]>(
     () => [
       {
@@ -90,16 +74,8 @@ export default function UserComponent() {
           </span>
         ),
       },
-      {
-        accessorKey: "fullName",
-        header: "Họ tên",
-        size: 160,
-      },
-      {
-        accessorKey: "email",
-        header: "Email",
-        size: 220,
-      },
+      { accessorKey: "fullName", header: "Họ tên", size: 160 },
+      { accessorKey: "email", header: "Email", size: 220 },
       {
         accessorKey: "role",
         header: "Vai trò",
@@ -121,11 +97,7 @@ export default function UserComponent() {
           );
         },
       },
-      {
-        accessorKey: "createdAt",
-        header: "Ngày tạo",
-        size: 120,
-      },
+      { accessorKey: "createdAt", header: "Ngày tạo", size: 120 },
       {
         id: "actions",
         header: "Thao tác",
@@ -138,10 +110,7 @@ export default function UserComponent() {
               onClick={() => setSelectedUser(row.original)}
               sx={{
                 color: "#6B7280",
-                "&:hover": {
-                  backgroundColor: "#F3F4F6",
-                  color: "#111827",
-                },
+                "&:hover": { backgroundColor: "#F3F4F6", color: "#111827" },
               }}
             >
               <Visibility fontSize="small" />
@@ -153,15 +122,17 @@ export default function UserComponent() {
     []
   );
 
-  // table config
   const table = useMaterialReactTable({
     columns,
     data: users,
+
     enableSorting: true,
     enableTopToolbar: false,
     enableColumnActions: false,
-    enableGlobalFilter: true,
     enablePagination: true,
+
+    // ===== NEW: tắt MRT global filter UI (vì dùng search custom UI-only) =====
+    enableGlobalFilter: false,
 
     muiTableHeadCellProps: {
       sx: {
@@ -176,7 +147,6 @@ export default function UserComponent() {
         px: 3,
       },
     },
-
     muiTableBodyCellProps: {
       sx: {
         fontSize: "14px",
@@ -187,19 +157,13 @@ export default function UserComponent() {
         borderBottom: "1px solid #F3F4F6",
       },
     },
-
     muiTableBodyRowProps: {
       sx: {
         transition: "all 0.15s ease",
-        "&:hover": {
-          backgroundColor: "#FAFBFC",
-        },
-        "&:last-child td": {
-          borderBottom: "none",
-        },
+        "&:hover": { backgroundColor: "#FAFBFC" },
+        "&:last-child td": { borderBottom: "none" },
       },
     },
-
     muiTablePaperProps: {
       elevation: 0,
       sx: {
@@ -210,7 +174,6 @@ export default function UserComponent() {
         backgroundColor: "#ffffff",
       },
     },
-
     initialState: {
       pagination: { pageIndex: 0, pageSize: 5 },
       density: "comfortable",
@@ -229,56 +192,58 @@ export default function UserComponent() {
 
   if (isLoading) {
     return (
-      <div className="py-10 text-center text-gray-500">
-        Đang tải dữ liệu...
-      </div>
+      <div className="py-10 text-center text-gray-500">Đang tải dữ liệu...</div>
     );
   }
 
   if (error) {
     return (
-      <div className="py-10 text-center text-red-500">
-        Không thể tải dữ liệu
-      </div>
+      <div className="py-10 text-center text-red-500">Không thể tải dữ liệu</div>
     );
   }
 
   return (
-  <div className="w-full">
-    {/* chi tiết người dung */}
-    {selectedUser ? (
-      <UserDetail
-        userId={selectedUser.id}
-        onBack={() => setSelectedUser(null)}
-      />
-    ) : (
-      <>
-        {/* header */}
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-bold text-gray-900">
-            Danh sách người dùng
-          </h2>
+    <div className="w-full">
+      {selectedUser ? (
+        <UserDetail userId={selectedUser.id} onBack={() => setSelectedUser(null)} />
+      ) : (
+        <>
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-bold text-gray-900">
+              Danh sách người dùng
+            </h2>
 
-          <button
-            onClick={() => setOpenCreateModal(true)}
-            className="rounded-lg px-5 py-2.5 text-sm font-semibold text-white bg-[#0B4DBA] hover:bg-[#0940A3] transition-all shadow-sm"
-          >
-            Thêm người dùng
-          </button>
-        </div>
+            <button
+              onClick={() => setOpenCreateModal(true)}
+              className="rounded-lg px-5 py-2.5 text-sm font-semibold text-white bg-[#0B4DBA] hover:bg-[#0940A3] transition-all shadow-sm"
+            >
+              Thêm người dùng
+            </button>
+          </div>
 
-        {/* table */}
-        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-          <MaterialReactTable table={table} />
-        </div>
+          {/* ===== NEW: Search bar (UI only) ===== */}
+          <div className="flex items-center gap-3 mb-4">
+            <div className="flex items-center gap-2 w-full max-w-md bg-white border border-gray-200 rounded-lg px-3 py-2">
+              <SearchIcon sx={{ fontSize: 20, color: "#6B7280" }} />
+              <input
+                value={searchText}
+                onChange={(e) => setSearchText(e.target.value)}
+                placeholder="Search..."
+                className="w-full text-sm outline-none text-gray-700 placeholder:opacity-70"
+              />
+            </div>
+          </div>
 
-        <CreateUserModal
-          open={openCreateModal}
-          onClose={() => setOpenCreateModal(false)}
-        />
-      </>
-    )}
-  </div>
-);
+          <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+            <MaterialReactTable table={table} />
+          </div>
 
+          <CreateUserModal
+            open={openCreateModal}
+            onClose={() => setOpenCreateModal(false)}
+          />
+        </>
+      )}
+    </div>
+  );
 }
