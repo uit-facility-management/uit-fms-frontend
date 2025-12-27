@@ -17,7 +17,6 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
-
 export default function DashboardHome() {
   const [chartView, setChartView] = useState<"week" | "month">("week");
   const stats = {
@@ -26,7 +25,6 @@ export default function DashboardHome() {
     totalAssets: 156,
     maintenanceNeeded: 8,
   };
-
   const pendingRequests = [
     { type: "Đặt phòng", count: 5 },
     { type: "Phiếu mượn", count: 3 },
