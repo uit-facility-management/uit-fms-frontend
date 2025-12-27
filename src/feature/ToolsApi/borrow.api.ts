@@ -23,6 +23,17 @@ export const borrowTicketApi = appApi.injectEndpoints({
       }),
     }),
 
+    // RETURN (PATCH)
+    returnBorrowTicket: builder.mutation<
+      BorrowTicket,
+      string 
+    >({
+      query: (id) => ({
+        url: `/borrow-ticket/return/${id}`,
+        method: "PATCH",
+      }),
+      invalidatesTags: ["BorrowTickets"],
+    }),
   }),
 });
 
@@ -30,4 +41,5 @@ export const {
   useGetAllBorrowTicketsQuery,
   useGetStudentsQuery,
   useCreateBorrowTicketMutation,
+  useReturnBorrowTicketMutation,
 } = borrowTicketApi;

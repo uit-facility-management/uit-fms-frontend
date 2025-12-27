@@ -5,6 +5,7 @@ import { TextField, FormControl, InputLabel, Select, MenuItem, Chip, SelectChang
 import ArrowBackIosNewRoundedIcon from "@mui/icons-material/ArrowBackIosNewRounded";
 import { useChangePasswordMutation, useGetUserByIdQuery, useUpdateUserMutation } from "@/feature/UserApi/user.api";
 import UserDelete from "./UserDelete";
+import { roleLabelMap } from "./UserComponent";
 
 type Props = {
   userId: string;
@@ -37,9 +38,9 @@ const roleChipSx = (role: UserRole) => {
     case "admin":
       return { backgroundColor: "#358597", color: "white" };
     case "user":
-      return { backgroundColor: "#f4a896", color: "white" };
+      return { backgroundColor: "#27a4f2", color: "white" };
     default:
-      return { backgroundColor: "#dcfce7", color: "#166534" };
+      return { backgroundColor: "#E5E7EB", color: "#374151" };
   }
 };
 
@@ -52,7 +53,7 @@ export default function UserDetail({ userId, onBack, showDelete = true }: Props)
   const [email, setEmail] = useState("");
   const [username, setUsername] = useState("");
   const [fullName, setFullName] = useState("");
-  const [role, setRole] = useState<UserRole>("user");
+  // const [role, setRole] = useState<UserRole>("user");
 
   // delete
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
@@ -109,25 +110,28 @@ export default function UserDetail({ userId, onBack, showDelete = true }: Props)
     setEmail(data.email);
     setUsername(data.username);
     setFullName(data.fullName);
-    setRole(data.role as UserRole);
+    // setRole(data.role as UserRole);
   }, [data]);
 
 
-  const roleChip = useMemo(
-    () => (
-      <Chip
-        label={role}
-        size="small"
-        sx={{
-          ...roleChipSx(role),
-          fontWeight: 700,
-          border: "none",
-          px: 0.5,
-        }}
-      />
-    ),
-    [role]
+  const roleChip = useMemo(() => {
+  if (!data) return null;
+
+  const roleValue = data.role as UserRole;
+
+  return (
+    <Chip
+      label={roleLabelMap[roleValue] ?? roleValue}
+      size="small"
+      sx={{
+        ...roleChipSx(roleValue),
+        fontWeight: 700,
+        border: "none",
+        px: 0.5,
+      }}
+    />
   );
+}, [data]);
 
   if (isLoading) return <p>Đang tải dữ liệu...</p>;
   if (isError || !data) return <p>Không tìm thấy người dùng</p>;
@@ -196,7 +200,7 @@ export default function UserDetail({ userId, onBack, showDelete = true }: Props)
                   setEmail(data.email);
                   setUsername(data.username);
                   setFullName(data.fullName);
-                  setRole(data.role as UserRole);
+                  // setRole(data.role as UserRole);
                 }}
                 className="rounded-lg px-4 py-2 font-semibold bg-white border border-gray-200"
               >
