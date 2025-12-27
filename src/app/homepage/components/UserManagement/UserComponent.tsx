@@ -25,6 +25,12 @@ export type UserRow = {
   updatedAt: string;
 };
 
+export const roleLabelMap: Record<string, string> = {
+  admin: "Quản trị viên",
+  user: "Cán bộ",
+};
+
+
 const roleChipSx = (role: string) => {
   switch (role) {
     case "admin":
@@ -35,7 +41,7 @@ const roleChipSx = (role: string) => {
       };
     case "user":
       return {
-        backgroundColor: "#f4a896",
+        backgroundColor: "#27a4f2",
         color: "white",
         border: "none",
       };
@@ -110,7 +116,7 @@ export default function UserComponent() {
                 height: 28,
                 borderRadius: "8px",
               }}
-              label={role}
+              label={roleLabelMap[role] ?? role}
             />
           );
         },

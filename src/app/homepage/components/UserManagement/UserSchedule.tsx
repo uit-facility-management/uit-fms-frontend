@@ -17,6 +17,24 @@ const formatDate = (value?: string) => {
   return new Date(value).toLocaleDateString("vi-VN");
 };
 
+const statusLabelMap: Record<string, string> = {
+  pending: "Chưa duyệt",
+  approved: "Đã duyệt",
+  rejected: "Từ chối",
+};
+
+
+const statusClassMap: Record<string, string> = {
+  pending: "bg-yellow-100 text-yellow-700 border-yellow-200",
+  approved: "bg-green-100 text-green-700 border-green-200",
+  rejected: "bg-red-100 text-red-700 border-red-200",
+};
+
+// const statusColorMap: Record<string, any> = {
+//   pending: "warning",
+//   approved: "success",
+//   rejected: "error",
+// };
 
 export default function UserSchedule({ userId }: { userId: string }) {
     // get schedule by user id
@@ -60,12 +78,16 @@ export default function UserSchedule({ userId }: { userId: string }) {
         size: 140,
         Cell: ({ cell }) => {
           const status = cell.getValue<string>();
-          const colorMap: Record<string, any> = {
-            pending: "warning",
-            approved: "success",
-            rejected: "error",
-          };
-          return <Chip label={status} size="small" color={colorMap[status] ?? "default"} sx={{ fontWeight: 600 }} />;
+
+          return (
+            <span
+              className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold border ${
+                statusClassMap[status] ?? "bg-gray-100 text-gray-600 border-gray-200"
+              }`}
+            >
+              {statusLabelMap[status] ?? status}
+            </span>
+          );
         },
       },
     ],
