@@ -56,9 +56,10 @@ export type CreateRoomAssetRequest = {
 
 export type GetFreeRoomsParams = {
   start_time: string;
-  end_time: string;  
+  end_time: string;
   period_start: number;
   period_end: number;
+  day_of_week?: number; 
 };
 
 export type CreateScheduleRequest = {
@@ -68,6 +69,7 @@ export type CreateScheduleRequest = {
   end_time: string;            
   period_start: number;
   period_end: number;
+  day_of_week?: number;
   status: "pending" | "approved" | "rejected";
 };
 

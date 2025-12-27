@@ -37,6 +37,17 @@ type Props = {
   onBack: () => void;
 };
 
+// ✅ Danh sách ngày trong tuần theo enum của BE
+const DAYS_OF_WEEK = [
+  { value: 1, label: "Thứ 2" },
+  { value: 2, label: "Thứ 3" },
+  { value: 3, label: "Thứ 4" },
+  { value: 4, label: "Thứ 5" },
+  { value: 5, label: "Thứ 6" },
+  { value: 6, label: "Thứ 7" },
+  { value: 7, label: "Chủ nhật" },
+];
+
 const statusChipSx = (s: RoomStatus) => {
   switch (s) {
     case "Hoạt động":
@@ -57,8 +68,8 @@ export default function RoomBookComponent({ onBack }: Props) {
   const [createSchedule, { isLoading: isBooking }] = useCreateScheduleMutation();
   const [startPeriod, setStartPeriod] = useState<string>("");
   const [endPeriod, setEndPeriod] = useState<string>("");
+  const [dayOfWeek, setDayOfWeek] = useState<string>(""); // ✅ State cho ngày trong tuần
 
-  // ✅ Optimistic UI: ẩn phòng vừa đặt (đỡ cảm giác đứng khi MRT render/refetch)
   const [optimisticHiddenIds, setOptimisticHiddenIds] = useState<Set<string>>(
     () => new Set()
   );
@@ -225,7 +236,6 @@ export default function RoomBookComponent({ onBack }: Props) {
         return;
       }
 
-      // ✅ Mở loading (không await) + luôn đóng trong finally
       Swal.fire({
         title: "Đang đặt phòng...",
         text: `Phòng ${room.room}`,
@@ -241,27 +251,25 @@ export default function RoomBookComponent({ onBack }: Props) {
         end_time: endIso,
         period_start: Number(startPeriod),
         period_end: Number(endPeriod),
+        day_of_week: dayOfWeek ? Number(dayOfWeek) : undefined,
         status: "pending",
       };
 
-      await createSchedule(payload).unwrap();
-
-      // ✅ đóng loading trước
+      const result = await createSchedule(payload).unwrap();
+      console.log("Đặt phòng thành công:", result);
       Swal.close();
 
-      // ✅ Optimistic: ẩn phòng vừa đặt (UI phản hồi ngay)
       setOptimisticHiddenIds((prev) => {
         const next = new Set(prev);
         next.add(room.id);
         return next;
       });
 
-      // ✅ refetch chạy nền (không await)
       if (queryParams) refetch();
 
       await Swal.fire({
         icon: "success",
-        title: "Đặt phòng thành công 🎉",
+        title: "Đặt phòng thành công",
         text: `Phòng ${room.room} đã được đặt.`,
         timer: 1400,
         showConfirmButton: false,
@@ -369,7 +377,7 @@ export default function RoomBookComponent({ onBack }: Props) {
         ),
       },
     ],
-    [isBooking, startDate, endDate, startPeriod, endPeriod, queryParams]
+    [isBooking, startDate, endDate, startPeriod, endPeriod, dayOfWeek, queryParams]
   );
 
   const table = useMaterialReactTable({
@@ -438,7 +446,6 @@ export default function RoomBookComponent({ onBack }: Props) {
     );
   }, [startDate, endDate, startPeriod, endPeriod, periodError]);
 
-  // ✅ FIX: handleSearch dùng toIso... để tránh Invalid Date + đồng bộ với booking
   const handleSearch = () => {
     const ok = validatePeriods(startPeriod, endPeriod);
     if (!ok) return;
@@ -465,6 +472,7 @@ export default function RoomBookComponent({ onBack }: Props) {
       end_time: endIso,
       period_start: Number(startPeriod),
       period_end: Number(endPeriod),
+      day_of_week: dayOfWeek ? Number(dayOfWeek) : undefined, // ✅ Thêm day_of_week vào query
     });
   };
 
@@ -540,6 +548,23 @@ export default function RoomBookComponent({ onBack }: Props) {
               placeholder="VD: 3"
               className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-700 outline-none placeholder:opacity-60"
             />
+          </div>
+
+          {/* ✅ Thêm dropdown chọn ngày trong tuần */}
+          <div className="flex items-center gap-3 md:col-span-2">
+            <p className="w-28 text-sm font-semibold text-gray-700">Ngày trong tuần</p>
+            <select
+              value={dayOfWeek}
+              onChange={(e) => setDayOfWeek(e.target.value)}
+              className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-700 outline-none"
+            >
+              <option value="">Tất cả (không chọn)</option>
+              {DAYS_OF_WEEK.map((day) => (
+                <option key={day.value} value={day.value}>
+                  {day.label}
+                </option>
+              ))}
+            </select>
           </div>
         </div>
 
