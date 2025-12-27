@@ -1,9 +1,13 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { TextField, FormControl, InputLabel, Select, MenuItem, Chip, SelectChangeEvent, } from "@mui/material";
+import { TextField, Chip } from "@mui/material";
 import ArrowBackIosNewRoundedIcon from "@mui/icons-material/ArrowBackIosNewRounded";
-import { useChangePasswordMutation, useGetUserByIdQuery, useUpdateUserMutation } from "@/feature/UserApi/user.api";
+import {
+  useChangePasswordMutation,
+  useGetUserByIdQuery,
+  useUpdateUserMutation,
+} from "@/feature/UserApi/user.api";
 import UserDelete from "./UserDelete";
 import { roleLabelMap } from "./UserComponent";
 
@@ -15,13 +19,7 @@ type Props = {
 
 type UserRole = "admin" | "user";
 
-function InfoRow({
-  label,
-  value,
-}: {
-  label: string;
-  value: React.ReactNode;
-}) {
+function InfoRow({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div className="flex items-center justify-between gap-6 py-3 border-b border-gray-100 last:border-b-0">
       <p className="text-sm text-gray-500">{label}</p>
@@ -31,7 +29,6 @@ function InfoRow({
     </div>
   );
 }
-
 
 const roleChipSx = (role: UserRole) => {
   switch (role) {
@@ -44,8 +41,11 @@ const roleChipSx = (role: UserRole) => {
   }
 };
 
-
-export default function UserDetail({ userId, onBack, showDelete = true }: Props) {
+export default function UserDetail({
+  userId,
+  onBack,
+  showDelete = true,
+}: Props) {
   const { data, isLoading, isError } = useGetUserByIdQuery(userId);
 
   const [isEditing, setIsEditing] = useState(false);
@@ -61,7 +61,8 @@ export default function UserDetail({ userId, onBack, showDelete = true }: Props)
   // chang password
   const [isChangingPassword, setIsChangingPassword] = useState(false);
   const [newPassword, setNewPassword] = useState("");
-  const [changePassword, { isLoading: isChangingPasswordLoading }] = useChangePasswordMutation();
+  const [changePassword, { isLoading: isChangingPasswordLoading }] =
+    useChangePasswordMutation();
 
   const handleChangePassword = async () => {
     if (!newPassword.trim()) return;
@@ -79,14 +80,13 @@ export default function UserDetail({ userId, onBack, showDelete = true }: Props)
     }
   };
 
-
   // update
   const [updateUser, { isLoading: isUpdating }] = useUpdateUserMutation();
 
   const handleSave = async () => {
     try {
       const payload = {
-        email,       
+        email,
         username,
         fullName,
       };
@@ -103,7 +103,6 @@ export default function UserDetail({ userId, onBack, showDelete = true }: Props)
     }
   };
 
-
   /* sync date */
   useEffect(() => {
     if (!data) return;
@@ -113,25 +112,24 @@ export default function UserDetail({ userId, onBack, showDelete = true }: Props)
     // setRole(data.role as UserRole);
   }, [data]);
 
-
   const roleChip = useMemo(() => {
-  if (!data) return null;
+    if (!data) return null;
 
-  const roleValue = data.role as UserRole;
+    const roleValue = data.role as UserRole;
 
-  return (
-    <Chip
-      label={roleLabelMap[roleValue] ?? roleValue}
-      size="small"
-      sx={{
-        ...roleChipSx(roleValue),
-        fontWeight: 700,
-        border: "none",
-        px: 0.5,
-      }}
-    />
-  );
-}, [data]);
+    return (
+      <Chip
+        label={roleLabelMap[roleValue] ?? roleValue}
+        size="small"
+        sx={{
+          ...roleChipSx(roleValue),
+          fontWeight: 700,
+          border: "none",
+          px: 0.5,
+        }}
+      />
+    );
+  }, [data]);
 
   if (isLoading) return <p>Đang tải dữ liệu...</p>;
   if (isError || !data) return <p>Không tìm thấy người dùng</p>;
@@ -174,7 +172,6 @@ export default function UserDetail({ userId, onBack, showDelete = true }: Props)
           </p>
 
           {!isEditing && !isChangingPassword ? (
-
             <div className="flex items-center gap-3">
               <button
                 onClick={() => setIsChangingPassword(true)}
@@ -189,8 +186,8 @@ export default function UserDetail({ userId, onBack, showDelete = true }: Props)
               >
                 Chỉnh sửa
               </button>
-            </div> 
-            ) : (
+            </div>
+          ) : (
             <div className="flex gap-2">
               <button
                 onClick={() => {
@@ -275,7 +272,6 @@ export default function UserDetail({ userId, onBack, showDelete = true }: Props)
               />
             </div>
           )}
-
         </div>
       </div>
       {showDelete && (

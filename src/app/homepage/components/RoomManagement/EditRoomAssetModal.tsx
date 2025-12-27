@@ -15,7 +15,7 @@ import {
   type SelectChangeEvent,
 } from "@mui/material";
 import { useUpdateRoomAssetMutation } from "@/feature/RoomApi/room.api";
-import type { CreateRoomAssetRequest, RoomAssetResponse } from "@/feature/RoomApi/type";
+import type { CreateRoomAssetRequest } from "@/feature/RoomApi/type";
 
 type Props = {
   open: boolean;
@@ -43,16 +43,26 @@ const mapUiTypeToApi = (ui: string) => {
   return found?.value ?? ui; // nếu ui đã là Electronics/Furniture... thì giữ nguyên
 };
 
-const mapUiStatusToApi = (ui: "Hoạt động" | "Hư hỏng"): CreateRoomAssetRequest["status"] =>
+const mapUiStatusToApi = (
+  ui: "Hoạt động" | "Hư hỏng"
+): CreateRoomAssetRequest["status"] =>
   ui === "Hoạt động" ? "ACTIVE" : "INACTIVE";
 
 const mapApiStatusToUi = (api: CreateRoomAssetRequest["status"]) =>
   api === "ACTIVE" ? "Hoạt động" : "Hư hỏng";
 
-export default function EditRoomAssetModal({ open, onClose, roomId, asset, onUpdated }: Props) {
+export default function EditRoomAssetModal({
+  open,
+  onClose,
+  roomId,
+  asset,
+  onUpdated,
+}: Props) {
   const [name, setName] = useState("");
-  const [type, setType] = useState<(typeof TYPE_OPTIONS)[number]["value"]>("Electronics");
-  const [status, setStatus] = useState<CreateRoomAssetRequest["status"]>("ACTIVE");
+  const [type, setType] =
+    useState<(typeof TYPE_OPTIONS)[number]["value"]>("Electronics");
+  const [status, setStatus] =
+    useState<CreateRoomAssetRequest["status"]>("ACTIVE");
 
   const [updateRoomAsset, { isLoading }] = useUpdateRoomAssetMutation();
 
@@ -64,7 +74,10 @@ export default function EditRoomAssetModal({ open, onClose, roomId, asset, onUpd
     setStatus(mapUiStatusToApi(asset.status));
   }, [open, asset]);
 
-  const canSubmit = useMemo(() => name.trim() !== "" && !!asset?.id, [name, asset?.id]);
+  const canSubmit = useMemo(
+    () => name.trim() !== "" && !!asset?.id,
+    [name, asset?.id]
+  );
 
   const handleSubmit = async () => {
     if (!asset) return;
@@ -106,7 +119,9 @@ export default function EditRoomAssetModal({ open, onClose, roomId, asset, onUpd
               labelId="asset-type-label"
               label="Loại"
               value={type}
-              onChange={(e: SelectChangeEvent) => setType(e.target.value as any)}
+              onChange={(e: SelectChangeEvent) =>
+                setType(e.target.value as any)
+              }
             >
               {TYPE_OPTIONS.map((opt) => (
                 <MenuItem key={opt.value} value={opt.value}>

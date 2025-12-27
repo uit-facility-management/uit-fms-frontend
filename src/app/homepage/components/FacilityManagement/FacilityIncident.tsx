@@ -1,22 +1,28 @@
-'use client';
+"use client";
 
-import { useMemo, useState } from 'react';
-import { Box, IconButton, Tooltip } from '@mui/material';
-import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
+import { useMemo, useState } from "react";
+import { Box, IconButton, Tooltip } from "@mui/material";
+import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
 import {
   MaterialReactTable,
   MRT_ColumnDef,
   useMaterialReactTable,
-} from 'material-react-table';
-import { useGetRoomIncidentsQuery, 
+} from "material-react-table";
+import {
+  useGetRoomIncidentsQuery,
   useCreateIncidentMutation,
-  useUpdateIncidentMutation, } from '@/feature/RoomAssetApi/incident.api';
-import { incidentStatusChipSx, IncidentStatus } from '../RoomManagement/RoomDetails';
-import CreateIncidentModal from '../RoomManagement/CreateIncidentModal';
-import EditIncidentModal, {EditIncidentPayload,} from "../RoomManagement/EditIncidentModal";
-import IncidentDeleteModal from './DeleteIncident';
-
+  useUpdateIncidentMutation,
+} from "@/feature/RoomAssetApi/incident.api";
+import {
+  incidentStatusChipSx,
+  IncidentStatus,
+} from "../RoomManagement/RoomDetails";
+import CreateIncidentModal from "../RoomManagement/CreateIncidentModal";
+import EditIncidentModal, {
+  EditIncidentPayload,
+} from "../RoomManagement/EditIncidentModal";
+import IncidentDeleteModal from "./DeleteIncident";
 
 export type FacilityIssue = {
   id: string;
@@ -30,7 +36,9 @@ export type FacilityIssue = {
 
 export type IncidentStatusApi = "pending" | "resolved";
 
-export const mapIncidentStatusFromApi = (status?: IncidentStatusApi): IncidentStatus => {
+export const mapIncidentStatusFromApi = (
+  status?: IncidentStatusApi
+): IncidentStatus => {
   switch (status) {
     case "resolved":
       return "Đã xử lý";
@@ -50,17 +58,28 @@ type Props = {
   onCreated?: () => void;
 };
 
-export default function FacilityIncident({ facilityId, facilityName, facilityType, roomId, open, onClose, onCreated }: Props) {
+export default function FacilityIncident({
+  facilityId,
+  facilityName,
+  facilityType,
+  roomId,
+  open,
+  onClose,
+  onCreated,
+}: Props) {
   // create incident
   const [createIncident] = useCreateIncidentMutation();
 
   // delete
   const [openDelete, setOpenDelete] = useState(false);
-  const [deletingIncident, setDeletingIncident] = useState<{id: string; description: string;} | null>(null);
-
+  const [deletingIncident, setDeletingIncident] = useState<{
+    id: string;
+    description: string;
+  } | null>(null);
 
   // upadate
-  const [updateIncident, { isLoading: isUpdating }] = useUpdateIncidentMutation();
+  const [updateIncident, { isLoading: isUpdating }] =
+    useUpdateIncidentMutation();
 
   const [editingIncident, setEditingIncident] = useState<{
     id: string;
@@ -72,131 +91,120 @@ export default function FacilityIncident({ facilityId, facilityName, facilityTyp
 
   const [openEdit, setOpenEdit] = useState(false);
 
-
   // get incident by id room
-  const { data: roomIncidents = [], isLoading } = useGetRoomIncidentsQuery({ roomId });
-
-  const apiIssues: FacilityIssue[] = roomIncidents?.map((i) => ({
-    id: i.id,
-    name: facilityName,
-    type: facilityType,
-    status: mapIncidentStatusFromApi(i.status),
-    description: i.description ?? '',
-    createdAt: new Date(i.createdAt).toLocaleString("vi-VN"),
-    createdBy: i.created_by
-  })) ?? [];
+  const { data: roomIncidents = [] } = useGetRoomIncidentsQuery({
+    roomId,
+  });
 
   // nếu user thêm issue mới
   const displayedIssues = useMemo(() => {
-    return roomIncidents.map(i => ({
+    return roomIncidents.map((i) => ({
       id: i.id,
       name: facilityName,
       type: facilityType,
       status: mapIncidentStatusFromApi(i.status),
-      description: i.description ?? '',
+      description: i.description ?? "",
       createdAt: new Date(i.createdAt).toLocaleString("vi-VN"),
-      createdBy: i.created_by
+      createdBy: i.created_user.id,
     }));
   }, [roomIncidents, facilityName, facilityType]);
 
-
   // table lịch sử hư hỏng
 
-  const columns = useMemo<MRT_ColumnDef<FacilityIssue>[]>(() => [
-    {
-      accessorKey: "name",
-      header: "Tên thiết bị",
-      size: 160,
-      Cell: ({ cell }) => (
-        <span className="font-medium text-gray-900">
-          {cell.getValue<string>()}
-        </span>
-      ),
-    },
-    {
-      accessorKey: "description",
-      header: "Mô tả",
-      size: 300,
-      Cell: ({ cell }) => (
-        <span className="text-gray-600">
-          {cell.getValue<string>()}
-        </span>
-      ),
-    },
-    {
-      accessorKey: "createdAt",
-      header: "Thời gian",
-      size: 160,
-      Cell: ({ cell }) => (
-        <span className="text-gray-500">
-          {cell.getValue<string>()}
-        </span>
-      ),
-    },
-    {
-      accessorKey: "status",
-      header: "Trạng thái",
-      size: 160,
-      Cell: ({ cell }) => {
-        const status = cell.getValue<IncidentStatus>();
-
-        return (
-          <span
-            className="px-2.5 py-1 rounded-full text-xs font-semibold"
-            style={incidentStatusChipSx(status)}
-          >
-            {status}
+  const columns = useMemo<MRT_ColumnDef<FacilityIssue>[]>(
+    () => [
+      {
+        accessorKey: "name",
+        header: "Tên thiết bị",
+        size: 160,
+        Cell: ({ cell }) => (
+          <span className="font-medium text-gray-900">
+            {cell.getValue<string>()}
           </span>
-        );
+        ),
       },
-    },
-    {
-      id: "actions",
-      header: "Thao tác",
-      size: 120,
-      enableSorting: false,
-      muiTableHeadCellProps: { align: "center" },
-      muiTableBodyCellProps: { align: "center" },
-      Cell: ({ row }) => (
-        <Box sx={{ display: "flex", gap: 0.5, justifyContent: "center" }}>
-          <Tooltip title="Chỉnh sửa">
-            <IconButton
-              size="small"
-              sx={{ color: "#2563eb" }}
-              onClick={() => {
-                setEditingIncident({
-                    id: row.original.id,         
+      {
+        accessorKey: "description",
+        header: "Mô tả",
+        size: 300,
+        Cell: ({ cell }) => (
+          <span className="text-gray-600">{cell.getValue<string>()}</span>
+        ),
+      },
+      {
+        accessorKey: "createdAt",
+        header: "Thời gian",
+        size: 160,
+        Cell: ({ cell }) => (
+          <span className="text-gray-500">{cell.getValue<string>()}</span>
+        ),
+      },
+      {
+        accessorKey: "status",
+        header: "Trạng thái",
+        size: 160,
+        Cell: ({ cell }) => {
+          const status = cell.getValue<IncidentStatus>();
+
+          return (
+            <span
+              className="px-2.5 py-1 rounded-full text-xs font-semibold"
+              style={incidentStatusChipSx(status)}
+            >
+              {status}
+            </span>
+          );
+        },
+      },
+      {
+        id: "actions",
+        header: "Thao tác",
+        size: 120,
+        enableSorting: false,
+        muiTableHeadCellProps: { align: "center" },
+        muiTableBodyCellProps: { align: "center" },
+        Cell: ({ row }) => (
+          <Box sx={{ display: "flex", gap: 0.5, justifyContent: "center" }}>
+            <Tooltip title="Chỉnh sửa">
+              <IconButton
+                size="small"
+                sx={{ color: "#2563eb" }}
+                onClick={() => {
+                  setEditingIncident({
+                    id: row.original.id,
                     facilityId: facilityId,
                     description: row.original.description,
                     status: row.original.status,
-                    createdBy: row.original.createdBy
+                    createdBy: row.original.createdBy,
                   });
                   setOpenEdit(true);
                 }}
-            >
-              <EditOutlinedIcon fontSize="small" />
-            </IconButton>
-          </Tooltip>
+              >
+                <EditOutlinedIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
 
-          <Tooltip title="Xóa">
-            <IconButton
-              size="small"
-              sx={{ color: "#dc2626" }}
-              onClick={() => {
-                setDeletingIncident({
-                  id: row.original.id,
-                  description: row.original.description,
-                });
-                setOpenDelete(true);
-              }}
-            >
-              <DeleteOutlineOutlinedIcon fontSize="small" />
-            </IconButton>
-          </Tooltip>
-        </Box>
-      ),
-    },
-  ], []);
+            <Tooltip title="Xóa">
+              <IconButton
+                size="small"
+                sx={{ color: "#dc2626" }}
+                onClick={() => {
+                  setDeletingIncident({
+                    id: row.original.id,
+                    description: row.original.description,
+                  });
+                  setOpenDelete(true);
+                }}
+              >
+                <DeleteOutlineOutlinedIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+          </Box>
+        ),
+      },
+    ],
+    [facilityId]
+  );
 
   const table = useMaterialReactTable({
     columns,
@@ -278,9 +286,7 @@ export default function FacilityIncident({ facilityId, facilityName, facilityTyp
       {/* bảng lịch sử hư hỏng */}
       <div className="mt-6 rounded-2xl border border-gray-100 bg-white shadow-sm overflow-hidden">
         <div className="px-5 py-4 bg-[#f8f9fa] border-b border-gray-100">
-          <p className="text-sm font-semibold text-blue-700">
-            Lịch sử hư hỏng
-          </p>
+          <p className="text-sm font-semibold text-blue-700">Lịch sử hư hỏng</p>
         </div>
 
         {displayedIssues.length === 0 ? (
@@ -310,7 +316,6 @@ export default function FacilityIncident({ facilityId, facilityName, facilityTyp
               status: payload.status === "Đã xử lý" ? "resolved" : "pending",
             }).unwrap();
 
-            
             onCreated?.();
             onClose();
           } catch (e) {
@@ -334,7 +339,7 @@ export default function FacilityIncident({ facilityId, facilityName, facilityTyp
                 description: payload.description,
                 room_asset_id: payload.facilityId,
                 status: payload.status === "Đã xử lý" ? "resolved" : "pending",
-                created_by: editingIncident?.createdBy ?? "" 
+                created_by: editingIncident?.createdBy ?? "",
               },
             }).unwrap();
 

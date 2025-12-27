@@ -21,7 +21,7 @@ export const incidentApi = appApi.injectEndpoints({
         url: `/room/${roomId}/incidents`,
         method: "GET",
       }),
-      providesTags: (result, error, arg) =>
+      providesTags: (result) =>
         result
           ? [
               ...result.map(({ id }) => ({ type: "Incident" as const, id })),

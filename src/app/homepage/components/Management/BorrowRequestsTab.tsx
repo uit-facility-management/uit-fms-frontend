@@ -1,6 +1,8 @@
-import { Check, X } from "lucide-react";
-import { useGetAllBorrowTicketsQuery, useReturnBorrowTicketMutation } from "@/feature/ToolsApi/borrow.api";
-
+import { Check } from "lucide-react";
+import {
+  useGetAllBorrowTicketsQuery,
+  useReturnBorrowTicketMutation,
+} from "@/feature/ToolsApi/borrow.api";
 
 type BorrowStatus = "BORROWING" | "RETURNED";
 
@@ -63,7 +65,6 @@ export default function BorrowRequestsTab() {
     }
   };
 
-
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString("vi-VN", {
@@ -108,7 +109,6 @@ export default function BorrowRequestsTab() {
       </div>
     );
   }
-
 
   return (
     <div className="overflow-x-auto">

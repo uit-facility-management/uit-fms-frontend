@@ -2,7 +2,7 @@
 "use client";
 
 import { useMemo } from "react";
-import { Chip, CircularProgress, Typography } from "@mui/material";
+import { CircularProgress, Typography } from "@mui/material";
 import {
   MaterialReactTable,
   useMaterialReactTable,
@@ -23,7 +23,6 @@ const statusLabelMap: Record<string, string> = {
   rejected: "Từ chối",
 };
 
-
 const statusClassMap: Record<string, string> = {
   pending: "bg-yellow-100 text-yellow-700 border-yellow-200",
   approved: "bg-green-100 text-green-700 border-green-200",
@@ -37,11 +36,14 @@ const statusClassMap: Record<string, string> = {
 // };
 
 export default function UserSchedule({ userId }: { userId: string }) {
-    // get schedule by user id
-  const { data: schedules = [], isLoading, isError } =
-    useGetSchedulesByUserIdQuery(userId, { skip: !userId });
+  // get schedule by user id
+  const {
+    data: schedules = [],
+    isLoading,
+    isError,
+  } = useGetSchedulesByUserIdQuery(userId, { skip: !userId });
 
-    // bảng schedule của user   
+  // bảng schedule của user
   const columns = useMemo<MRT_ColumnDef<ScheduleResponseByIdUser>[]>(
     () => [
       {
@@ -82,7 +84,8 @@ export default function UserSchedule({ userId }: { userId: string }) {
           return (
             <span
               className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold border ${
-                statusClassMap[status] ?? "bg-gray-100 text-gray-600 border-gray-200"
+                statusClassMap[status] ??
+                "bg-gray-100 text-gray-600 border-gray-200"
               }`}
             >
               {statusLabelMap[status] ?? status}
@@ -152,7 +155,10 @@ export default function UserSchedule({ userId }: { userId: string }) {
     },
     muiTopToolbarProps: { sx: { backgroundColor: "#f8f9fa" } },
     muiBottomToolbarProps: { sx: { backgroundColor: "#f8f9fa" } },
-    initialState: { pagination: { pageIndex: 0, pageSize: 5 }, density: "comfortable" },
+    initialState: {
+      pagination: { pageIndex: 0, pageSize: 5 },
+      density: "comfortable",
+    },
     localization: {
       noRecordsToDisplay: "Không có dữ liệu hiển thị",
       rowsPerPage: "Số dòng mỗi trang",
@@ -164,7 +170,6 @@ export default function UserSchedule({ userId }: { userId: string }) {
       search: "Tìm kiếm",
     },
   });
-
 
   if (isLoading) return <CircularProgress size={28} />;
   if (isError)

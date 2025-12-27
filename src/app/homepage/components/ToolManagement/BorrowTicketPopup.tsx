@@ -7,19 +7,16 @@ import {
   DialogContent,
   DialogActions,
   TextField,
-  MenuItem,
   IconButton,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { Autocomplete } from "@mui/material";
-import {useGetStudentsQuery} from "@/feature/ToolsApi/borrow.api";
-import {useGetToolsQuery} from "@/feature/ToolsApi/tool.api";
-import {useGetRoomQuery} from "@/feature/RoomApi/room.api";
+import { useGetStudentsQuery } from "@/feature/ToolsApi/borrow.api";
+import { useGetToolsQuery } from "@/feature/ToolsApi/tool.api";
+import { useGetRoomQuery } from "@/feature/RoomApi/room.api";
 import type { RoomResponse } from "@/feature/RoomApi/type";
 import { useCreateBorrowTicketMutation } from "@/feature/ToolsApi/borrow.api";
 import { useUpdateToolMutation } from "@/feature/ToolsApi/tool.api";
-
-
 
 /* ================== Types ================== */
 export type BorrowTicketForm = {
@@ -51,11 +48,7 @@ const textFieldSx = {
 };
 
 /* ================== Component ================== */
-export default function BorrowTicketPopup({
-  open,
-  onClose,
-  onSubmit,
-}: Props) {
+export default function BorrowTicketPopup({ open, onClose }: Props) {
   const [form, setForm] = useState<BorrowTicketForm>({
     studentCode: undefined,
     deviceId: "",
@@ -64,11 +57,10 @@ export default function BorrowTicketPopup({
 
   const [updateTool] = useUpdateToolMutation();
   const [createBorrowTicket, { isLoading: isCreating }] =
-  useCreateBorrowTicketMutation();
+    useCreateBorrowTicketMutation();
   const { data: students = [], isLoading: loadingStudents } =
     useGetStudentsQuery();
-  const { data: devices = [], isLoading: loadingDevices } =
-    useGetToolsQuery();
+  const { data: devices = [], isLoading: loadingDevices } = useGetToolsQuery();
   const selectedDevice = useMemo(
     () => devices.find((d) => d.id === form.deviceId),
     [devices, form.deviceId]
@@ -103,9 +95,8 @@ export default function BorrowTicketPopup({
     );
   }, [form]);
 
-
   const handleSubmit = async () => {
-    if (!canSubmit || !selectedDevice) return
+    if (!canSubmit || !selectedDevice) return;
 
     try {
       const userStr = localStorage.getItem("user");
@@ -135,7 +126,6 @@ export default function BorrowTicketPopup({
     }
   };
 
-
   return (
     <Dialog
       open={open}
@@ -150,9 +140,7 @@ export default function BorrowTicketPopup({
       <DialogTitle sx={{ pb: 1 }}>
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-lg font-bold text-gray-900">
-              Tạo phiếu mượn
-            </p>
+            <p className="text-lg font-bold text-gray-900">Tạo phiếu mượn</p>
             <p className="text-sm text-gray-500 mt-1">
               Nhập thông tin để tạo phiếu mượn thiết bị.
             </p>
@@ -169,7 +157,9 @@ export default function BorrowTicketPopup({
         <div className="grid grid-cols-1 gap-6">
           <Autocomplete
             options={students}
-            value={students.find((s) => s.student_code === form.studentCode) || null}
+            value={
+              students.find((s) => s.student_code === form.studentCode) || null
+            }
             onChange={(_, value) =>
               setForm((prev) => ({
                 ...prev,
@@ -274,7 +264,6 @@ export default function BorrowTicketPopup({
             )}
           />
 
-
           <Autocomplete<RoomResponse>
             options={rooms}
             loading={loadingRooms}
@@ -328,7 +317,6 @@ export default function BorrowTicketPopup({
               />
             )}
           />
-
         </div>
       </DialogContent>
 

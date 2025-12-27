@@ -133,7 +133,7 @@ function parseSchedulesForWeek(
   return result;
 }
 
-export default function RoomScheduleView({ roomId }: Props) {
+export default function RoomScheduleView({}: Props) {
   const [currentWeekStart, setCurrentWeekStart] = useState(() =>
     getMonday(new Date())
   );

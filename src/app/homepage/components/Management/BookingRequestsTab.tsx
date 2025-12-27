@@ -4,32 +4,6 @@ import {
   useUpdateScheduleStatusMutation,
 } from "@/feature/ScheduleApi/schedule.api";
 
-type BookingStatus = "pending" | "approved" | "rejected";
-
-interface BookingRequest {
-  id: string;
-  start_time: string;
-  end_time: string;
-  period_start: number;
-  period_end: number;
-  status: "pending" | "approved" | "rejected" | string;
-  room: {
-    id: string;
-    name: string;
-    status: string;
-    stage: number;
-    type: string;
-    capacity: number;
-  };
-  createdBy: {
-    id: string;
-    email: string;
-    username: string;
-    fullName: string;
-    role: string;
-  };
-}
-
 export default function BookingRequestsTab() {
   const { data: schedules = [], isLoading, isError } = useGetSchedulesQuery();
   const [updateScheduleStatus, { isLoading: isUpdating }] =

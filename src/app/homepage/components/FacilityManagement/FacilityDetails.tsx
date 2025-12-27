@@ -19,7 +19,6 @@ import FacilityDelete from "./FacilityDelete";
 import { mapType, mapStatus } from "./FacilityComponent";
 import { useGetRoomAssetByIdQuery,useUpdateFacilityMutation } from "@/feature/RoomAssetApi/facility.api";
 import { RoomAssetResponse } from "@/feature/RoomAssetApi/type";
-import CreateIncidentModal from "../RoomManagement/CreateIncidentModal";
 type Props = {
   onUpdate: (newFacility: FacilityRow) => void;
   facilityId: string;

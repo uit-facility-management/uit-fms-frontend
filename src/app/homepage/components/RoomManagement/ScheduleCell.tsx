@@ -43,12 +43,7 @@ const statusLabels = {
   rejected: "Từ chối",
 };
 
-export default function ScheduleCell({
-  period,
-  date,
-  schedules,
-  isToday,
-}: Props) {
+export default function ScheduleCell({ period, schedules, isToday }: Props) {
   // Find the schedule that starts at this period
   const primarySchedule = useMemo(() => {
     return schedules.find((s) => s.period_start === period);

@@ -1,4 +1,4 @@
-import { Box, Button } from "@mui/material";
+import React from "react";
 import UserDetail from "./UserDetail";
 import UserSchedule from "./UserSchedule";
 
@@ -11,11 +11,8 @@ export default function PersonalComponent({
 }) {
   return (
     <>
-      <UserDetail
-        userId={userId}
-        onBack={onBack}
-        showDelete={false} />
-        
+      <UserDetail userId={userId} onBack={onBack} showDelete={false} />
+
       <UserSchedule userId={userId} />
     </>
   );
