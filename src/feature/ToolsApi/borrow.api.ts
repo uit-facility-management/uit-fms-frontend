@@ -21,6 +21,10 @@ export const borrowTicketApi = appApi.injectEndpoints({
         method: "POST",
         body,
       }),
+      //  invalidatesTags: [
+      //   { type: "BorrowTickets" },
+      //   { type: "Tools" },
+      // ],
     }),
 
     // RETURN (PATCH)
@@ -32,7 +36,10 @@ export const borrowTicketApi = appApi.injectEndpoints({
         url: `/borrow-ticket/return/${id}`,
         method: "PATCH",
       }),
-      invalidatesTags: ["BorrowTickets"],
+      invalidatesTags: [
+        { type: "BorrowTickets" },
+        { type: "Tools" },
+      ],
     }),
   }),
 });
