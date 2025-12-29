@@ -1,12 +1,15 @@
 import { appApi } from "@/lib/appApi";
-import type {UserResponse, CreateUserRequest, UpdateUserRequest,} from "./type";
+import type {UserResponse, CreateUserRequest, UpdateUserRequest, UserQueryParams} from "./type";
 
 export const userApi = appApi.injectEndpoints({
   overrideExisting: true,
   endpoints: (builder) => ({
     // get
-    getUsers: builder.query<UserResponse[], void>({
-      query: () => "/user",
+    getUsers: builder.query<UserResponse[], UserQueryParams | void>({
+      query: (params) => ({
+        url: "/user",
+        params: params ?? undefined,
+      }),
       keepUnusedDataFor: 60,
       providesTags: ["User"],
     }),

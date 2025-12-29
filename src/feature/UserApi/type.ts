@@ -36,7 +36,9 @@ export type ChangePasswordRequest = {
   password: string;
 };
 
-
+export type UserQueryParams = {
+  q?: string;
+};
 
 // API wrapper
 export type GetUsersResponse = UserResponse[];

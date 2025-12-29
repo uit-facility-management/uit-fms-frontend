@@ -9,7 +9,7 @@ import {
 import { IconButton, Tooltip, Chip } from "@mui/material";
 import { Visibility, Search as SearchIcon } from "@mui/icons-material";
 import { useGetUsersQuery } from "@/feature/UserApi/user.api";
-import type { UserResponse } from "@/feature/UserApi/type";
+import type { UserResponse, UserQueryParams  } from "@/feature/UserApi/type";
 import CreateUserModal from "./CreateUserModal";
 import UserDetail from "./UserDetail";
 
@@ -41,7 +41,8 @@ const roleChipSx = (role: string) => {
 };
 
 export default function UserComponent() {
-  const { data, isLoading, error } = useGetUsersQuery();
+  const [appliedParams, setAppliedParams] = useState<UserQueryParams>({});
+  const { data, isLoading, error } = useGetUsersQuery(appliedParams);
 
   const [selectedUser, setSelectedUser] = useState<UserRow | null>(null);
   const [openCreateModal, setOpenCreateModal] = useState(false);
@@ -61,6 +62,12 @@ export default function UserComponent() {
       updatedAt: new Date(u.updatedAt).toLocaleDateString("vi-VN"),
     }));
   }, [data]);
+
+  const applySearch = () => {
+    const q = searchText.trim();
+    setAppliedParams({ q: q || undefined });
+  };
+
 
   const columns = useMemo<MRT_ColumnDef<UserRow>[]>(
     () => [
@@ -224,13 +231,37 @@ export default function UserComponent() {
           {/* ===== NEW: Search bar (UI only) ===== */}
           <div className="flex items-center gap-3 mb-4">
             <div className="flex items-center gap-2 w-full max-w-md bg-white border border-gray-200 rounded-lg px-3 py-2">
-              <SearchIcon sx={{ fontSize: 20, color: "#6B7280" }} />
+              <button
+                type="button"
+                onClick={applySearch}
+                className="p-0 m-0 bg-transparent border-0 cursor-pointer"
+                title="Tìm kiếm"
+              >
+                <SearchIcon sx={{ fontSize: 20, color: "#6B7280" }} />
+              </button>
+
               <input
                 value={searchText}
                 onChange={(e) => setSearchText(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") applySearch();
+                }}
                 placeholder="Search..."
                 className="w-full text-sm outline-none text-gray-700 placeholder:opacity-70"
               />
+
+              {searchText.trim() !== "" && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearchText("");
+                    setAppliedParams({}); // reset về full list
+                  }}
+                  className="text-xs font-semibold text-gray-500 hover:text-gray-800"
+                >
+                  Xóa
+                </button>
+              )}
             </div>
           </div>
 
