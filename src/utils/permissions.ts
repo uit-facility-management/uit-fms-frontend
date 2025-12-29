@@ -1,8 +1,3 @@
-// ============================================
-// FILE: utils/permissions.ts
-// TẠO FILE MỚI - Copy toàn bộ code này
-// ============================================
-
 export type UserRole = "admin" | "manager" | "user";
 
 export type TabKey =
@@ -15,9 +10,7 @@ export type TabKey =
   | "user"
   | "management";
 
-// Cấu hình quyền truy cập cho từng role
 export const TAB_PERMISSIONS: Record<UserRole, TabKey[]> = {
-  // Admin: Truy cập tất cả
   admin: [
     "home",
     "personal",
@@ -29,7 +22,6 @@ export const TAB_PERMISSIONS: Record<UserRole, TabKey[]> = {
     "management",
   ],
 
-  // Manager: Không có quyền "Quản lý người dùng"
   manager: [
     "home",
     "personal",
@@ -40,11 +32,9 @@ export const TAB_PERMISSIONS: Record<UserRole, TabKey[]> = {
     "management",
   ],
 
-  // User: Chỉ có quyền cơ bản
   user: ["personal", "room"],
 };
 
-// Kiểm tra xem user có quyền truy cập tab không
 export const canAccessTab = (
   userRole: UserRole | undefined,
   tab: TabKey
@@ -53,7 +43,6 @@ export const canAccessTab = (
   return TAB_PERMISSIONS[userRole]?.includes(tab) ?? false;
 };
 
-// Lấy danh sách tabs mà user được phép truy cập
 export const getAccessibleTabs = (userRole: UserRole | undefined): TabKey[] => {
   if (!userRole) return ["home"];
   return TAB_PERMISSIONS[userRole] || ["home"];

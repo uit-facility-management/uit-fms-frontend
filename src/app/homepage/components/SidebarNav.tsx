@@ -13,7 +13,7 @@ import { canAccessTab, UserRole, TabKey } from "@/utils/permissions";
 interface SidebarNavProps {
   active: TabKey;
   onChange: (tab: TabKey) => void;
-  userRole?: string; // ← THÊM PROP NÀY
+  userRole?: string; 
 }
 
 export default function SidebarNav({ active, onChange, userRole }: SidebarNavProps) {
@@ -39,7 +39,6 @@ export default function SidebarNav({ active, onChange, userRole }: SidebarNavPro
     },
   ];
 
-  // ← THÊM ĐOẠN NÀY: Lọc các tab theo quyền
   const accessibleItems = navItems.filter(item => 
     canAccessTab(userRole as UserRole, item.key as TabKey)
   );
