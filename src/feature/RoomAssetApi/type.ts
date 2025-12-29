@@ -49,5 +49,13 @@ export interface UpdateIncidentRequest {
   status: "pending" | "resolved";
 }
 
+export type RoomAssetQueryParams = {
+  q?: string;
+  type?: "Electronics" | "Furniture" | "Stationery" | "Other";
+  status?: "ACTIVE" | "INACTIVE" | "MAINTENANCE";
+  roomId?: string;
+  buildingId?: string;
+};
+
 export type GetRoomAssetsResponse = RoomAssetResponse[];
 export type GetRoomIncidentsResponse = RoomIncidentResponse[];

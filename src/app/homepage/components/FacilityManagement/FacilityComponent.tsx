@@ -25,6 +25,7 @@ import CreateFacilityModal, {
   CreateFacilityPayload,
 } from "./CreateFacilityModal";
 import type { RoomOption } from "./CreateFacilityModal";
+import type { RoomAssetQueryParams } from "@/feature/RoomAssetApi/type";
 
 export type FacilityType =
   | "Đồ điện tử"
@@ -68,29 +69,44 @@ const facilityStatusChipSx = (s: FacilityStatus) => {
   }
 };
 
-// ===== NEW: same TextField style as BorrowTicketPopup =====
-const BLUE = "#0B4DBA";
-const BORDER = "#D1D5DB";
+const toApiType = (t: string): RoomAssetQueryParams["type"] | undefined => {
+  switch (t) {
+    case "Đồ điện tử":
+      return "Electronics";
+    case "Đồ nội thất":
+      return "Furniture";
+    case "Văn phòng phẩm":
+      return "Stationery";
+    case "Khác":
+      return "Other";
+    default:
+      return undefined;
+  }
+};
 
-const textFieldSx = {
-  "& .MuiOutlinedInput-root": {
-    "& fieldset": { borderColor: BORDER },
-    "&:hover fieldset": { borderColor: BORDER },
-    "&.Mui-focused fieldset": { borderColor: BLUE },
-  },
-  "& .MuiInputLabel-root": {
-    color: "#6B7280",
-    "&.Mui-focused": { color: BLUE },
-  },
+const toApiStatus = (s: string): RoomAssetQueryParams["status"] | undefined => {
+  switch (s) {
+    case "Hoạt động":
+      return "ACTIVE";
+    case "Không hoạt động":
+      return "INACTIVE";
+    case "Hư hỏng":
+      return "MAINTENANCE";
+    default:
+      return undefined;
+  }
 };
 
 export default function ToolsComponent() {
+  const [appliedParams, setAppliedParams] = useState<RoomAssetQueryParams>({});
   const {
     data,
     isLoading,
     error,
     refetch: refetchFacilities,
-  } = useGetRoomAssetsQuery();
+  } = useGetRoomAssetsQuery(appliedParams);
+  
+  console.log("appliedParams", appliedParams);
 
   const [selectedFacilityId, setSelectedFacilityId] = useState<string | null>(
     null
@@ -107,7 +123,7 @@ export default function ToolsComponent() {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
   const [filterType, setFilterType] = useState<string>("");
-  const [filterBuilding, setFilterBuilding] = useState<string>("");
+  const [filterBuildingId, setFilterBuildingId] = useState<string>("");
   const [filterStatus, setFilterStatus] = useState<string>("");
   const [filterRoom, setFilterRoom] = useState<RoomResponse | null>(null);
 
@@ -170,6 +186,18 @@ export default function ToolsComponent() {
     }
   };
 
+  const applySearchAndFilter = () => {
+    const q = searchText.trim();
+
+    setAppliedParams({
+      q: q || undefined,
+      type: filterType ? toApiType(filterType) : undefined,
+      status: filterStatus ? toApiStatus(filterStatus) : undefined,
+      roomId: filterRoom?.id || undefined,
+      buildingId: filterBuildingId || undefined,
+    });
+  };
+
   const facilities: FacilityRow[] = useMemo(() => {
     if (!data) return [];
     return data.map((asset) => ({
@@ -192,10 +220,16 @@ export default function ToolsComponent() {
   );
 
   const buildingFilterOptions = useMemo(() => {
-    const set = new Set<string>();
-    facilities.forEach((f) => set.add(f.building));
-    return Array.from(set).sort((a, b) => a.localeCompare(b));
-  }, [facilities]);
+    const map = new Map<string, string>(); // id -> name
+    roomsList.forEach((r: any) => {
+      if (r?.building?.id) map.set(r.building.id, r.building.name);
+    });
+
+    return Array.from(map.entries())
+      .map(([id, name]) => ({ id, name }))
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }, [roomsList]);
+
 
   const statusOptions: FacilityStatus[] = useMemo(
     () => ["Hoạt động", "Không hoạt động", "Hư hỏng"],
@@ -418,10 +452,22 @@ export default function ToolsComponent() {
           {/* Search + Filter bar */}
           <div className="flex items-center gap-3 mb-4">
             <div className="flex items-center gap-2 w-full max-w-md bg-white border border-gray-200 rounded-lg px-3 py-2">
-              <SearchIcon sx={{ fontSize: 20, color: "#6B7280" }} />
+              <button
+                type="button"
+                onClick={applySearchAndFilter}
+                className="p-0 m-0 bg-transparent border-0 cursor-pointer"
+                title="Tìm kiếm"
+              >
+                <SearchIcon sx={{ fontSize: 20, color: "#6B7280" }} />
+              </button>
               <input
                 value={searchText}
                 onChange={(e) => setSearchText(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    applySearchAndFilter();
+                  }
+                }}
                 placeholder="Search..."
                 className="w-full text-sm outline-none text-gray-700 placeholder:opacity-70"
               />
@@ -515,14 +561,14 @@ export default function ToolsComponent() {
                     Tòa
                   </p>
                   <select
-                    value={filterBuilding}
-                    onChange={(e) => setFilterBuilding(e.target.value)}
+                    value={filterBuildingId}
+                    onChange={(e) => setFilterBuildingId(e.target.value)}
                     className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-700 outline-none"
                   >
                     <option value="">Tất cả</option>
                     {buildingFilterOptions.map((b) => (
-                      <option key={b} value={b}>
-                        {b}
+                      <option key={b.id} value={b.id}>
+                        {b.name}
                       </option>
                     ))}
                   </select>
@@ -552,9 +598,10 @@ export default function ToolsComponent() {
                   type="button"
                   onClick={() => {
                     setFilterType("");
-                    setFilterBuilding("");
+                    setFilterBuildingId("");
                     setFilterStatus("");
                     setFilterRoom(null);
+                    setAppliedParams({});
                   }}
                   className="rounded-lg px-4 py-2 text-sm font-semibold border border-gray-200 text-gray-700 hover:bg-gray-50 transition"
                 >
@@ -563,16 +610,17 @@ export default function ToolsComponent() {
 
                 <button
                   type="button"
-                  onClick={() =>
-                    console.log("APPLY FILTER (UI only)", {
-                      searchText,
-                      filterType,
-                      filterRoomId: filterRoom?.id ?? "",
-                      filterRoomName: filterRoom?.name ?? "",
-                      filterBuilding,
-                      filterStatus,
-                    })
-                  }
+                  onClick={() => {
+                    const q = searchText.trim();
+
+                    setAppliedParams({
+                      q: q || undefined,
+                      type: filterType ? toApiType(filterType) : undefined,
+                      status: filterStatus ? toApiStatus(filterStatus) : undefined,
+                      roomId: filterRoom?.id || undefined,
+                      buildingId: filterBuildingId || undefined,
+                    });
+                  }}
                   className="rounded-lg px-4 py-2 text-sm font-semibold text-white bg-[#0B4DBA] hover:bg-[#0940A3] transition"
                 >
                   Áp dụng

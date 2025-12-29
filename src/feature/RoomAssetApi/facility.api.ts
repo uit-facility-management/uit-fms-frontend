@@ -3,14 +3,18 @@ import type {
   RoomAssetResponse,
   CreateFacilityRequest,
   UpdateFacilityRequest,
+  RoomAssetQueryParams,
 } from "./type";
 
 export const roomAssetApi = appApi.injectEndpoints({
   overrideExisting: true,
   endpoints: (builder) => ({
     // ---------- GET ----------
-    getRoomAssets: builder.query<RoomAssetResponse[], void>({
-      query: () => "/room-assets",
+    getRoomAssets: builder.query<RoomAssetResponse[], RoomAssetQueryParams | void>({
+      query: (params) => ({
+        url: "/room-assets",
+        params: params ?? undefined,
+      }),
       keepUnusedDataFor: 1,
       providesTags: ["RoomAsset"],
     }),
