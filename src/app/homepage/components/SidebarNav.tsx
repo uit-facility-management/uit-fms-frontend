@@ -8,23 +8,15 @@ import {
   SquareChartGantt,
   DoorClosedLocked,
 } from "lucide-react";
-
-type TabKey =
-  | "home"
-  | "calendar"
-  | "room"
-  | "tools"
-  | "facility"
-  | "user"
-  | "management"
-  | "personal";
+import { canAccessTab, UserRole, TabKey } from "@/utils/permissions";
 
 interface SidebarNavProps {
   active: TabKey;
   onChange: (tab: TabKey) => void;
+  userRole?: string; // ← THÊM PROP NÀY
 }
 
-export default function SidebarNav({ active, onChange }: SidebarNavProps) {
+export default function SidebarNav({ active, onChange, userRole }: SidebarNavProps) {
   const navItems = [
     { key: "home" as TabKey, label: "Trang chủ", icon: Home },
     {
@@ -47,9 +39,14 @@ export default function SidebarNav({ active, onChange }: SidebarNavProps) {
     },
   ];
 
+  // ← THÊM ĐOẠN NÀY: Lọc các tab theo quyền
+  const accessibleItems = navItems.filter(item => 
+    canAccessTab(userRole as UserRole, item.key as TabKey)
+  );
+
   return (
     <div className="space-y-1">
-      {navItems.map((item) => {
+      {accessibleItems.map((item) => {
         const Icon = item.icon;
         const isActive = active === item.key;
 

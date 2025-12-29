@@ -1,3 +1,8 @@
+// ============================================
+// FILE: app/homepage/page.tsx (hoặc file HomePage của bạn)
+// NHỮNG ĐOẠN CẦN THÊM/SỬA - Đánh dấu bằng // ←
+// ============================================
+
 "use client";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
@@ -24,16 +29,8 @@ import PersonalComponent from "./components/UserManagement/PersonalComponent";
 import { scheduleApi } from "@/feature/ScheduleApi/schedule.api";
 import { incidentApi } from "@/feature/RoomAssetApi/incident.api";
 import { roomAssetApi } from "@/feature/RoomAssetApi/facility.api";
-
-export type TabKey =
-  | "home"
-  | "personal"
-  | "calendar"
-  | "room"
-  | "tools"
-  | "facility"
-  | "user"
-  | "management";
+// ← 1. THÊM IMPORT NÀY
+import { canAccessTab, UserRole, TabKey } from "@/utils/permissions";
 
 function HomePageContent() {
   const searchParams = useSearchParams();
@@ -43,11 +40,28 @@ function HomePageContent() {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const user = useSelector(selectCurrentUser);
   const userID = user.id;
+  // ← 2. THÊM DÒNG NÀY
+  const userRole = user?.role as UserRole;
   const dispatch = useDispatch();
-  // Function to change tab
-  const setTab = (newTab: TabKey) => {
-    router.push(`?tab=${newTab}`);
+  const getDefaultTab = (): TabKey => {
+    if (canAccessTab(userRole, "personal")) return "personal";
+    if (canAccessTab(userRole, "room")) return "room";
+    return "home"; // fallback
   };
+  // ← 3. THÊM useEffect NÀY - Kiểm tra quyền khi tab thay đổi
+  useEffect(() => {
+    if (!canAccessTab(userRole, tab)) {
+      router.push(`?tab=${getDefaultTab()}`);
+    }
+  }, [tab, userRole, router]);
+
+  // ← 4. SỬA HÀM setTab - Thêm kiểm tra quyền
+  const setTab = (newTab: TabKey) => {
+    if (canAccessTab(userRole, newTab)) {
+      router.push(`?tab=${newTab}`);
+    }
+  };
+
   useEffect(() => {
     if (tab === "management") {
       dispatch(scheduleApi.util.invalidateTags(["Schedule"]));
@@ -55,6 +69,7 @@ function HomePageContent() {
       dispatch(roomAssetApi.util.invalidateTags(["RoomAsset"]));
     }
   }, [tab, dispatch]);
+
   const handleLogout = async () => {
     localStorage.removeItem("access_token");
     (await Cookies).remove("access_token");
@@ -127,13 +142,13 @@ function HomePageContent() {
           </div>
         </div>
 
-        {/* Navigation */}
+        {/* Navigation - ← 5. THÊM userRole VÀO PROPS */}
         <nav className="flex-1 px-3 py-6">
-          <SidebarNav active={tab} onChange={setTab} />
+          <SidebarNav active={tab} onChange={setTab} userRole={userRole} />
         </nav>
       </aside>
 
-      {/* Main Content */}
+      {/* Main Content - GIỮ NGUYÊN TẤT CẢ PHẦN NÀY */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Header */}
         <header className="h-16 bg-white border-b border-gray-200 shadow-sm">
