@@ -134,15 +134,20 @@ export default function ToolsComponent() {
     },
   };
 
+  const roomsList = useMemo<any[]>(() => {
+    if (!roomsRes) return [];
+    if (Array.isArray(roomsRes)) return roomsRes;
+    return (roomsRes as any).roomsData ?? (roomsRes as any).data ?? [];
+  }, [roomsRes]);
+
   const roomOptions: RoomOption[] = useMemo(() => {
-    if (!roomsRes?.roomsData) return [];
-    return roomsRes.roomsData.map((r: any) => ({
+    return roomsList.map((r: any) => ({
       id: r.id,
       name: `${r.name} - Tầng ${r.stage}`,
       buildingId: r.building.id,
       buildingName: r.building.name,
     }));
-  }, [roomsRes]);
+  }, [roomsList]);
 
   // ===== NEW: parse rooms like your BorrowTicketPopup to feed Autocomplete
   const rooms = useMemo<RoomResponse[]>(() => {
