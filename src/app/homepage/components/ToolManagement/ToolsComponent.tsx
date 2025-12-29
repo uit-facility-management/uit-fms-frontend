@@ -68,7 +68,9 @@ export default function ToolsComponent() {
     isFetching,
     isError,
     refetch,
-  } = useGetToolsQuery();
+  } = useGetToolsQuery({ q: searchText });
+  
+  
 
   const toolsFromApi: ToolRow[] = useMemo(() => {
     if (!Array.isArray(data)) return [];
@@ -81,16 +83,7 @@ export default function ToolsComponent() {
   }, [data]);
 
 
-  /* FE-only search */
-  const tableData = useMemo(() => {
-    if (!searchText) return toolsFromApi;
-    const q = searchText.toLowerCase();
-    return toolsFromApi.filter(
-      (t) =>
-        t.name.toLowerCase().includes(q) ||
-        t.description.toLowerCase().includes(q)
-    );
-  }, [searchText, toolsFromApi]);
+  
 
 
   const columns = useMemo<MRT_ColumnDef<ToolRow>[]>(
@@ -182,7 +175,7 @@ export default function ToolsComponent() {
 
   const table = useMaterialReactTable({
     columns,
-    data: tableData,
+    data: toolsFromApi,
 
     state: {
       isLoading: isLoading || isFetching,
@@ -354,7 +347,7 @@ export default function ToolsComponent() {
           {activeTab === "tools" ? (
             <MaterialReactTable table={table} />
           ) : (
-            <BorrowTicket />
+            <BorrowTicket searchText={searchText} />
           )}
         </div>
         </>

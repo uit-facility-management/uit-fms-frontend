@@ -1,10 +1,13 @@
 import { appApi } from "@/lib/appApi";
-import type { BorrowTicket, Student, CreateBorrowTicketRequest, BorrowTicketResponse } from "./type";
+import type { BorrowTicket, Student, CreateBorrowTicketRequest, BorrowTicketResponse, BorrowTicketQueryParams } from "./type";
 
 export const borrowTicketApi = appApi.injectEndpoints({
   endpoints: (builder) => ({
-    getAllBorrowTickets: builder.query<BorrowTicket[], void>({
-      query: () => "/borrow-ticket",
+    getAllBorrowTickets: builder.query<BorrowTicket[], BorrowTicketQueryParams | void>({
+      query: (params) => ({
+        url: "/borrow-ticket", 
+        params: params ?? undefined 
+      }),
       providesTags: ["BorrowTickets"],
     }),
 

@@ -14,6 +14,9 @@ import type { BorrowTicket } from "@/feature/ToolsApi/type";
 
 /* ================== Types ================== */
 type BorrowStatus = "Đang mượn" | "Đã trả";
+type BorrowTicketProps = {
+  searchText: string;
+};
 
 type BorrowTicketRow = {
   id: string;
@@ -42,8 +45,8 @@ const statusChipSx = (s: BorrowStatus) => {
   }
 };
 
-export default function BorrowTicket() {
-  const { data, isLoading, isError } = useGetAllBorrowTicketsQuery();
+export default function BorrowTicket({ searchText }: BorrowTicketProps) {
+  const { data, isLoading, isError } = useGetAllBorrowTicketsQuery({ q: searchText });
 
   const tableData = useMemo<BorrowTicketRow[]>(() => {
     if (!data) return [];
@@ -60,6 +63,8 @@ export default function BorrowTicket() {
       status: apiToUiBorrowStatus(t.status),
     }));
   }, [data]);
+``
+
 
   const columns = useMemo<MRT_ColumnDef<BorrowTicketRow>[]>(
     () => [

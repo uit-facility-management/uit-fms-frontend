@@ -86,3 +86,10 @@ export type BorrowTicketResponse = {
   created_at: string;
 };
 
+export type ToolsQueryParams = {
+  q?: string;
+};
+
+export type BorrowTicketQueryParams = {
+  q?: string;
+};

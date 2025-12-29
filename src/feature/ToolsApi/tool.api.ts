@@ -4,12 +4,16 @@ import type {
   CreateToolRequest,
   UpdateToolRequest,
   BorrowTicket,
+  ToolsQueryParams
  } from "./type";
 
 export const toolApi = appApi.injectEndpoints({
   endpoints: (builder) => ({
-    getTools: builder.query<ToolsResponse[], void>({
-      query: () => "/device",
+    getTools: builder.query<ToolsResponse[], ToolsQueryParams | void>({
+      query: (params) => ({
+        url: "/device",
+        params: params ?? undefined,
+      }),
       providesTags: ["Tools"],
     }),
 
