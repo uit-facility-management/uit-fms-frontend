@@ -18,39 +18,85 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import Overdue from "./ToolManagement/Overdue";
+import { useGetDashboardQuery } from "@/feature/DashboardApi/dashboard.api";
+
 
 export default function DashboardHome() {
   const [chartView, setChartView] = useState<"week" | "month">("week");
+  // get dữ liệu dashboard
+  const { data, isLoading, isError } = useGetDashboardQuery();
+  if (isLoading) return <p>Đang tải dashboard...</p>;
+  if (isError || !data) return <p>Lỗi tải dashboard</p>;
+
+  // console.log("data dashboard tra ve:" data)
   const stats = {
-    totalRooms: 48,
-    availableRooms: 45,
-    totalAssets: 156,
-    maintenanceNeeded: 8,
+  totalRooms: data.rooms.totalRooms,
+  availableRooms: data.rooms.availableRooms,
+  totalAssets: data.roomAssets.totalAssets,
+  maintenanceRooms:
+    data.rooms.totalRooms - data.rooms.availableRooms,
+
+  maintenanceAssets:
+    data.roomAssets.totalAssets - data.roomAssets.activeAssets - data.roomAssets.inactiveAssets,
+  // maintenanceNeeded:
+  //   (data.roomAssets.totalAssets - data.roomAssets.activeAssets),
   };
+
+  const incidentDataWeek = data.incident.weeklyIncidents.map((item) => ({
+  date: new Date(item.date).toLocaleDateString("vi-VN", {
+    day: "2-digit",
+    month: "2-digit",
+  }),
+  count: item.count,
+}));
+
+  const incidentDataMonth = data.incident.monthlyIncidents.map((item) => ({
+    date: `Tháng ${item.month}`,
+    count: item.count,
+  }));
+
+
   const pendingRequests = [
-    { type: "Đặt phòng", count: 5 },
-    { type: "Phiếu mượn", count: 3 },
-    { type: "Báo hỏng", count: 2 },
-  ];
+  {
+    type: "Đặt phòng",
+    count: data.schedules.pendingSchedules,
+  },
+  {
+    type: "Phiếu mượn",
+    count: data.borrowedTickets.currentlyBorrowed,
+  },
+  {
+    type: "Báo hỏng",
+    count: data.incident.pendingIncidents,
+  },
+];
 
-  // Dữ liệu biểu đồ incident theo tuần (7 ngày gần nhất)
-  const incidentDataWeek = [
-    { date: "17/12", count: 2 },
-    { date: "18/12", count: 5 },
-    { date: "19/12", count: 3 },
-    { date: "20/12", count: 7 },
-    { date: "21/12", count: 4 },
-    { date: "22/12", count: 6 },
-    { date: "23/12", count: 3 },
-  ];
+  // // Dữ liệu biểu đồ incident theo tuần (7 ngày gần nhất)
+  // const incidentDataWeek = [
+  //   { date: "17/12", count: 2 },
+  //   { date: "18/12", count: 5 },
+  //   { date: "19/12", count: 3 },
+  //   { date: "20/12", count: 7 },
+  //   { date: "21/12", count: 4 },
+  //   { date: "22/12", count: 6 },
+  //   { date: "23/12", count: 3 },
+  // ];
 
-  // Dữ liệu biểu đồ incident theo tháng (30 ngày, nhóm theo tuần)
-  const incidentDataMonth = [
-    { date: "Tuần 1", count: 12 },
-    { date: "Tuần 2", count: 18 },
-    { date: "Tuần 3", count: 15 },
-    { date: "Tuần 4", count: 22 },
-  ];
+  // // Dữ liệu biểu đồ incident theo tháng (30 ngày, nhóm theo tuần)
+  // const incidentDataMonth = [
+  //   { date: "Tuần 1", count: 12 },
+  //   { date: "Tuần 2", count: 18 },
+  //   { date: "Tuần 3", count: 15 },
+  //   { date: "Tuần 4", count: 22 },
+  // ];
+
+  const overdueData = data.borrowedTickets.overdueBorrowed.map((item) => ({
+  asset: item.device.name,
+  borrower: item.student.name,
+  borrowedAt: new Date(item.borrowed_at).toLocaleDateString("vi-VN"),
+  status: "Quá hạn",
+}));
+
 
   const incidentData =
     chartView === "week" ? incidentDataWeek : incidentDataMonth;
@@ -115,10 +161,10 @@ export default function DashboardHome() {
             <div>
               <p className="text-sm font-medium text-gray-600">Cần bảo trì</p>
               <p className="text-3xl font-bold text-gray-900 mt-2">
-                {stats.maintenanceNeeded}
+                {stats.maintenanceRooms + stats.maintenanceAssets}
               </p>
               <p className="text-xs text-amber-600 mt-1">
-                3 phòng + 5 thiết bị
+                {stats.maintenanceRooms} phòng + {stats.maintenanceAssets} thiết bị
               </p>
             </div>
             <div className="w-12 h-12 bg-amber-100 rounded-lg flex items-center justify-center">
@@ -162,7 +208,7 @@ export default function DashboardHome() {
         </div>
 
         {/* Overdue Borrow Table */}
-        <Overdue />
+        <Overdue data={overdueData}/>
       </div>
 
         {/* Incident Chart */}
