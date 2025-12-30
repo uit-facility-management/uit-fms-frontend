@@ -6,47 +6,20 @@ import {
   useMaterialReactTable,
   type MRT_ColumnDef,
 } from "material-react-table";
+import { ClockAlert } from "lucide-react";
+
 
 type OverdueBorrowRow = {
   asset: string;
   borrower: string;
-  overdueDays: number;
+  borrowedAt: string;
+  status: string;
 };
-
-const overdueStatusStyle = (days: number) => {
-  if (days >= 3)
-    return {
-      label: "Quá hạn",
-      className: "bg-orange-100 text-orange-700",
-    };
-  return {
-    label: "Sắp quá hạn",
-    className: "bg-yellow-100 text-yellow-700",
-  };
-};
-
-export default function Overdue() {
-  // mock data (sau này thay bằng API)
-  const data = useMemo<OverdueBorrowRow[]>(
-    () => [
-      {
-        asset: "Máy chiếu",
-        borrower: "Nguyễn Văn A",
-        overdueDays: 3,
-      },
-      {
-        asset: "Mic",
-        borrower: "Trần Thị B",
-        overdueDays: 7,
-      },
-      {
-        asset: "Điều khiển",
-        borrower: "Lê Văn C",
-        overdueDays: 1,
-      },
-    ],
-    []
-  );
+export default function Overdue({
+  data,
+}: {
+  data: OverdueBorrowRow[];
+}) {
 
   const columns = useMemo<MRT_ColumnDef<OverdueBorrowRow>[]>(
     () => [
@@ -63,32 +36,22 @@ export default function Overdue() {
       {
         accessorKey: "borrower",
         header: "Người mượn",
-        size: 140,
+        size: 160,
       },
       {
-        accessorKey: "overdueDays",
-        header: "Quá hạn",
-        size: 80,
-        Cell: ({ cell }) => (
-          <span className="font-semibold text-[#fe5c5c]">
-            {cell.getValue<number>()} ngày
-          </span>
-        ),
+        accessorKey: "borrowedAt",
+        header: "Ngày mượn",
+        size: 140,
       },
       {
         id: "status",
         header: "Trạng thái",
         size: 120,
-        Cell: ({ row }) => {
-          const status = overdueStatusStyle(row.original.overdueDays);
-          return (
-            <span
-              className={`px-2.5 py-1 rounded-full text-xs font-semibold ${status.className}`}
-            >
-              {status.label}
-            </span>
-          );
-        },
+        Cell: () => (
+          <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-700">
+            Quá hạn
+          </span>
+        ),
       },
     ],
     []
@@ -108,16 +71,29 @@ export default function Overdue() {
       density: "compact",
     },
 
+    localization: {
+      noRecordsToDisplay: "Không có dữ liệu hiển thị",
+      rowsPerPage: "Số dòng mỗi trang",
+      of: "của",
+      goToNextPage: "Trang tiếp",
+      goToPreviousPage: "Trang trước",
+      goToFirstPage: "Trang đầu",
+      goToLastPage: "Trang cuối",
+      search: "Tìm kiếm",
+    },
+
     muiTableHeadCellProps: {
       sx: {
         backgroundColor: "#F9FAFB",
-        color: "#6B7280",
+        color: "#9CA3AF",
         fontWeight: 700,
-        fontSize: "12px",
+        fontSize: "11px",
         textTransform: "uppercase",
-        borderBottom: "none",
+        letterSpacing: "0.04em",
+        borderBottom: "1px solid #E5E7EB",
       },
     },
+
 
     muiTableBodyCellProps: {
       sx: {
@@ -148,12 +124,14 @@ export default function Overdue() {
   return (
     <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
       <div className="px-5 py-4 border-b border-gray-200 flex items-center justify-between">
-        <h3 className="text-base font-semibold text-gray-900">
+        <h3 className="flex items-center gap-2 text-base font-semibold text-gray-900">
+          <ClockAlert className="w-5 h-5 text-amber-500" />
           Mượn quá hạn
         </h3>
-        <button className="text-sm text-blue-600 hover:underline">
+
+        {/* <button className="text-sm text-blue-600 hover:underline">
           Xem tất cả
-        </button>
+        </button> */}
       </div>
 
       <div className="px-3 pb-3">
