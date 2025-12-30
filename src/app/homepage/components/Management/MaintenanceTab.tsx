@@ -48,7 +48,7 @@ export default function MaintenanceTab() {
 
     return (
       <span
-        className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold border ${styles[status]}`}
+        className={`whitespace-nowrap inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold border ${styles[status]}`}
       >
         {labels[status]}
       </span>

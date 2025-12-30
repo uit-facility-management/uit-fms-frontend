@@ -62,7 +62,7 @@ export default function BookingRequestsTab() {
 
     return (
       <span
-        className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold border ${styles[status]}`}
+        className={`whitespace-nowrap inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold border ${styles[status]}`}
       >
         {labels[status]}
       </span>
@@ -132,7 +132,7 @@ export default function BookingRequestsTab() {
                   {booking.room.name}
                 </span>
               </td>
-              <td className="py-4 px-4 text-gray-700">
+              <td className="whitespace-nowrap py-4 px-4 text-gray-700">
                 {booking.createdBy.fullName}
               </td>
               <td className="py-4 px-4 text-gray-700">
