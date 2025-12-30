@@ -71,25 +71,6 @@ export default function DashboardHome() {
   },
 ];
 
-  // // Dữ liệu biểu đồ incident theo tuần (7 ngày gần nhất)
-  // const incidentDataWeek = [
-  //   { date: "17/12", count: 2 },
-  //   { date: "18/12", count: 5 },
-  //   { date: "19/12", count: 3 },
-  //   { date: "20/12", count: 7 },
-  //   { date: "21/12", count: 4 },
-  //   { date: "22/12", count: 6 },
-  //   { date: "23/12", count: 3 },
-  // ];
-
-  // // Dữ liệu biểu đồ incident theo tháng (30 ngày, nhóm theo tuần)
-  // const incidentDataMonth = [
-  //   { date: "Tuần 1", count: 12 },
-  //   { date: "Tuần 2", count: 18 },
-  //   { date: "Tuần 3", count: 15 },
-  //   { date: "Tuần 4", count: 22 },
-  // ];
-
   const overdueData = data.borrowedTickets.overdueBorrowed.map((item) => ({
   asset: item.device.name,
   borrower: item.student.name,
