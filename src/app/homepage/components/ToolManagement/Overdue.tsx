@@ -6,6 +6,7 @@ import {
   useMaterialReactTable,
   type MRT_ColumnDef,
 } from "material-react-table";
+import { ClockAlert } from "lucide-react";
 
 
 type OverdueBorrowRow = {
@@ -19,27 +20,6 @@ export default function Overdue({
 }: {
   data: OverdueBorrowRow[];
 }) {
-  // mock data (sau này thay bằng API dashboard)
-  // const data = useMemo<OverdueBorrowRow[]>(
-  //   () => [
-  //     {
-  //       asset: "Máy chiếu",
-  //       borrower: "Nguyễn Văn A",
-  //       borrowedAt: "27/12/2025",
-  //     },
-  //     {
-  //       asset: "Mic",
-  //       borrower: "Trần Thị B",
-  //       borrowedAt: "26/12/2025",
-  //     },
-  //     {
-  //       asset: "Điều khiển",
-  //       borrower: "Lê Văn C",
-  //       borrowedAt: "25/12/2025",
-  //     },
-  //   ],
-  //   []
-  // );
 
   const columns = useMemo<MRT_ColumnDef<OverdueBorrowRow>[]>(
     () => [
@@ -91,6 +71,17 @@ export default function Overdue({
       density: "compact",
     },
 
+    localization: {
+      noRecordsToDisplay: "Không có dữ liệu hiển thị",
+      rowsPerPage: "Số dòng mỗi trang",
+      of: "của",
+      goToNextPage: "Trang tiếp",
+      goToPreviousPage: "Trang trước",
+      goToFirstPage: "Trang đầu",
+      goToLastPage: "Trang cuối",
+      search: "Tìm kiếm",
+    },
+
     muiTableHeadCellProps: {
       sx: {
         backgroundColor: "#F9FAFB",
@@ -133,9 +124,11 @@ export default function Overdue({
   return (
     <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
       <div className="px-5 py-4 border-b border-gray-200 flex items-center justify-between">
-        <h3 className="text-base font-semibold text-gray-900">
+        <h3 className="flex items-center gap-2 text-base font-semibold text-gray-900">
+          <ClockAlert className="w-5 h-5 text-amber-500" />
           Mượn quá hạn
         </h3>
+
         {/* <button className="text-sm text-blue-600 hover:underline">
           Xem tất cả
         </button> */}
