@@ -21,7 +21,7 @@ import {
   useGetBuildingsQuery,
 } from "@/feature/RoomApi/room.api";
 import { RoomResponse } from "@/feature/RoomApi/type";
-import type { CreateRoomRequest } from "@/feature/RoomApi/type";
+import type { CreateRoomRequest, RoomQueryParams } from "@/feature/RoomApi/type";
 import type { BuildingOption } from "./CreateRoomModal";
 import RoomBookComponent from "./RoomBookComponent";
 
@@ -63,6 +63,32 @@ const mapType = (t: RoomResponse["type"]): RoomType => {
       return "Phòng học";
     default:
       return "Phòng học";
+  }
+};
+
+const toApiType = (t: string): RoomQueryParams["type"] | undefined => {
+  switch (t) {
+    case "Phòng học":
+      return "classroom";
+    case "Thực hành":
+      return "lab";
+    case "Hội trường":
+      return "meeting";
+    default:
+      return undefined;
+  }
+};
+
+const toApiStatus = (s: string): RoomQueryParams["status"] | undefined => {
+  switch (s) {
+    case "Hoạt động":
+      return "active";
+    case "Hư hỏng":
+      return "inactive";
+    case "Bảo trì":
+      return "maintenance";
+    default:
+      return undefined;
   }
 };
 
@@ -109,8 +135,32 @@ export default function RoomComponent() {
   const [filterStage, setFilterStage] = useState<string>("");
   const [filterCapacity, setFilterCapacity] = useState<string>("");
 
-  const { data, isLoading, isError, error, isFetching, refetch } =
-    useGetRoomQuery();
+  const queryParams = useMemo<RoomQueryParams>(() => {
+    const stageNum =
+      filterStage.trim() !== "" ? Number(filterStage) : undefined;
+    const capacityNum =
+      filterCapacity.trim() !== "" ? Number(filterCapacity) : undefined;
+
+    return {
+      q: searchText.trim() || undefined,
+      buildingId: filterBuilding || undefined, // nhớ: buildingId theo swagger
+      type: filterType ? toApiType(filterType) : undefined,
+      status: filterStatus ? toApiStatus(filterStatus) : undefined,
+      stage: Number.isFinite(stageNum) ? stageNum : undefined,
+      capacity: Number.isFinite(capacityNum) ? capacityNum : undefined,
+    };
+  }, [
+    searchText,
+    filterBuilding,
+    filterType,
+    filterStatus,
+    filterStage,
+    filterCapacity,
+  ]);
+
+const { data, isLoading, isError, error, isFetching, refetch } =
+  useGetRoomQuery(queryParams);
+
 
   const roomsData = useMemo<RoomResponse[]>(() => {
     if (!data) return [];
@@ -426,10 +476,11 @@ export default function RoomComponent() {
                     className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-700 outline-none"
                   >
                     <option value="">Tất cả</option>
-                    <option value="A">A</option>
-                    <option value="B">B</option>
-                    <option value="C">C</option>
-                    <option value="D">D</option>
+                    {buildings.map((b) => (
+                      <option key={b.id} value={b.id}>
+                        {b.name}
+                      </option>
+                    ))}
                   </select>
                 </div>
 
@@ -497,6 +548,8 @@ export default function RoomComponent() {
                     setFilterBuilding("");
                     setFilterType("");
                     setFilterStatus("");
+                    setFilterStage("");
+                    setFilterCapacity("");
                   }}
                   className="rounded-lg px-4 py-2 text-sm font-semibold border border-gray-200 text-gray-700 hover:bg-gray-50 transition"
                 >

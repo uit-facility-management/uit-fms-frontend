@@ -4,13 +4,17 @@ import type {
   CreateRoomRequest, 
   BuildingDTO, 
   RoomAssetResponse, 
-  CreateRoomAssetRequest 
+  CreateRoomAssetRequest ,
+  RoomQueryParams
 } from "./type";
 
 export const roomApi = appApi.injectEndpoints({
   endpoints: (builder) => ({
-    getRoom: builder.query<{ roomsData: RoomResponse[] }, void>({
-      query: () => "/room",
+    getRoom: builder.query<{ roomsData: RoomResponse[] }, RoomQueryParams | void>({
+      query: (params) => ({
+        url: "/room",
+        params: params ?? undefined,
+      }),
       keepUnusedDataFor: 60,
     }),
 

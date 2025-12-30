@@ -17,7 +17,7 @@ export const roomAssetApi = appApi.injectEndpoints({
       }),
       keepUnusedDataFor: 1,
       providesTags: ["RoomAsset"],
-    }),
+    }), 
 
     // ---------- GET BY ID ----------
     getRoomAssetById: builder.query<RoomAssetResponse, string>({

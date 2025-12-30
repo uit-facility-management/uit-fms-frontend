@@ -85,4 +85,14 @@ export type ScheduleResponse = {
   created_at: string;
 };
 
+export type RoomApiType = "classroom" | "lab" | "meeting" | "other";
+export type RoomApiStatus = "active" | "inactive" | "maintenance";
 
+export type RoomQueryParams = {
+  q?: string;
+  buildingId?: string;
+  type?: RoomApiType;
+  status?: RoomApiStatus;
+  stage?: number;     // >=0
+  capacity?: number;  // >=0
+};
