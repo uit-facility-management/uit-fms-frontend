@@ -8,7 +8,9 @@ The project is built with Next.js + Tailwind CSS (frontend), NestJS + TypeScript
 ## Features
 
 ### Dashboard (Home)
-![Dashboard](screenshot/trangchu.png)
+<p align="center">
+  <img src="screenshot/trangchu.png" width="1000" alt="Dashboard - Home">
+</p>
 
 - Displays 4 key KPIs: total rooms, available rooms, total assets/equipment, and items requiring maintenance for a quick operational overview.
 - Shows a “Pending Requests” panel grouped into 3 categories (room booking, borrowing tickets, incident reports) to help admins prioritize approvals.
