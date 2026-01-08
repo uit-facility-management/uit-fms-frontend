@@ -9,7 +9,7 @@ The project is built with Next.js + Tailwind CSS (frontend), NestJS + TypeScript
 
 ### Dashboard (Home)
 <p align="center">
-  <img src="screenshot/trangchu.png" width="1000" alt="Dashboard - Home">
+  <img src="screenshot/trangchu.png" width="1400" alt="Dashboard - Home">
 </p>
 
 - Displays 4 key KPIs: total rooms, available rooms, total assets/equipment, and items requiring maintenance for a quick operational overview.
