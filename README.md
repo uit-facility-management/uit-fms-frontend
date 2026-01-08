@@ -1,3 +1,21 @@
+# UIT Facility Management System
+
+## Introduction
+This project is a full-stack web application that helps the University of Information Technology (UIT) manage classrooms, equipment, and usage schedules in a centralized and efficient way.  
+The system enables users to search for available rooms, book rooms, borrow equipment, and report incidents; it also provides administrators with a statistics dashboard, request approvals, and comprehensive asset management—effectively eliminating schedule conflicts and manual tracking workflows.  
+The project is built with Next.js + Tailwind CSS (frontend), NestJS + TypeScript (backend), and PostgreSQL, and is deployed production-ready on Railway with automated CI/CD.
+
+## Features
+
+### Dashboard (Home)
+![Dashboard](screenshot/trangchu.png)
+
+- Displays 4 key KPIs: total rooms, available rooms, total assets/equipment, and items requiring maintenance for a quick operational overview.
+- Shows a “Pending Requests” panel grouped into 3 categories (room booking, borrowing tickets, incident reports) to help admins prioritize approvals.
+- Provides an overdue borrowing table (equipment, borrower, borrow date, status) with pagination to support asset recovery and prevent loss.
+- Includes an incident trend chart over time with weekly/monthly views to monitor issues and support maintenance decisions.
+
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
